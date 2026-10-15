@@ -5,7 +5,7 @@ import sys, os, re, json, math, shutil, unicodedata
 import xml.etree.ElementTree as ET
 
 def norm(s): return unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode().lower()
-ID_SUFFIX = re.compile(r'(-\d{2,})+$')
+ID_SUFFIX = re.compile(r'-\d{5,}(-\d+)*$')
 def slug(s): return re.sub(r'[^a-z0-9]+', '-', norm(s)).strip('-') or 'trace'
 def auto_cat(kind, km):
     if kind == 'bike': return '45' if km < 52.5 else '60' if km < 80 else '100'
