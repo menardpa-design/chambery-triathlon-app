@@ -1,10 +1,30 @@
 """Met à jour les données de l'app Chambéry Triathlon depuis le Google Sheet "Plan adulte 2026-2027".
-Usage : python3 -I update_planning.py plan.xlsx page.html
+Usage : python3 -I update_planning.py plan.xlsx page.html      (relit le Sheet)
+        python3 -I update_planning.py --refilter page.html     (sans Sheet : recalcule seulement les semaines visibles)
 Remplace les lignes `const WEEKS=...;` et `const SEASON=...;` de la page, sans toucher au reste
-(CRENEAUX, EXTRA, RACES, lieux, etc.)."""
-import sys, re, json, openpyxl
+(CRENEAUX, EXTRA, RACES, lieux, etc.).
+Séances : seules la semaine en cours et la suivante sont publiées (demande de Paul, 2026-10-15) ;
+toutes les semaines sont gardées dans weeks_full.json, à côté de ce script (hors dépôt public).
+La planification annuelle (SEASON) reste complète."""
+import sys, os, re, json, datetime
+from zoneinfo import ZoneInfo
 
 DAYS = {'LUNDI': 1, 'MARDI': 2, 'MERCREDI': 3, 'JEUDI': 4, 'VENDREDI': 5, 'SAMEDI': 6, 'DIMANCHE': 0}
+
+FULL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weeks_full.json')
+AHEAD = 1  # semaines visibles après la semaine en cours
+
+def visible(weeks, now=None):
+    now = now or datetime.datetime.now(ZoneInfo('Europe/Paris'))
+    keys = [int(w) for w in weeks]
+    def key(w): return (w < 36, w)
+    cur = now.isocalendar()[1]
+    if cur not in keys:
+        past = [w for w in keys if key(w) <= key(cur)]
+        cur = max(past, key=key) if past else min(keys, key=key)
+    order = sorted(keys, key=key); i = order.index(cur)
+    keep = set(order[:i + AHEAD + 1])
+    return {w: v for w, v in weeks.items() if int(w) in keep}
 
 def merged_map(ws):
     mr = {}
@@ -107,12 +127,20 @@ def season_from(wb):
     return out
 
 if __name__ == '__main__':
-    xlsx, html = sys.argv[1], sys.argv[2]
-    wb = openpyxl.load_workbook(xlsx, data_only=True)
-    weeks, season = weeks_from(wb), season_from(wb)
+    if sys.argv[1] == '--refilter':
+        html = sys.argv[2]; weeks = json.load(open(FULL, encoding='utf-8')); season = None
+    else:
+        import openpyxl
+        xlsx, html = sys.argv[1], sys.argv[2]
+        wb = openpyxl.load_workbook(xlsx, data_only=True)
+        weeks, season = weeks_from(wb), season_from(wb)
+        json.dump(weeks, open(FULL, 'w', encoding='utf-8'), ensure_ascii=False)
+    shown = visible(weeks)
     s = open(html, encoding='utf-8').read()
-    s, a = re.subn(r'^const WEEKS=.*;$', lambda m: 'const WEEKS=' + json.dumps(weeks, ensure_ascii=False) + ';', s, count=1, flags=re.M)
-    s, b = re.subn(r'^const SEASON=.*;$', lambda m: 'const SEASON=' + json.dumps(season, ensure_ascii=False) + ';', s, count=1, flags=re.M)
+    s, a = re.subn(r'^const WEEKS=.*;$', lambda m: 'const WEEKS=' + json.dumps(shown, ensure_ascii=False) + ';', s, count=1, flags=re.M)
+    b = 1
+    if season is not None:
+        s, b = re.subn(r'^const SEASON=.*;$', lambda m: 'const SEASON=' + json.dumps(season, ensure_ascii=False) + ';', s, count=1, flags=re.M)
     assert a == 1 and b == 1, 'lignes WEEKS/SEASON introuvables'
     open(html, 'w', encoding='utf-8').write(s)
-    print('semaines :', ', '.join(weeks), '| saison :', len(season), 'semaines')
+    print('semaines dans le Sheet :', ', '.join(weeks), '| publiées :', ', '.join(shown))
