@@ -9,7 +9,7 @@ ID_SUFFIX = re.compile(r'(-\d{2,})+$')
 def slug(s): return re.sub(r'[^a-z0-9]+', '-', norm(s)).strip('-') or 'trace'
 def auto_cat(kind, km):
     if kind == 'bike': return '45' if km < 52.5 else '60' if km < 80 else '100'
-    return 'court' if km < 15 else 'moyen' if km <= 30 else 'long'
+    return 'court' if km < 10 else 'moyen' if km <= 15 else 'long'
 
 def parse(path):
     root = ET.parse(path).getroot()

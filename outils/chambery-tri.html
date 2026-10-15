@@ -459,9 +459,9 @@ render();
 // ---- Banque de traces GPX (onglets Vélo et Trail) ----
 const CATS={
   bike:[['45','≈ 45 km'],['60','≈ 60 km'],['100','100 km et +']],
-  trail:[['court','Court (< 15 km)'],['moyen','Moyen (15–30 km)'],['long','Long (> 30 km)']]
+  trail:[['court','Court (< 10 km)'],['moyen','Moyen (10–15 km)'],['long','Long (> 15 km)']]
 };
-const autoCat=(kind,km)=>kind==='bike'?(km<52.5?'45':km<80?'60':'100'):(km<15?'court':km<=30?'moyen':'long');
+const autoCat=(kind,km)=>kind==='bike'?(km<52.5?'45':km<80?'60':'100'):(km<10?'court':km<=15?'moyen':'long');
 const catLabel=(kind,c)=>(CATS[kind].find(x=>x[0]===c)||[,''])[1];
 const TCOL='data/traces/items';
 const G={db:null,assets:null,downloads:null,canEdit:false,traces:[],cat:{bike:'all',trail:'all'}};

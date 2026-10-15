@@ -1,5 +1,5 @@
 // Service worker : l'app s'ouvre même sans réseau ; les données se mettent à jour dès qu'il y a du réseau.
-const VERSION='b4e67d2c';
+const VERSION='055c60e4';
 const CACHE='chambery-tri-'+VERSION;
 const SHELL=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png','favicon-32.png','traces.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
