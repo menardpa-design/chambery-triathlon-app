@@ -81,7 +81,7 @@ h3{font:700 1.1rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.0
 .race .d strong.ap{font-size:.95rem;font-weight:700}
 .race .d strong{white-space:nowrap}
 .race .warn{color:var(--bike);font-weight:600}
-.race .tag{display:inline}
+.race .tag{display:block}
 .race.key{border-color:var(--pink);box-shadow:inset 3px 0 0 var(--pink)}
 /* VMA */
 .vma-in{display:flex;flex-wrap:wrap;align-items:end;gap:14px}
@@ -399,7 +399,7 @@ function renderRaces(){
     const cd=n<0?'Passée':n===0?"Aujourd'hui":(r.approx?'~':'')+`J-${n}`;
     const d=r.approx?`<strong class="ap">${r.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}${r.end?'–'+r.end:''}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`;
     const meta=[r.f,r.pres?'Présents : '+r.pres:''].filter(Boolean).join(' · ');
-    return `<div class="race${n<0?' past':''}${r.club?'':' key'}"><div class="d">${d}</div><div><span class="tag" style="--c:var(--red)">${r.club?'Course club':'Course phare'}</span><span class="tag" style="--c:var(--muted)">${r.type}</span><b>${r.t}</b><span>${meta}</span>${r.note?`<span class="warn">${r.note}</span>`:''}${r.clash?'<span class="warn">Même jour que 2 autres courses</span>':''}</div><div class="cd">${cd}</div></div>`}).join('');
+    return `<div class="race${n<0?' past':''}${r.club?'':' key'}"><div class="d">${d}</div><div><span class="tag" style="--c:var(--muted)">${r.type==='CAP'?'Course à pied':r.type}</span><b>${r.t}</b><span>${meta}</span>${r.note?`<span class="warn">${r.note}</span>`:''}${r.clash?'<span class="warn">Même jour que 2 autres courses</span>':''}</div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderRaces();
 
