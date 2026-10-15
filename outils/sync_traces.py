@@ -5,6 +5,7 @@ import sys, os, re, json, math, shutil, unicodedata
 import xml.etree.ElementTree as ET
 
 def norm(s): return unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode().lower()
+ID_SUFFIX = re.compile(r'(-\d{2,})+$')
 def slug(s): return re.sub(r'[^a-z0-9]+', '-', norm(s)).strip('-') or 'trace'
 def auto_cat(kind, km):
     if kind == 'bike': return '45' if km < 52.5 else '60' if km < 80 else '100'
@@ -57,6 +58,10 @@ if __name__ == '__main__':
             try: t = parse(os.path.join(folder, f))
             except Exception as e: errors.append(f'{f} : {e}'); continue
             name = os.path.splitext(f)[0].replace('_', ' ').strip()
+            if ID_SUFFIX.search(name):  # nom exporté (Openrunner, Komoot…) : on préfère le nom interne du GPX
+                name = ID_SUFFIX.sub('', t['gpxName'] or name).replace('_', ' ').strip()
+            if name.isupper(): name = name.capitalize()
+            name = name[:1].upper() + name[1:]
             fn = slug(name) + '.gpx'
             shutil.copyfile(os.path.join(folder, f), f'{out}/traces/{kind}/{fn}')
             items.append(dict(id=f'{kind}-{slug(name)}', kind=kind, cat=auto_cat(kind, t['km']), name=name, desc='',
