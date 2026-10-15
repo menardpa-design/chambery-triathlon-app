@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chambéry Tri">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon-32.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Chambéry Triathlon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: barre de marque rouge en tête, onglets collés en bas sur mobile (en haut sur grand écran), contenu en colonne unique. */
+:root{
+  --red:#C2387A; --pink:#ED68A3; --black:#0A0A0A; --bg:#FAF6F8; --surface:#FFFFFF; --fg:#121114; --muted:#615A63; --line:#EADFE5;
+  --swim:#2A7BD6; --bike:#D9861C; --run:#ED68A3; --other:#7A7280; --chip:#F3EBEF;
+  --display:"Exo 2","Arial Narrow",system-ui,sans-serif; --body:"Barlow",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --red:#F48BBC; --pink:#ED68A3; --black:#000000; --bg:#0E0D10; --surface:#1A181C; --fg:#F1EDF0; --muted:#A79FA8; --line:#2C282E;
+  --swim:#5AA5F5; --bike:#F2A54A; --run:#ED68A3; --other:#A79FA8; --chip:#241F26; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --red:#F48BBC; --pink:#ED68A3; --black:#000000; --bg:#0E0D10; --surface:#1A181C; --fg:#F1EDF0; --muted:#A79FA8; --line:#2C282E;
+  --swim:#5AA5F5; --bike:#F2A54A; --run:#ED68A3; --other:#A79FA8; --chip:#241F26; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--body);margin:0}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.brand{background:var(--black);color:#fff;position:relative;overflow:hidden}
+header.brand .wrap{padding-block:18px 16px;display:flex;align-items:center;gap:14px}
+.logo{height:52px;width:auto;max-width:100%;display:block}
+.brand h1{font:800 1.9rem/1 var(--display);letter-spacing:.02em;text-transform:uppercase;margin:0}
+.brand p{margin:2px 0 0;font-size:.9rem;opacity:.9}
+.stripes{position:absolute;right:-20px;top:0;bottom:0;width:180px;opacity:.18;background:repeating-linear-gradient(115deg,#fff 0 10px,transparent 10px 26px)}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--black);border-top:1px solid #2a2a2a}
+nav.tabs .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-block:6px}
+nav.tabs button{appearance:none;border:0;background:transparent;color:#CFC8CE;font:700 .95rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.06em;padding:10px 4px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+nav.tabs button svg{width:20px;height:20px}
+nav.tabs button[aria-selected="true"]{background:var(--pink);color:#0A0A0A}
+nav.tabs button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+main .wrap{padding-block:20px 48px;display:flex;flex-direction:column;gap:22px}
+h2{font:800 1.5rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.03em;margin:0;text-wrap:balance}
+h3{font:700 1.1rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;color:var(--muted)}
+.note{font-size:.85rem;color:var(--muted);background:var(--chip);border-radius:8px;padding:8px 12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+/* Planning */
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filters button{border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 .85rem var(--body);padding:6px 12px;border-radius:999px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.days{display:flex;flex-direction:column;gap:14px}
+.day h4{font:700 1rem var(--display);text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.day.today h4::after{content:"Aujourd'hui";font:600 .7rem var(--body);letter-spacing:.04em;background:var(--pink);color:#0A0A0A;padding:2px 8px;border-radius:999px}
+.slot{display:block;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:8px;margin-bottom:6px}
+.slot .sinfo{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.slot .sinfo time{font:600 1rem var(--mono);font-variant-numeric:tabular-nums;color:var(--fg)}
+.slot .sinfo .coach{font-weight:600;font-size:.92rem}
+.slot .sinfo .coach::before{content:"Entraîneur : ";font-weight:400;color:var(--muted)}
+.slot .sinfo .place{flex-basis:100%;font-size:.88rem;color:var(--muted)}
+.slot .sinfo .place::before{content:"";display:inline-block;width:.55em;height:.55em;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--pink);margin-right:6px;vertical-align:.05em}
+.slot .sinfo .auto{font-weight:600;font-size:.92rem}
+.slot .tbd{font:italic .88rem var(--body);color:var(--muted)}
+.slot .sh{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:2px}
+.slot .lv{font:600 .7rem var(--body);text-transform:uppercase;letter-spacing:.05em;background:var(--chip);color:var(--fg);padding:1px 7px;border-radius:999px}
+.slot .dist{float:right;margin-left:8px;font:500 .8rem var(--mono);color:var(--muted)}
+.slot details+details,.slot details+b,.slot b+details{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.slot .var{display:inline-block;font:600 .7rem var(--body);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-right:6px}
+.slot b{display:block;font-weight:600}
+.slot summary{font-weight:600;cursor:pointer}
+.slot summary:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+.slot pre{margin:8px 0 2px;white-space:pre-wrap;font:.9rem/1.45 var(--body);color:var(--fg)}
+.wk-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.wk-nav{display:flex;align-items:center;gap:8px}
+.wk-nav button{width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:1.3rem;line-height:1;cursor:pointer}
+.wk-nav button:disabled{opacity:.35;cursor:default}
+#wLabel{text-align:center;min-width:150px}
+#wLabel b{display:block;font:700 1rem var(--display);text-transform:uppercase;letter-spacing:.05em}
+#wLabel span{font-size:.8rem;color:var(--muted)}
+.tag{display:inline-block;font:600 .7rem var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--c)}
+.races{display:flex;flex-direction:column;gap:8px}
+.race{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.race .d{text-align:center;font-family:var(--display);line-height:1}
+.race .d strong{display:block;font-size:1.7rem;font-weight:800}
+.race .d small{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.race b{font-weight:600}
+.race span{display:block;font-size:.85rem;color:var(--muted)}
+.race .cd{font:500 .8rem var(--mono);color:var(--red);white-space:nowrap}
+.race.past{opacity:.5}
+.race .d strong.ap{font-size:.95rem;font-weight:700}
+.race .d strong{white-space:nowrap}
+.race .warn{color:var(--bike);font-weight:600}
+.race .tag{display:inline}
+.race.key{border-color:var(--pink);box-shadow:inset 3px 0 0 var(--pink)}
+/* VMA */
+.vma-in{display:flex;flex-wrap:wrap;align-items:end;gap:14px}
+.vma-in label{font:700 .85rem var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;margin-bottom:4px}
+.big{font:700 2.4rem/1 var(--mono);width:5.2ch;padding:6px 8px;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg)}
+.big:focus{outline:none;border-color:var(--pink)}
+input[type=range]{width:100%;accent-color:var(--pink)}
+.unit{font:600 1rem var(--display);color:var(--muted)}
+.grow{flex:1;min-width:180px}
+.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.zone{border-radius:10px;padding:10px 12px;background:var(--chip);border-top:4px solid var(--z)}
+.zone b{font:700 1rem var(--display);text-transform:uppercase;letter-spacing:.04em}
+.zone .p{font:500 1.05rem var(--mono);margin-top:4px;font-variant-numeric:tabular-nums}
+.zone small{color:var(--muted);font-size:.8rem;display:block}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font:700 .8rem var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+td{font:500 .9rem var(--mono)}
+th:first-child,td:first-child{text-align:left}
+tr.hl td{background:var(--chip)}
+.split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.split label{font:700 .8rem var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:4px}
+.split input,.split select{width:100%;font:500 1rem var(--mono);padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.result{margin-top:12px;font:700 1.6rem var(--mono);color:var(--red)}
+.result small{display:block;font:500 .85rem var(--body);color:var(--muted)}
+@media (max-width:480px){.split{grid-template-columns:1fr 1fr}.split > :last-child{grid-column:1 / -1}}
+/* Empty */
+.soon{text-align:center;padding:40px 16px}
+.soon h2{margin-bottom:8px}
+.soon p{color:var(--muted);max-width:40ch;margin:0 auto}
+@media (prefers-reduced-motion:no-preference){section[role=tabpanel]{animation:in .2s ease-out}@keyframes in{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}}
+.add-btn,.tact button{font:600 .9rem var(--body);padding:8px 14px;border-radius:999px;border:0;background:var(--pink);color:#0A0A0A;cursor:pointer}
+.tact button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.tact button:disabled{opacity:.5;cursor:default}
+.tact{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
+.tmsg{font-size:.85rem;color:var(--muted)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fgrid .full{grid-column:1/-1}
+.fgrid label{font:700 .8rem var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:4px}
+.fgrid input,.fgrid select,.fgrid textarea{width:100%;font:1rem var(--body);padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.trace-list{display:flex;flex-direction:column;gap:12px}
+.trace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.tvis{display:flex;flex-direction:column;gap:6px;min-width:0}
+.tmap{width:100%;height:auto;background:var(--chip);border-radius:8px}
+.tprof{width:100%;height:48px;display:block}
+.tinfo{min-width:0}
+.tname{font:700 1.2rem/1.15 var(--display);text-transform:none;letter-spacing:.01em;color:var(--fg);margin:4px 0 4px}
+.tdesc{margin:0 0 8px;color:var(--muted);font-size:.92rem}
+.tstats{display:grid;grid-template-columns:repeat(4,auto);gap:4px 14px;margin:0;justify-content:start}
+.tstats dt{font:700 .7rem var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tstats dd{margin:0;font:500 .95rem var(--mono);font-variant-numeric:tabular-nums}
+.empty{display:flex;flex-direction:column;gap:4px;padding:28px 16px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+.empty b{color:var(--fg)}
+@media (max-width:560px){.trace{grid-template-columns:1fr}.tstats{grid-template-columns:repeat(2,auto)}}
+.season{display:flex;flex-direction:column;gap:18px}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.frise{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:30px 10px 14px;display:flex;flex-direction:column;gap:6px}
+.fr-months{position:absolute;inset:8px 10px auto 10px;height:16px}
+.fr-months span{position:absolute;font:600 .68rem var(--display);text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-left:1px solid var(--line);padding-left:3px;height:16px}
+.fr-row{position:relative;height:22px}
+.fr-macro{height:26px}
+.fr-row .bar{position:absolute;top:0;bottom:0;border-radius:5px;overflow:hidden;white-space:nowrap;font:700 .72rem/26px var(--display);text-transform:uppercase;letter-spacing:.04em;padding-left:6px;color:#0A0A0A;border-right:2px solid var(--surface)}
+.bar.c1{background:#F7B7D3}.bar.c2{background:#ED68A3}.bar.c3{background:#B8306F;color:#fff}.bar.c0{background:var(--chip)}
+.fr-meso .bar{background:var(--fg);opacity:.75}
+.fr-meso .bar.light{opacity:.2}
+.fr-ev{height:14px}
+.dot{position:absolute;top:2px;width:10px;height:10px;margin-left:-5px;border-radius:50%}
+.dot.phare{background:var(--pink)}
+.dot.club{border:2px solid var(--pink);background:var(--surface)}
+.fr-today{position:absolute;top:24px;bottom:8px;border-left:2px dashed var(--fg)}
+.fr-today span{position:absolute;bottom:-2px;left:4px;font:600 .62rem var(--body);white-space:nowrap;color:var(--fg);background:var(--surface);padding:0 2px}
+.cyc-n{flex:none;font:800 .72rem var(--display);text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border-radius:6px;color:#0A0A0A}
+.cyc-n.c1{background:#F7B7D3}.cyc-n.c2{background:#ED68A3}.cyc-n.c3{background:#B8306F;color:#fff}
+.mac-leg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.mac-leg li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;align-items:center}
+.mac-leg li .muted{grid-column:2;font-size:.8rem}
+.muted{color:var(--muted)}
+.months{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.month{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.month.cur{border-color:var(--pink);box-shadow:inset 4px 0 0 var(--pink)}
+.month header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.month h3{font:800 1.25rem/1 var(--display);text-transform:uppercase;letter-spacing:.03em;color:var(--fg);margin:0;margin-right:auto}
+.month h3 span{font-weight:600;color:var(--muted)}
+.now{font:600 .7rem var(--body);text-transform:uppercase;letter-spacing:.05em;background:var(--pink);color:#0A0A0A;padding:2px 8px;border-radius:999px}
+.mb-h{display:flex;gap:8px;align-items:baseline}
+.mb-h b{font-weight:600}
+.wr{flex:none;font:500 .78rem var(--mono);color:var(--muted)}
+.tbd{font-style:italic;font-weight:400;color:var(--muted)}
+.th{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:.88rem}
+.th .tag{min-width:5.5em;color:var(--c)}
+.mev{list-style:none;margin:0;padding:8px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:5px}
+.mev li{display:grid;grid-template-columns:5.5em minmax(0,1fr);gap:8px;align-items:center}
+.dd{font:500 .82rem var(--mono);color:var(--muted)}
+.ev{justify-self:start;font-size:.8rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--chip)}
+.ev.phare{background:var(--pink);color:#0A0A0A}
+.ev.club{border:1px solid var(--pink);background:transparent}
+.ev.info{color:var(--muted)}
+nav.tabs .wrap{grid-template-columns:repeat(5,1fr)}
+nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
+.hr-in output{display:block;font:600 1rem var(--mono);padding:8px 0}
+.hr-help{margin:10px 0}
+.hr-help input{width:5em;font:500 .9rem var(--mono);padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+.hr-help button{font:600 .8rem var(--body);padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.hr-help label{font-weight:600}
+.hrz{display:flex;flex-direction:column;gap:6px}
+.hrz .z{display:grid;grid-template-columns:2.6em minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--chip);border-left:5px solid var(--z)}
+.hrz .z b{font:800 1.05rem var(--display)}
+.hrz .z span{font-size:.88rem}
+.hrz .z small{display:block;color:var(--muted);font-size:.78rem}
+.hrz .z .bpm{font:600 1rem var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header class="brand">
+    <div class="wrap">
+    <h1 style="margin:0"><img class="logo" alt="Chambéry Triathlon" src="data:image/png;base64,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ps5cECFg9dAjk8kUCoVMJpNIxHy+XUvyqEYcWXYeioqKMjMzbcgvLy+vQ4cO/fLLL3/++WdycnJ+fv7dA3MMw/h8vp+fn6uLi6ubW1BQUN++fYODg318fBScEmop1s6JkL06CSGAYZiLi0v37t0HDxrULzra9rE/wzB1Ah8UFhbeuHEjun/DwTJ4PN6XGzc+8kjfHd/uuBIb27KQ5BBCHo+nUCgCAgI8PDxcXV1pmj548KCdjogcpPg///zzsWPHtibcQWsVUq/evQEA/aKjD/311+rVq7du3domC0a1Wt3co6OHFk9Pz23btk2YMMFgMLTtmwsKCt5/f8WOHTubdQ4vk8tlcrntEJ8tJjQsVKVSdeCos4cjhw/bNveQyWQvvPDCCy+8YPWfptfrrVN4mUwmFovlcrlIJGq9tTqHlZCQkL///rtZohVCiOP2nkfEx8fFxsbW/gtJknt//bUxhQQAwHm8Z555dsaMmVlZWelpaZlZWbdu3aqqqrJ6aaplroYwDLcGwMQwTC6XS6VSayhxlcrFzc1NqVQqFIq78ddXr179/vvvd2BVX7x48cMPPvjvmjUdloOf742ac+zY0SFDhrTynUKhcN/vvyOO5rB27VoHNfFnn33WeYppNpujoqJqZ69J10ERERGtrIGBAwfaDIhX18dBQECADc8xnS0eUk1NTe/evVtWM1999ZWNnKxatbJlr33sscdsvPbKlSt3RbCVDoyHhBCaOnVq/SK4uLhkZGS07IVMLayrZztpbB/Ytuugd955uw3FBYTwww8+aE2Q+BZz9OhR7P3338/Ly/t3n23kqL///nvPnj0DBwxoMpZiY7z77ruTnniCm9k1izfeeGP69OmOePM777yzefOmTlJMgUAQ0bVrJ2+LrKysb7/dzvXJh4Hdu3f//vvv9f9eVlb23rJlLTu7wmrRLNuHrl27tsAErM037t5bvnzG9Olt63G8rKzs77//XrVqpW2DESwtPf0/775b++6FQCCYPn36yX/+OXz48PNz5zbXsdLYsWPfeustrqM3F4IgvvjiiyaDarcAiqIWLVq8atWq2oatHch9YWO2du26i1y8qAedv/76a8GCBY2Ni1/27v2oma78WolSqezTp09nqJm9v/46bNiwV155+cSJEy2LUmExm/Pz88+cObNu3bppU6dGRUU9/thjH3/8cVVVlQ1F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"></h1>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button role="tab" id="t-plan" aria-controls="p-plan" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Planning</button>
+    <button role="tab" id="t-vma" aria-controls="p-vma" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M10 2h4"/></svg>Allures</button>
+    <button role="tab" id="t-3" aria-controls="p-3" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M5.5 17l4-8h6l3 8M9.5 9L12 17h2M14 5h2l1.5 4"/></svg>Vélo</button>
+    <button role="tab" id="t-4" aria-controls="p-4" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20l6-11 4 6 3-4 5 9z"/></svg>Trail</button>
+    <button role="tab" id="t-5" aria-controls="p-5" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h8"/></svg>Saison</button>
+  </div>
+</nav>
+
+<main>
+<section role="tabpanel" id="p-plan" aria-labelledby="t-plan"><div class="wrap">
+  <div class="wk-head"><h2>Plan de la semaine</h2>
+    <div class="wk-nav"><button id="wPrev" aria-label="Semaine précédente">‹</button><div id="wLabel"></div><button id="wNext" aria-label="Semaine suivante">›</button></div></div>
+  <div class="filters" id="filters"></div>
+  <div class="days" id="days"></div>
+  <div><h2>Calendrier des courses</h2></div>
+  <div class="filters" id="rfilters"></div>
+  <div class="races" id="races"></div>
+</div></section>
+
+<section role="tabpanel" id="p-vma" aria-labelledby="t-vma" hidden><div class="wrap">
+  <div><h2>Calculateur d'allure</h2></div>
+  <div class="panel vma-in">
+    <div><label for="vma">Ta VMA</label><input class="big" id="vma" type="number" inputmode="decimal" min="8" max="25" step="0.1" value="16"> <span class="unit">km/h</span></div>
+    <div class="grow"><label for="vmaR">Ajuster</label><input id="vmaR" type="range" min="10" max="24" step="0.1" value="16"></div>
+  </div>
+  <div><h3>Zones d'entraînement</h3><div class="zones" id="zones"></div></div>
+  <div class="panel hr">
+    <h3>Zones cardiaques (méthode de Karvonen)</h3>
+    <div class="split hr-in">
+      <div><label for="hrRest">FC repos</label><input id="hrRest" type="number" inputmode="numeric" min="30" max="110" value="55"></div>
+      <div><label for="hrMax">FC max</label><input id="hrMax" type="number" inputmode="numeric" min="120" max="230" value="190"></div>
+      <div><label for="hrRes">FC de réserve</label><output id="hrRes">135</output></div>
+    </div>
+    <p class="note hr-help">FC cible = FC repos + % × (FC max − FC repos). Prends ta FC de repos le matin au réveil, allongé. Tu ne connais pas ta FC max ? <label for="hrAge">Ton âge</label> <input id="hrAge" type="number" inputmode="numeric" min="12" max="90" placeholder="âge"> <button type="button" id="hrEst">Estimer</button> <span id="hrEstMsg"></span></p>
+    <div class="hrz" id="hrZones"></div>
+  </div>
+  <div><h3>Allures par % de VMA</h3><div class="panel tbl"><table id="pct"></table></div></div>
+  <div><h3>Temps de passage</h3><div class="panel tbl"><table id="frac"></table></div></div>
+  <div class="panel">
+    <h3>Mon fractionné</h3>
+    <div class="split">
+      <div><label for="fd">Distance (m)</label><input id="fd" type="number" inputmode="numeric" value="400" min="50" step="50"></div>
+      <div><label for="fp">% VMA</label><input id="fp" type="number" inputmode="numeric" value="100" min="50" max="120" step="1"></div>
+      <div><label for="fr">Répétitions</label><input id="fr" type="number" inputmode="numeric" value="8" min="1" step="1"></div>
+    </div>
+    <div class="result" id="fres"></div>
+  </div>
+  <div><h3>Objectifs course (estimation)</h3><div class="panel tbl"><table id="races-pred"></table></div>
+  <p class="note" style="margin-top:8px">Estimation selon des % de VMA usuels. Ça varie selon l'endurance et le profil de chacun.</p></div>
+</div></section>
+
+<section role="tabpanel" id="p-3" aria-labelledby="t-3" hidden><div class="wrap" data-kind="bike">
+  <div class="wk-head"><h2>Traces vélo</h2><button class="add-btn" hidden>Ajouter une trace</button></div>
+  <div class="filters cat-filters"></div>
+  <form class="panel add-form" hidden></form>
+  <div class="trace-list"><p class="note">Chargement des traces…</p></div>
+</div></section>
+<section role="tabpanel" id="p-4" aria-labelledby="t-4" hidden><div class="wrap" data-kind="trail">
+  <div class="wk-head"><h2>Traces trail</h2><button class="add-btn" hidden>Ajouter une trace</button></div>
+  <div class="filters cat-filters"></div>
+  <form class="panel add-form" hidden></form>
+  <div class="trace-list"><p class="note">Chargement des traces…</p></div>
+</div></section>
+<section role="tabpanel" id="p-5" aria-labelledby="t-5" hidden><div class="wrap season">
+  <div><h2>Saison 2026-2027</h2></div>
+  <div class="legend"><span class="ev phare">Course phare</span><span class="ev club">Course club</span><span class="ev info">Vacances / test</span></div>
+  <div id="season" class="season"></div>
+</div></section>
+</main>
+
+<script>
+// ---- Données (à remplacer par les vraies) ----
+const WEEKS={"36": [{"d": 2, "s": "swim", "slot": "", "lvl": "all", "x": "2x (300 cr / 100 4n / 100 jbs) r30\"\n6 x 50 (25 educ / 25 nc) opposition\n200 cr\n200 cr\n200 cr\n6 x 50 (25 educ / 25 nc) godilles\n6 x 50 (25 educ / 25 nc) water polo\n200 récup"}, {"d": 4, "s": "swim", "slot": "", "lvl": "all", "x": "400 cr / 100 4n / 100 jbs\n4 x 50 cr prog r30\"\n6 x 100m (25 vite / 75 sv1) r30\"\n200 cr respi 3/5 tps\n6 x 100 (75 sv1 / 25 à fond) r30\"\n200 cr respiration triathlon\n200 récup"}, {"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "20' chauff \n5' gammes + \n\n800 sv2 \n2 x 400 sv2\n4 x 200 VMA\n\n5' souple"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "Footing 1h"}], "37": [{"d": 2, "s": "swim", "slot": "Matin", "lvl": "all", "x": "Endurance\n400cr + 3X100 3N (25nc/50cr/25NC) + 200jbes + 100 4n\n\n400m palmes tuba, alternance 25 rattrapé, coude haut/ 25 nage complète\n\n4X 100 (75CR/25 pap)\n\nSV1 montante plaq descente pull R=45s\n200\n300\n400\n300\n200\n\nRécupération 200\n\n3400m"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "all", "x": "Technique\n\n300 m NL \n4×50 m 25 rattrapé + 25 NL\n100cr\n4×50 m 25 poings fermés + 25 NL\n200cr\n4×50 m 25 un bras + 25 NL\n300cr\n4×50 m 25 jbs+ 25 NL\n400 pull\n4×100 m NL — progressif 1→4 — 15\"\n2 x 100 m 4N\n200 plaq \n200 pull\n400 pull plaq\n\n3500m"}, {"d": 1, "s": "swim", "slot": "Midi", "lvl": "all", "x": "Mixte\n\n300 respi 3/4/5T par 100m\n• 100m jbs sur le dos bien en flèche\n• 300 respi 2/4/6T par 100m, regarde du même côté du bassin à la respiration à l'aller et au retour !\n• 100m jbs sur le dos bien en flèche\n2X LE BLOC\n- 2x50 le moins de mouvements de bras possible en mettant beaucoup de jambes r30\"\n- 2x50 le moins de mouvements de bras possible en ne mettant presque pas de jambes r30\"\n- 400 amplitude avec 1 respi crocodile par 25m\n2X LE BLOC\n- 6x 25 cr sans respirer avec le moins de mouvements possible récup = suffisante pour pouvoir faire 25 sans respirer\n- 100 jbs sur le dos bien en flèche\n200 facile au choix"}, {"d": 5, "s": "swim", "slot": "Midi", "lvl": "all", "x": "Mixte\n\n300 NL\n2 x 100 4N\n100 jbs\n\n2x 4×50 m poings fermés / NL \n200 cr\n\n8×100 m r20s\n(Pair 25 vite / 25 souple)\n(Impair 25 souple / 25 vite)\n\n300 souple\n\n\n2500m"}, {"d": 1, "s": "swim", "slot": "Soir", "lvl": "all", "x": "Technique\n\n\nMAX"}, {"d": 3, "s": "swim", "slot": "Soir", "lvl": "all", "x": "Intensité\n200 souple\n100 jbs\n300 (25 4n / 50cr)\n\n4X 50 crawl progressif sur le 50\n\n8X 100 (25 sprint - 75 allure SV1) R=30\"\n\n200 souple\n\n8 X 100 (25 waterpolo - 75 SV1) R=30\"\n\n200 souple\n\n6 X 100 (75 SV2 - 25 cr) R=30\"\n\n200 souple\n\n3600 m"}, {"d": 5, "s": "swim", "slot": "Soir", "lvl": "all", "x": "Vitesse\n\n300 Libre\n\n6 x 50\n- 25 godille / 25 cr\n- 25 prop 2 bras / 25 cr\n\n6x50 (25 jambes vites / 25 souple) \n\n400 plaq ampli (compter les cdbs)\n\n6x 25 sprint / 175 souple\n\n4x50 palmes (25 coulée / 25 souple)\n200 souple\n \n2900"}, {"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "20' chauff \n5' gammes + \n\n2 à 3x le BLOC :\n- 800 SV2 r2'\n- 2x400 VMA r1'30 \n\n5' souple"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "20' chauff \n5' gammes + \n\n5 à 7 x 4' SV1 récup 1'min \n\n10' souple"}], "38": [{"d": 2, "s": "swim", "slot": "Matin", "lvl": "all", "x": "Endurance\n\n4x300 (2 palmes - 2 NC)\n- 25 rattrapé / 75 cr\n- 25 tête/épaule/tête / 75 cr\n\n8x50 palmes (25 4N ampli max - 25 cr)\n\n2x (100 pap r30\"\n200 -1cp bras par 50 \n200 pull ampli)\n\n2x200 tuba (25 grand chien / 75 cr ampli)\n\n100 souple"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "all", "x": "Technique\n\n300 respi 3/4/5T \n100m jbs\n300 respi 2/4/6T \n 100 jbs \n\n200 palmes respi coté\n300 pull (H / G / Cheville)\n\n4 x 200 \n- palmes 15m vite / 50\n- Pull\n\n8x 50 25 4n prog / 25 cr\n\n200 pull culbutes rapides\n\n4x 200\n- 50 SV1 / 50 bn\n- pull + plaquettes\n\n200 souples\n\n3700m"}, {"d": 1, "s": "swim", "slot": "Midi", "lvl": "all", "x": "MAX"}, {"d": 5, "s": "swim", "slot": "Midi", "lvl": "all", "x": "400cr + 200 jbes + 6X50 (25 godille/25cr)\n\nCorps de séance : \n\n18 x 50m (25 éducatifs / 25 CR) \n* 6 x grand chien\n* 200 cr \n* 6 x coude haut/ feuille morte\n* 200 cr\n* 6 x poing fermé\n* 200 cr \n\n400 CR pull appliqué"}, {"d": 1, "s": "swim", "slot": "Soir", "lvl": "all", "x": "MAX"}, {"d": 3, "s": "swim", "slot": "Soir", "lvl": "all", "x": "300 respi 3/4/5T \n100m jbs\n300 respi 2/4/6T \n 100 jbs \n\n200 palmes respi coté\n300 pull (H / G / Cheville)\n\n4 x 200 \n- palmes 15m vite / 50\n- Pull\n\n8x 50 25 4n prog / 25 cr\n\n200 pull culbutes rapides\n\n4x 200\n- 50 SV1 / 50 bn\n- pull + plaquettes\n\n200 souples\n\n3700m"}, {"d": 5, "s": "swim", "slot": "Soir", "lvl": "all", "x": "400cr + 200 jbes \n6X50 coulée gainée + souple\n2 x 200 respi 3/5/7 par 25\n6 x 50 prog\n\n18 x 50m (25 éducatifs / 25 CR) \n6 x grand chien\n 200 cr (15 vit / 85 souple)\n 6 x pg fermé/ feuille morte\n200 cr pull genou (15 vit/85 souple)\n6 x godille\n 200 cr  (15 vite sans respirer/85 souple)\n\n400 cr pull appliqué\n\n\n3500m"}, {"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "30' EF\n5' gammes\n\n2x 10x 30\"/30\"\n\n5' EF"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "20' EF\n5' gammes\n\n2 × \n(8' SV1, récup 2'\n4 × 30\" dynamique / 30\" souple)\n\n10' EF"}], "39": [{"d": 2, "s": "swim", "slot": "Matin", "lvl": "all", "x": "Endurance \n600 palmes (200 cr /100 jbs)\n3 x 100 4n (25 educ/25 jbs/ 25nc / 25cr)\n100 4n\n\nBloc à faire 2x\n100 prog\n200 pull -1cb/50\n200 palmes (respi/roulie)\n400 respi 3/5/6/7\n400 souple"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "all", "x": "Endurance technique\n\n400 (150 cr - 50 jbs) palmes\n\n400 pull 3/4/5/6T / 50\n\n400 (25 touché épaule / 25 NC / 25 feuille morte / 25 NC)\n\nBLOC à faire 2 fois\n2x50 pap\n200 (25 vite - 150 BN - 25 vite) \n2x50 pull cheville engager épaule r15\"\n200 (25 vite - 150 BN - 25 vite) \n100 souple\n\n400 (25 touché tête/épaule/tête / 25 NC / 25 tps arret coude haut / 25 NC)\n\n100 souple​\n\n3600"}, {"d": 1, "s": "swim", "slot": "Midi", "lvl": "all", "x": "MAX"}, {"d": 5, "s": "swim", "slot": "Midi", "lvl": "all", "x": "Mixte tech/vitesse\n\n500 palmes 100 cr 25 jbs\n300 respi 2/3/4/5 par 25\n200 (25 touché tête/25nc/25 feuille morte / 25 nc)\n\n8 x 50 prog\n400 pull respi 3/5\n\nBloc à faire 2 fois:\n4 x 50 25 paume magic/25nc\n100 progressif\n100 souple\n\n200 tuba coulée gainée en flèche\n\n200 souple\n\n3000"}, {"d": 1, "s": "swim", "slot": "Soir", "lvl": "all", "x": "MAX"}, {"d": 3, "s": "swim", "slot": "Soir", "lvl": "all", "x": "IT\n\n300 CR \n200 dos palmes\n100 Br\n 200 jbes \n\n6 x 50 (25 paume magic/25nc)\n\n8X 50 prog R=15\"\n\nBloc à faire 3x\n200 SV1\n2 X 100 sv2\n4x50 VMA\n\n200 tuba \n200 souple\n\n3700"}, {"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "30' EF\n5' gammes\n\n2x 30\"/30\" – 45\"/45\" – 1'/1' – 1'30/1' – 1'/1' – 45\"/45\" – 30\"/30\"\n\n5' EF"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "20' chauff \n5' gammes + \n\n8 à 10 x 3' SV1 récup 2min \n\n10' souple"}, {"d": 6, "s": "run", "slot": "", "lvl": "all", "x": "Footing 45 ' à 60'"}], "40": [{"d": 2, "s": "swim", "slot": "Matin", "lvl": "all", "x": "400 palmes (75nc + 25jbs) + 300 pull tuba\n\n300 crawl rattrapé pull buoy, accélération de la poussée en fin de geste\n\n100 jambes\n\n6x50 25 poings fermés 25 normal\n\n100jbs\n\n6x 100 crawl (25 normal/ puis -1CDB)\n\n6x 100 crawl pull plaq respiration 5 temps, récup 15\"\n\n4X 50 cr\n\n1/ compter le nombre de coups de bras (CDB) + prendre le temps (ex: 38+42=80)\n2-3-4 = améliorer le score en diminuant CDB et temps\n\nRécupération 200"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "all", "x": "4 x 200 R20\"\n1 libre\n1 25 4N / 25 cr\n1 25 jambes / 75 cr\n1 repi 5tps pull\n\n4x100 cr R15\" palmes\n25 rotation épaule D respi 25 cr 25 rotation épaule G respi 25 cr\n\n200 \n100 jbs / 100 progressif\n\nPyramides SV1 R30\"\n200 \n300 pull\n400 plaq\n300 pull plaq\n200 \n\n4x100 meilleure moyenne possible, départ fixe (2'15 à 2'30 selon niveau)\n\n200 souple\n\n3200m"}, {"d": 1, "s": "swim", "slot": "Midi", "lvl": "all", "x": "MAX"}, {"d": 5, "s": "swim", "slot": "Midi", "lvl": "all", "x": "4 x 200\n1 cr\n1 25 4n / 25cr\n1 respi 3/5\n1 50 progressif / 50 souple\n\n12x50 (6 palmes - 6 NC) :  (1 respi 3T devant - 1 4 mvmts de pap vite reste cr souple - 1 moins de mvmts possible)\n\n4x100 (25 à bloc sans respirer + 75 ampli max) r30\"\n\n200 souple\n\n4x100 (25 à bloc sans respirer + 75 ampli max) r30\"\n\n200 souple\n\n\n2600m"}, {"d": 1, "s": "swim", "slot": "Soir", "lvl": "all", "x": "MAX"}, {"d": 3, "s": "swim", "slot": "Soir", "lvl": "all", "x": "2x (200 cr respi 3/5 + 100 dos) \n8 x 50 25 1 bras/ 25 nc\n200 cr\n8 x 50 VMA\n100 souple\n6 x 200 (50 SV2 / 150 SV1)\n-1 pull\n-1 plaq\n\n400 pull aero respi 5tps\n\n4 x 50 SCORE\n\n200 souple\n\n3700m"}, {"d": 5, "s": "swim", "slot": "Soir", "lvl": "all", "x": "4x100 4N (1 à l'envers / 1 jbs / 1 à l'endroit / 1 tech)\n\n12x50 (6 palmes - 6 NC) :  (1 respi 3T devant - 1 4 mvmts de pap vite reste cr souple - 1 moins de mvmts possible)\n\n200 jbs\n\n4x100 (25 à bloc sans respirer + 175 ampli max) r30\"\n\n8x50 jambes tuba bien en flèche r20\"\n\n4x100 (25 à bloc sans respirer + 75 ampli max) r30\"\n\n400 palmes ampli tête rentrée\n\n8x 50 VMA r20\"\n\n200 souple\n\n3400"}, {"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "20' EF\n5' gammes\n\n \n4 x 1'/45\" + 6 x 45\"/30\" + 8 x 30\"/30\"\n\n5' EF"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "Footing reco chambérienne10kms"}], "41": [{"d": 2, "s": "swim", "slot": "Matin", "lvl": "deb", "x": "200m libre\n200 1 bras / 25 nc\n200 cr \n\n3 x 100 PB (hanche/genoux cheville)\n\n200 cr \n\n3 x 100 cr rattrapé arc en ciel\n1 palmes/ 1 NC / 1 PB\n\n2x 100 cr bien nagé\n\n200 jambes palmes pull boy mains\n\n12 x 50\n3 vite cr\n1 brasse lent\n\n200 cr 3 tps pull\n100 souple\n\n2700m"}, {"d": 2, "s": "swim", "slot": "Matin", "lvl": "av", "x": "200 libre\n200 1 bras / 25 nc\n200 cr\n\n3 x 100 PB (hanche/genoux/cheville)\n\n200 cr\n\n3 x 100 cr rattrapé arc-en-ciel\n1 palmes / 1 NC / 1 PB\n\n4 x 100 cr bien nagé (+200)\n\n200 jambes palmes pull boy mains\n\n16 x 50 (+200)\n3 vite cr\n1 brasse lent\n\n4 x 100 cr allure seuil R 15\" (+400)\n\n200 cr 3 tps pull\n100 souple\n\n3500 m"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "deb", "x": "400 libre\n8x50 R10\" : 1 bras / NC alterné\n2x150 PB R20\" : 50 hanche / 50 genoux / 50 cheville\n\n\nPyramide rattrapé arc-en-ciel R15\" :\n50 palmes / 100 NC / 100 PB / 100 NC / 50 palmes\n\n300 jambes : 100 palmes / 100 pull boy mains / 100 palmes\n\n4x50 R20\" : 3 vite cr / 1 brasse lent\n2x100 cr bien nagé R20\"\n4x50 R20\" : 3 vite cr / 1 brasse lent\n\n200 cr 3 tps pull\n100 souple\n\n2700m"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "av", "x": "4 x 200 R20\"\n1 libre\n1 25 4N / 25 cr\n1 25 jambes / 75 cr\n1 repi 5tps pull\n\n4x100 cr R15\" palmes\n25 rotation épaule D respi 25 cr 25 rotation épaule G respi 25 cr\n\n200 \n100 jbs / 100 progressif\n\nPyramides SV1 R30\"\n200 \n300 pull\n400 plaq\n300 pull plaq\n200 \n\n4x100 meilleure moyenne possible, départ fixe (2'15 à 2'30 selon niveau)\n\n200 souple\n\n3400m"}, {"d": 1, "s": "swim", "slot": "Midi", "lvl": "all", "x": "MAX"}, {"d": 5, "s": "swim", "slot": "Midi", "lvl": "all", "x": "100 cr / 100 dos / 100 cr\n\n4x100 R15\"\n1 cr\n1 25 dos / 25 cr\n1 respi 3/5\n1 dégressif par 25\n\n8x100 R20\" (4 palmes / 4 NC)\n1 rattrapé\n1 25 1 bras G / 25 1 bras D / 25 cr\n1 Superman\n1 moins de mvts possible (compter)\n\n8x50 R20\" : 25 vite / 25 ampli max\n\n200 souple\n\n3x200 R30\"\n1 respi 3T\n1 50 vite / 50 souple\n1 progressif par 50\n\n200 souple\n\n2900m"}, {"d": 1, "s": "swim", "slot": "Soir", "lvl": "all", "x": "MAX"}, {"d": 3, "s": "swim", "slot": "Soir", "lvl": "all", "x": "300 libre\n4x50 R15\" : 25 1 bras / 25 NC\n200 cr 3 tps\n\n4x75 PB R15\" : 25 hanche / 25 genoux / 25 cheville\n\n6x50 R15\" : 25 rattrapé / 25 cr complet\n\n3x100 R20\" : 25 1 bras G / 25 1 bras D / 50 cr complet\n\n200 jambes palmes : 25 ventral / 25 dorsal\n\n4x100 cr bien nagé R20\", dégressif \n\n400 pull tuba\n\n6 x 50 MMP\n\n400 cr 3 tps pull\n200 souple\n\n\n3500m"}, {"d": 5, "s": "swim", "slot": "Soir", "lvl": "deb", "x": "100 cr / 100 dos / 100 cr\n\n4x100 PB R15\"\n50 hanche / 50 genoux \n\n\n8x100 R20\" (4 palmes / 4 NC)\n1 rattrapé\n1 25 1 bras G / 25 1 bras D / 25 cr\n1 Superman\n1 moins de mvts possible (compter)\n\n8x50 R20\" : 25 vite / 25 ampli max\n\n200 souple\n\n\n2100m"}, {"d": 5, "s": "swim", "slot": "Soir", "lvl": "av", "x": "500 (100 cr 25jbs) palmes\n400 pull \n\n4x100 R15\"\n1 cr\n1 25 dos / 25 cr\n1 respi 3/5\n1 dégressif par 25\n\n8x100 R20\" (4 palmes / 4 NC)\n1 rattrapé\n1 25 1 bras G / 25 1 bras D / 25 cr\n1 Superman\n1 moins de mvts possible (compter)\n\n8x50 R20\" : 25 vite / 25 ampli max\n\n200 souple\n\n3x200 R30\"\n1 respi 3T\n1 50 vite / 50 souple\n1 progressif par 50\n\n200 souple\n\n3500m"}, {"d": 2, "s": "run", "slot": "", "lvl": "deb", "x": "Piste\n\n30' EF\n5' gammes\n\n 2 x (6 x 200m récup diag trot) \n\n\n5' EF"}, {"d": 2, "s": "run", "slot": "", "lvl": "av", "x": "Trail\n\n8'-6'-4'-2' : première série  de 8' au seuil RPE 7 et plus le temps d'effort diminue et plus on accélère pour se rapprocher le plus possible de la VMAa sur les 2' !\n Récup descente footing au point de départ de toutes les séries"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "20' EF\n5' gammes\n \n8' actif, r2'\n6' SV1 r2'\n4' SV2 r2'\n\n5' EF\""}], "42": [{"d": 2, "s": "swim", "slot": "Matin", "lvl": "deb", "x": "500 palmes (100 cr 25 4n)\n4 x 50 PB arc en ciel\n200 cr respi 3/5 temps\n4 x 50 rattrapé\n200 cr \n200 jambes palmes respi sur le dos\n\n\nBloc à faire 3 fois :\n4 x 100 4n ( 25 educ / 25 jbs / 25 nc / 25 cr)\n100 souple\n\n4 x 50 m coulée passive ou travail cul bute\n\n\n2700 m"}, {"d": 2, "s": "swim", "slot": "Matin", "lvl": "av", "x": "500 palmes (100cr 25 4n)\n4 x 50 PB (cheville)\n400 cr pull respi 5/7 temps\n\n200 jambes palmes respi sur le dos\n\nBloc à faire 3x\n 2 x 100 4n\n1 200 plaq ampli CDB fixe\n100 souple\n\n400 cr 3 tps pull\n100 souple\n\n3300 m"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "deb", "x": "4 x 100cr / 100 4n\n\n8 x 50 educ\n- 2 feuille morte\n- 2 toboggans\n\n4x 100 pull focus alignement\n\n4 x 50 ampli\n\n6 x 50 prog fréquence sans casser la technique\n\n400 meilleur nage possible technique pas vitesse\n\n\n2500m"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "av", "x": "4 x 100cr / 100 4n\n\n8 x 50 educ\n- 2 feuille morte\n- 2 toboggans\n\n4x 100 pull focus alignement\n\n4 x 50 ampli\n\n6 x 50 prog fréquence sans casser la technique\n\n SV1 R30\"\n3 x 400 \nplaq\npull\npull plaq\n\n200 souple\n\n3500m"}, {"d": 1, "s": "swim", "slot": "Midi", "lvl": "all", "x": "MAX"}, {"d": 5, "s": "swim", "slot": "Midi", "lvl": "all", "x": "400 libre\n\n9 x100 R20\"\n1 respi 3/5\n1 25 dos / 25 cr\n1 dégressif par 25\n\n200 souple\n\n8x50 R20\" : 25 vite / 25 ampli max\n\n200 souple\n\nBloc à faire 2 x \n4 x 50 MMP r20s\n200 cr/dos\n\n\n2900m"}, {"d": 1, "s": "swim", "slot": "Soir", "lvl": "all", "x": "MAX"}, {"d": 3, "s": "swim", "slot": "Soir", "lvl": "all", "x": "300 cr\n 4x 50 (25 batt lat /25 cr)\n4x 50 éduc\n200 pull \n8 x 100 cr (1 à 4 : 50 facile/50 moyen , 4 à 8: 25fac/50moy/25 soutenu)\n2 x 300 cr  (200 Z2 / 100 Z3) 2 pull/plaq 1 NC\n4 x 100 cr (1 Z3 / 1 Z4) \n8 x 50 (25 sprint / 25 souple ampli max) \n200 souple libre \n\n3600m"}, {"d": 5, "s": "swim", "slot": "Soir", "lvl": "all", "x": "400 libre\n4 x 100 palmes 1 par nage \n( 25 educ / 25 jbs / 25 nc / 25 cr)\n\n9 x100 R20\"\n1 respi 3/5\n1 25 dos / 25 cr\n1 dégressif par 25\n\n200 souple\n\n8x50 R20\" : 25 vite / 25 ampli max\n\n200 souple\n\nBloc à faire 2 x \n4 x 50 MMP r20s\n200 cr/dos\n\n200 souple\n\n3500m"}, {"d": 3, "s": "bike", "slot": "", "lvl": "all", "x": "Endurance 1h30 ou HT 50' à 90 rpm"}, {"d": 6, "s": "bike", "slot": "", "lvl": "all", "x": "Endurance 2H \n\n3 bloc de force 5min (60rpm) + 1min vélocité >110rpm R2'"}, {"d": 2, "s": "run", "slot": "", "lvl": "deb", "x": "Piste\n\n20' EF\n5' gammes\n\n 2 x 5x 300 r100m \n\n\n5' EF"}, {"d": 2, "s": "run", "slot": "", "lvl": "av", "x": "En côte: 2*3'-3*2'-4*1' \nintensité hard!!\n Récupération au point de départ en descente"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "20' EF\n5' gammes\n \n10' actif - 8' sv1 -5' SV2\n\nR2'\n\n5' EF"}], "43": [{"d": 2, "s": "swim", "slot": "Matin", "lvl": "all", "x": "400cr \n3X100 3N (25nc/50cr/25NC)\n 200jbes\n100 4n\n\nBloc à faire 3 x \n4 x 50 PB cheville\n400 SV1 (1 PB / 1 PBP / 1 PB)\n100 4N\n100 Souple\n\n3400 m"}, {"d": 4, "s": "swim", "slot": "Matin", "lvl": "all", "x": "200cr \n3X100 3N (25nc/50cr/25NC)\n4 x 50 jbs prog\n4 x 50 (25 godille/ 25 nc)\n4x 50 prog\n100 dos\n\nBloc x3\n200 sv1\n\n\n\n3500m"}, {"d": 1, "s": "swim", "slot": "Midi", "lvl": "all", "x": "MAX"}, {"d": 5, "s": "swim", "slot": "Midi", "lvl": "all", "x": "2900m"}, {"d": 1, "s": "swim", "slot": "Soir", "lvl": "all", "x": "MAX"}, {"d": 3, "s": "swim", "slot": "Soir", "lvl": "all", "x": "200cr \n3X100 3N (25nc/50cr/25NC)\n4 x 50 jbs prog\n4 x 50 (25 godille/ 25 nc)\n4x 50 prog\n100 dos\n\n\nBLOC x3\n8 x 50 VMA\n200 Tuba / pull\n100 dos\n\n200 souple\n\n3500m"}, {"d": 5, "s": "swim", "slot": "Soir", "lvl": "all", "x": "3500m"}, {"d": 3, "s": "bike", "slot": "", "lvl": "all", "x": "En autonomie\nSortie vélo de 2h allure @ Z2\n\nOu\n\nHT 55' \n\nEchelle de difficulté sur 10 = 3 à 4 max"}, {"d": 0, "s": "bike", "slot": "", "lvl": "all", "x": "Endurance 2H \n\n3 bloc de force 5min (60rpm) + 1min vélocité >110rpm R2'"}, {"d": 2, "s": "run", "slot": "", "lvl": "deb", "x": "20' EF\n5' gammes\n\n 8 à 10 x 400 r1'\n\n\n5' EF"}, {"d": 2, "s": "run", "slot": "", "lvl": "av", "x": "3*6' au seuil en côte RPE7/8\nRécupération en descente\n+ 10 min tempo sur le plat RPE 6 c'est loin d'être à bloc mais tu t'obliges à bien dérouler sur la fatigue de la côte"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "20' EF\n5' gammes\n \n4x7' R1'30 à SV1\n\n5' EF"}, {"d": 6, "s": "run", "slot": "", "lvl": "all", "x": "Autonomie \n\nFooting 50' \n\nRPE 3"}], "44": [{"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "20' EF\n5' gammes\n\n 2x(400-600-800) R1'30, R3' entre séries\n\n\n5' EF"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "20' EF\n5' gammes\n \n6' SV1, r2'\n6 × 45\" dynamique / 30\" souple\n6' SV1 r2'\n6 × 45\" dynamique / 30\" souple\n\n5' EF"}], "45": [{"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "Test VMA"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "Footing chemin 1h15"}]};
+// Créneaux récurrents : clé jour-sport-moment (jour : 0 = dimanche, 1 = lundi…)
+const CRENEAUX={
+  '1-swim-Midi':{h:'12h30 – 13h30',coach:'Maxime'},
+  '1-swim-Soir':{h:'20h00 – 21h15',coach:'Maxime'},
+  '2-swim-Matin':{h:'6h45 – 8h00',coach:'Paul'},
+  '2-run-':{h:'19h00 – 20h30 · Piste',coach:'Paul'},
+  '2-run--deb':{h:'19h00 – 20h30',coach:'Paul',grp:'Piste'},
+  '2-run--av':{h:'19h00 – 20h30',coach:'Sylvain Rota',grp:'Trail'},
+  '3-swim-Soir':{h:'19h30 – 21h00',coach:'Paul'},
+  '4-swim-Matin':{h:'6h45 – 8h00',coach:'Paul'},
+  '4-other-':{h:'19h00 – 20h30',coach:'Régis Chaboud'},
+  '6-swim-Matin':{h:'8h30 – 10h00',coach:'Maxime et Paul',lieu:'Piscine du Stade'},
+  '5-swim-Midi':{h:'12h30 – 13h30',coach:'Paul'},
+  '5-swim-Soir':{h:'20h00 – 21h15',coach:'Paul'},
+  '4-run-':{h:'19h00 – 20h30',coach:'Paul'},
+};
+// Séances récurrentes absentes du Google Sheet, ajoutées chaque semaine
+// Lieu : natation à Buisson Rond ; à partir de S45, mardi et jeudi matin à la piscine du Stade
+const lieu=(s,w)=>s.s!=='swim'?'':(w>=45&&(s.d===2||s.d===4)&&s.slot==='Matin')?'Piscine du Stade':'Piscine de Buisson Rond';
+// Plan annuel (onglet « Plan annuelle » du Google Sheet)
+const SEASON=[{"w": 37, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Reprise intensité / Technique - Développement aérobie", "nat": "Reprise varié", "velo": "Focus endurance", "cap": "Intensité courte vo2\nSeuil 1 fraction début à 20' fin à 40'", "info": "", "club": ""}, {"w": 38, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Reprise intensité / Technique - Développement aérobie", "nat": "Reprise varié", "velo": "Focus endurance", "cap": "Intensité courte vo2\nSeuil 1 fraction début à 20' fin à 40'", "info": "", "club": ""}, {"w": 39, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Reprise intensité / Technique - Développement aérobie", "nat": "Reprise varié", "velo": "Focus endurance", "cap": "Intensité courte vo2\nSeuil 1 fraction début à 20' fin à 40'", "info": "", "club": ""}, {"w": 40, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Reprise intensité / Technique - Développement aérobie", "nat": "Reprise varié", "velo": "Focus endurance", "cap": "Intensité courte vo2\nSeuil 1 fraction début à 20' fin à 40'", "info": "", "club": ""}, {"w": 41, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Reprise intensité / Technique - Développement aérobie", "nat": "Décharge", "velo": "Décharge", "cap": "Décharge", "info": "", "club": ""}, {"w": 42, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Développement force + léger de vitesse", "nat": "Focus technique : Corps flottant et projectile", "velo": "Développement de la force + technique de pédalage", "cap": "Développement V02 max", "info": "", "club": ""}, {"w": 43, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Développement force + léger de vitesse", "nat": "Focus technique : Corps flottant et projectile", "velo": "Développement de la force + technique de pédalage", "cap": "Développement V02 max", "info": "Vacance toussaint", "club": ""}, {"w": 44, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Développement force + léger de vitesse", "nat": "Focus technique : Corps flottant et projectile", "velo": "Développement de la force + technique de pédalage", "cap": "Développement V02 max", "info": "Vacance toussaint", "club": ""}, {"w": 45, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Développement force + léger de vitesse", "nat": "Focus technique : Corps flottant et projectile", "velo": "Développement de la force + technique de pédalage", "cap": "Développement V02 max", "info": "TEST VMA", "club": ""}, {"w": 46, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Décharge", "nat": "Décharge", "velo": "Décharge", "cap": "Décharge", "info": "", "club": "Chambérienne"}, {"w": 47, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 48, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 49, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 50, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 51, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 52, "y": 2026, "macro": "CYCLE 1 : SEPTEMBRE - DECEMBRE : PRÉPARATION GÉNÉRALE", "meso": "Coupure", "nat": "Coupure", "velo": "Coupure", "cap": "Coupure", "info": "Vacance de Noêl", "club": ""}, {"w": 1, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Reprise progressive", "nat": "aérobie / Vo2", "velo": "aérobie stricte", "cap": "Aérobie / Cycle vitesse", "info": "Vacance de Noêl", "club": ""}, {"w": 2, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Reprise progressive", "nat": "aérobie / Vo2", "velo": "aérobie stricte", "cap": "Aérobie / Cycle vitesse", "info": "", "club": ""}, {"w": 3, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Reprise progressive", "nat": "aérobie / Vo2", "velo": "aérobie stricte", "cap": "Aérobie / Cycle vitesse", "info": "", "club": ""}, {"w": 4, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Reprise progressive", "nat": "aérobie / Vo2", "velo": "aérobie stricte", "cap": "Aérobie / Cycle vitesse", "info": "", "club": ""}, {"w": 5, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 6, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 7, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 8, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 9, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 10, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 11, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "Test 400M nat", "club": ""}, {"w": 12, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 13, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 14, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 15, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 16, "y": 2027, "macro": "CYCLE 2 : Janvier - Avril : Préparation spécifique triathlon", "meso": "Développement du seuil", "nat": "Développement du seuil", "velo": "Développement du seuil", "cap": "Travail au seuil + technique de course à pied", "info": "", "club": ""}, {"w": 17, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 18, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 19, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 20, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 21, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 22, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 23, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 24, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 25, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 26, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 27, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "Test 400M nat / PMA", "club": ""}, {"w": 28, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 29, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 30, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 31, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 32, "y": 2027, "macro": "CYCLE 3 : AVRIL- AOÛT : PÉRIODE DE COMPÉTITION", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 33, "y": 2027, "macro": "", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 34, "y": 2027, "macro": "", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}, {"w": 35, "y": 2027, "macro": "", "meso": "", "nat": "", "velo": "", "cap": "", "info": "", "club": ""}];
+const EXTRA=[{d:4,s:'other',slot:'',lvl:'all',x:'Renforcement et course'},
+  {d:6,s:'swim',slot:'Matin',lvl:'all',x:'',from:45}];
+// Source : Google Sheet "Plan adulte 2026-2027" (onglets SEMAINE xx et plan CAP).
+const RACES=[
+  // date = date de tri (approximative si "approx" est rempli)
+  {date:"2026-11-29",type:"CAP",t:"Bourget Xpress",f:"5 et 10 km",club:true},
+  {date:"2027-01-30",end:"31",type:"Trail",t:"Raidlight Winter Trail, St Pierre de Chartreuse",f:"9 à 30 km",pres:"Coach trail ?"},
+  {date:"2027-03-21",type:"CAP",t:"10 km d'Aix-les-Bains",f:"10 km",club:true},
+  {date:"2027-04-04",type:"Triathlon",t:"Triathlon de St Marcellin",f:"S par équipe",pres:"À définir",clash:true},
+  {date:"2027-04-04",type:"Trail",t:"ERAT, Trail Entrelacs",f:"13 à 61 km",pres:"Coach trail ?",clash:true},
+  {date:"2027-04-04",type:"CAP",t:"Foulée de Villeurbanne",f:"5 à 21 km",club:true,pres:"Paul",clash:true},
+  {date:"2027-05-27",approx:"fin mai",type:"Triathlon",t:"Triathlon de Combe de Savoie",f:"Enfants, XS à L",pres:"Blanche"},
+  {date:"2027-06-06",type:"Triathlon",t:"Triathlon du Lac de Laffrey",f:"Enfants et M",club:true,pres:"Blanche",note:"Si Combe de Savoie n'est pas maintenu"},
+  {date:"2027-06-25",end:"27",type:"Triathlon",t:"Embrunman",f:"XS à XL",pres:"Emy, Ania, Carla"},
+  {date:"2027-07-03",approx:"1er WE juil.",type:"Cross tri",t:"Xterra Gérardmer",f:"S et M",club:true,pres:"Blanche, Paul"},
+  {date:"2027-08-20",end:"22",type:"Triathlon",t:"Vercors Man",f:"Enfants, S à XL",pres:"Blanche"},
+  {date:"2027-09-04",approx:"début sept.",type:"Triathlon",t:"Triathlon d'Aix-les-Bains",f:"Enfants, M",pres:"Blanche"},
+  {date:"2027-09-25",approx:"fin sept.",type:"Trail",t:"Petit Saint Bernard",f:"KV à 68 km",club:true},
+];
+const SPORT={swim:["Natation","--swim"],bike:["Vélo","--bike"],run:["Course","--run"],other:["Renfo","--other"]};
+const DAYS=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+
+// ---- Onglets ----
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function show(id){tabs.forEach(b=>{const on=b.id===id;b.setAttribute('aria-selected',on);document.getElementById(b.getAttribute('aria-controls')).hidden=!on});
+  try{localStorage.setItem('tab',id)}catch(e){}}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b.id)));
+const hashMap={planning:'t-plan',allures:'t-vma',velo:'t-3',trail:'t-4',saison:'t-5'};
+let start='t-plan';try{start=localStorage.getItem('tab')||start}catch(e){}
+if(hashMap[location.hash.slice(1)])start=hashMap[location.hash.slice(1)];
+if(document.getElementById(start))show(start);
+
+// ---- Planning ----
+let filter='all',level='all',week=null;
+try{level=localStorage.getItem('lvl')||'all'}catch(e){}
+// La sortie vélo du week-end a lieu le dimanche
+Object.values(WEEKS).forEach(l=>l.forEach(x=>{if(x.s==='bike'&&x.d===6)x.d=0}));
+const wkKeys=Object.keys(WEEKS).map(Number).sort((a,b)=>a-b);
+const monday=w=>{const d=new Date(2025,11,29);d.setDate(d.getDate()+7*(w-1));return d};
+const isoWeek=dt=>{const d=new Date(Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate()));const n=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-n);const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil(((d-y)/864e5+1)/7)};
+const curW=isoWeek(new Date());
+week=wkKeys.includes(curW)?curW:wkKeys.reduce((a,b)=>Math.abs(b-curW)<Math.abs(a-curW)?b:a);
+const fWrap=document.getElementById('filters');
+function chips(wrap,list,get,set){list.forEach(([k,lab])=>{const b=document.createElement('button');b.textContent=lab;b.setAttribute('aria-pressed',k===get());
+  b.onclick=()=>{set(k);[...wrap.children].forEach(c=>c.setAttribute('aria-pressed',c===b));renderDays()};wrap.appendChild(b)})}
+chips(fWrap,[['all','Tous sports'],['swim','Natation'],['bike','Vélo'],['run','Course'],['other','Renfo']],()=>filter,k=>filter=k);
+document.getElementById('wPrev').onclick=()=>{const i=wkKeys.indexOf(week);if(i>0){week=wkKeys[i-1];renderDays()}};
+document.getElementById('wNext').onclick=()=>{const i=wkKeys.indexOf(week);if(i<wkKeys.length-1){week=wkKeys[i+1];renderDays()}};
+const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const SLOTORD={Matin:0,Midi:1,Soir:2,'':3},SPORTORD={swim:0,bike:1,run:2,other:3};
+function renderDays(){
+  const M=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
+  const m=monday(week),e=new Date(m);e.setDate(m.getDate()+6);
+  document.getElementById('wLabel').innerHTML=`<b>Semaine ${week}</b><span>${m.getDate()} ${M[m.getMonth()]} – ${e.getDate()} ${M[e.getMonth()]}${week===curW?' · en cours':''}</span>`;
+  document.getElementById('wPrev').disabled=week===wkKeys[0];document.getElementById('wNext').disabled=week===wkKeys[wkKeys.length-1];
+  const today=new Date().getDay(),out=document.getElementById('days');out.innerHTML='';
+  [1,2,3,4,5,6,0].forEach(d=>{
+    const items=WEEKS[week].concat(EXTRA.filter(e=>!e.from||week>=e.from)).filter(s=>s.d===d&&(filter==='all'||s.s===filter)&&true)
+      .sort((a,b)=>SPORTORD[a.s]-SPORTORD[b.s]||SLOTORD[a.slot]-SLOTORD[b.slot]||({all:0,deb:1,av:2}[a.lvl]-{all:0,deb:1,av:2}[b.lvl]));
+    if(!items.length)return;
+    const dd=new Date(m);dd.setDate(m.getDate()+(d+6)%7);
+    const div=document.createElement('div');div.className='day'+(d===today&&week===curW?' today':'');
+    // Regroupe les colonnes Débutant / Avancé d'un même créneau en une seule carte (sauf groupes nommés, ex. Piste / Trail)
+    const cards=[];
+    items.forEach(s=>{
+      const key=`${s.d}-${s.s}-${s.slot}`,grp=(CRENEAUX[key+'-'+s.lvl]||{}).grp;
+      const prev=cards.find(c=>c.key===key&&!c.grp&&!grp&&c.lvl!=='all'&&s.lvl!=='all');
+      if(prev)prev.texts.push(s.x);else cards.push({...s,key,grp,texts:[s.x]});
+    });
+    const parse=x=>{let ls=x.split('\n').map(l=>l.trim()),dist='',hint=false;
+      if(ls.filter(Boolean).slice(-1)[0]==='MAX'){hint=true;ls.splice(ls.lastIndexOf('MAX'),1)}
+      const nz=ls.filter(Boolean),last=nz[nz.length-1]||'';
+      if(/^\d[\d .]*\s?m$/i.test(last)&&nz.length>1){dist=last;ls.splice(ls.lastIndexOf(last),1)}
+      while(ls.length&&!ls[ls.length-1])ls.pop();
+      const first=ls.findIndex(Boolean);
+      return {title:ls[first]||'',rest:ls.slice(first+1).join('\n').replace(/^\n+/,'').replace(/\n{3,}/g,'\n\n'),dist,hint}};
+    div.innerHTML=`<h4>${DAYS[d]} ${dd.getDate()}</h4>`+cards.map(s=>{
+      const P=s.texts.map(parse),hint=P.some(p=>p.hint);
+      const ci=CRENEAUX[`${s.key}-${s.lvl}`]||CRENEAUX[s.key]||{};
+      const coach=ci.coach||(hint?'Maxime':'');
+      const lv=s.grp?`<span class="lv">${esc(s.grp)}</span>`:'';
+      const head=s.s==='bike'?'<div class="sinfo"><span class="auto">En autonomie</span></div>':`<div class="sinfo">${ci.h?`<time>${esc(ci.h)}</time>`:'<span class="tbd">Horaire à préciser</span>'}${coach?`<span class="coach">${esc(coach)}</span>`:'<span class="tbd">Entraîneur à préciser</span>'}${(ci.lieu||lieu(s,week))?`<span class="place">${esc(ci.lieu||lieu(s,week))}</span>`:''}</div>`;
+      const one=(p,i)=>{const lab=P.length>1?`<span class="var">Variante ${i+1}</span>`:'';const dist=p.dist?`<span class="dist">${esc(p.dist)}</span>`:'';
+        if(!p.title)return '<span class="tbd">Séance à venir</span>';
+        return p.rest?`<details><summary>${lab}${esc(p.title)}${dist}</summary><pre>${esc(p.rest)}</pre></details>`:`<b>${lab}${esc(p.title)}${dist}</b>`};
+      return `<div class="slot" style="--c:var(${SPORT[s.s][1]})">${head}<div class="sh"><span class="tag">${SPORT[s.s][0]}${s.slot?' · '+s.slot:''}</span>${lv}</div>${P.map(one).join('')}</div>`}).join('');
+    out.appendChild(div)});
+  if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
+}
+renderDays();
+let rFilter='all';
+const rf=document.getElementById('rfilters');
+[['all','Toutes'],['phare','Courses phares'],['club','Courses club']].forEach(([k,lab])=>{
+  const b=document.createElement('button');b.textContent=lab;b.setAttribute('aria-pressed',k===rFilter);
+  b.onclick=()=>{rFilter=k;[...rf.children].forEach(c=>c.setAttribute('aria-pressed',c===b));renderRaces()};rf.appendChild(b)});
+function renderRaces(){
+  const now=new Date();now.setHours(0,0,0,0);const M=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
+  const list=RACES.filter(r=>rFilter==='all'||(rFilter==='club')===!!r.club).sort((a,b)=>a.date.localeCompare(b.date));
+  document.getElementById('races').innerHTML=list.map(r=>{const dt=new Date(r.date+'T00:00:00'),n=Math.round((dt-now)/864e5);
+    const cd=n<0?'Passée':n===0?"Aujourd'hui":(r.approx?'~':'')+`J-${n}`;
+    const d=r.approx?`<strong class="ap">${r.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}${r.end?'–'+r.end:''}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`;
+    const meta=[r.f,r.pres?'Présents : '+r.pres:''].filter(Boolean).join(' · ');
+    return `<div class="race${n<0?' past':''}${r.club?'':' key'}"><div class="d">${d}</div><div><span class="tag" style="--c:var(--red)">${r.club?'Course club':'Course phare'}</span><span class="tag" style="--c:var(--muted)">${r.type}</span><b>${r.t}</b><span>${meta}</span>${r.note?`<span class="warn">${r.note}</span>`:''}${r.clash?'<span class="warn">Même jour que 2 autres courses</span>':''}</div><div class="cd">${cd}</div></div>`}).join('');
+}
+renderRaces();
+
+// ---- VMA ----
+const fmtPace=kmh=>{const s=3600/kmh;let m=Math.floor(s/60),r=Math.round(s%60);if(r===60){m++;r=0}return `${m}'${String(r).padStart(2,'0')}`};
+const fmtT=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;
+  return h?`${h}h${String(m).padStart(2,'0')}'${String(s).padStart(2,'0')}`:m?`${m}'${String(s).padStart(2,'0')}"`:`${s}"`};
+const ZONES=[["Endurance fond.",60,70,"--swim","Footing, récup"],["Endurance active",70,80,"--other","Sortie longue"],["Seuil",80,90,"--bike","Tempo, allure semi-10 km"],["VMA",95,105,"--run","Fractionné court"]];
+const PCTS=[60,65,70,75,80,85,90,95,100,105,110];
+const DISTS=[200,300,400,500,800,1000,2000];
+const PRED=[["5 km",5,95],["10 km",10,90],["Semi-marathon",21.0975,83],["Marathon",42.195,77]];
+const vIn=document.getElementById('vma'),vR=document.getElementById('vmaR');
+function vma(){const v=parseFloat(String(vIn.value).replace(',','.'));return v>=6&&v<=30?v:null}
+function render(){
+  const v=vma();if(!v)return;
+  try{localStorage.setItem('vma',v)}catch(e){}
+  document.getElementById('zones').innerHTML=ZONES.map(([n,a,b,c,u])=>`<div class="zone" style="--z:var(${c})"><b>${n}</b><small>${a}–${b} % · ${u}</small><div class="p">${fmtPace(v*b/100)} – ${fmtPace(v*a/100)} /km</div></div>`).join('');
+  document.getElementById('pct').innerHTML='<tr><th>% VMA</th><th>Vitesse</th><th>Allure /km</th><th>400 m</th><th>1000 m</th></tr>'+
+    PCTS.map(p=>{const s=v*p/100;return `<tr${p===100?' class="hl"':''}><td>${p} %</td><td>${s.toFixed(1)} km/h</td><td>${fmtPace(s)}</td><td>${fmtT(400/(s/3.6))}</td><td>${fmtT(1000/(s/3.6))}</td></tr>`}).join('');
+  const fp=[85,90,95,100,105];
+  document.getElementById('frac').innerHTML='<tr><th>Distance</th>'+fp.map(p=>`<th>${p} %</th>`).join('')+'</tr>'+
+    DISTS.map(d=>`<tr><td>${d} m</td>`+fp.map(p=>`<td>${fmtT(d/(v*p/100/3.6))}</td>`).join('')+'</tr>').join('');
+  document.getElementById('races-pred').innerHTML='<tr><th>Course</th><th>% VMA</th><th>Allure /km</th><th>Temps</th></tr>'+
+    PRED.map(([n,km,p])=>{const s=v*p/100;return `<tr><td>${n}</td><td>~${p} %</td><td>${fmtPace(s)}</td><td>${fmtT(km/s*3600)}</td></tr>`}).join('');
+  renderFrac();
+}
+function renderFrac(){
+  const v=vma(),d=+document.getElementById('fd').value,p=+document.getElementById('fp').value,r=+document.getElementById('fr').value||1,o=document.getElementById('fres');
+  if(!v||!(d>0)||!(p>0)){o.textContent='';return}
+  const s=v*p/100;o.innerHTML=`${fmtT(d/(s/3.6))} <small>par répétition, à ${fmtPace(s)} /km (${s.toFixed(1)} km/h) · ${r} × ${d} m = ${(r*d/1000).toFixed(1)} km</small>`;
+}
+vIn.addEventListener('input',()=>{const v=vma();if(v)vR.value=v;render()});
+vR.addEventListener('input',()=>{vIn.value=(+vR.value).toFixed(1);render()});
+['fd','fp','fr'].forEach(id=>document.getElementById(id).addEventListener('input',renderFrac));
+try{const s=localStorage.getItem('vma');if(s){vIn.value=s;vR.value=s}}catch(e){}
+render();
+</script>
+<script>
+// ---- Zones cardiaques (Karvonen) ----
+(function(){
+  const HRZ=[["Z1",50,60,"Récupération","Footing très lent, retour au calme","--other"],["Z2",60,70,"Endurance fondamentale","Sorties longues, base aérobie","--swim"],["Z3",70,80,"Endurance active","Tempo, allure marathon","--bike"],["Z4",80,90,"Seuil","Allure semi à 10 km, fractionné long","--run"],["Z5",90,100,"VMA / PMA","Fractionné court, efforts maximaux","--red"]];
+  const r=document.getElementById('hrRest'),m=document.getElementById('hrMax'),a=document.getElementById('hrAge');
+  try{const v=JSON.parse(localStorage.getItem('hr')||'null');if(v){r.value=v.r;m.value=v.m}}catch(e){}
+  function draw(){
+    const R=+r.value,M=+m.value,out=document.getElementById('hrZones');
+    if(!(R>=30&&M>R+30&&M<=230)){out.innerHTML='<p class="note">Entre une FC de repos et une FC max valides (la FC max doit dépasser la FC de repos d\'au moins 30).</p>';document.getElementById('hrRes').textContent='–';return}
+    const res=M-R;document.getElementById('hrRes').textContent=res+' bpm';
+    try{localStorage.setItem('hr',JSON.stringify({r:R,m:M}))}catch(e){}
+    out.innerHTML=HRZ.map(([z,lo,hi,n,u,c])=>`<div class="z" style="--z:var(${c})"><b>${z}</b><span>${n} <small>${lo}–${hi} % · ${u}</small></span><span class="bpm">${Math.round(R+lo/100*res)}–${Math.round(R+hi/100*res)}</span></div>`).join('');
+  }
+  [r,m].forEach(i=>i.addEventListener('input',draw));
+  document.getElementById('hrEst').onclick=()=>{const g=+a.value,msg=document.getElementById('hrEstMsg');
+    if(!(g>=12&&g<=90)){msg.textContent='Entre ton âge.';return}
+    m.value=Math.round(208-0.7*g);msg.textContent=`FC max estimée : ${m.value} (formule de Tanaka, 208 − 0,7 × âge). Un test terrain reste plus fiable.`;draw()};
+  draw();
+})();
+// ---- Banque de traces GPX (onglets Vélo et Trail) ----
+const CATS={
+  bike:[['45','≈ 45 km'],['60','≈ 60 km'],['100','100 km et +']],
+  trail:[['court','Court (< 15 km)'],['moyen','Moyen (15–30 km)'],['long','Long (> 30 km)']]
+};
+const autoCat=(kind,km)=>kind==='bike'?(km<52.5?'45':km<80?'60':'100'):(km<15?'court':km<=30?'moyen':'long');
+const catLabel=(kind,c)=>(CATS[kind].find(x=>x[0]===c)||[,''])[1];
+const TCOL='data/traces/items';
+const G={db:null,assets:null,downloads:null,canEdit:false,traces:[],cat:{bike:'all',trail:'all'}};
+const escH=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function parseGpx(text){
+  const doc=new DOMParser().parseFromString(text,'application/xml');
+  if(doc.querySelector('parsererror'))throw new Error("Ce fichier n'est pas un GPX lisible.");
+  let pts=[...doc.getElementsByTagName('trkpt')];if(!pts.length)pts=[...doc.getElementsByTagName('rtept')];
+  if(pts.length<2)throw new Error('Aucun point de trace trouvé dans ce fichier.');
+  const P=pts.map(p=>{const e=p.getElementsByTagName('ele')[0];return [+p.getAttribute('lat'),+p.getAttribute('lon'),e?+e.textContent:null]}).filter(p=>isFinite(p[0])&&isFinite(p[1]));
+  const R=6371,rad=Math.PI/180;let dist=0,gain=0,loss=0,ref=null;const cum=[0];
+  for(let i=1;i<P.length;i++){const[a,b]=[P[i-1],P[i]];const dl=(b[0]-a[0])*rad,dn=(b[1]-a[1])*rad;
+    const h=Math.sin(dl/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dn/2)**2;dist+=2*R*Math.asin(Math.sqrt(h));cum.push(dist)}
+  for(const p of P){if(p[2]==null)continue;if(ref==null){ref=p[2];continue}const d=p[2]-ref;if(d>=5){gain+=d;ref=p[2]}else if(d<=-5){loss-=d;ref=p[2]}}
+  const eles=P.map(p=>p[2]).filter(v=>v!=null);
+  const step=Math.max(1,Math.ceil(P.length/300)),simp=[];
+  for(let i=0;i<P.length;i+=step)simp.push([+P[i][0].toFixed(5),+P[i][1].toFixed(5),P[i][2]==null?null:Math.round(P[i][2]),+cum[i].toFixed(2)]);
+  const L=P.length-1;if(simp[simp.length-1][3]!==+cum[L].toFixed(2))simp.push([+P[L][0].toFixed(5),+P[L][1].toFixed(5),P[L][2]==null?null:Math.round(P[L][2]),+cum[L].toFixed(2)]);
+  const nm=doc.querySelector('trk > name, rte > name, metadata > name');
+  return {km:+dist.toFixed(1),gain:Math.round(gain),loss:Math.round(loss),maxEle:eles.length?Math.round(Math.max(...eles)):null,minEle:eles.length?Math.round(Math.min(...eles)):null,pts:simp,name:nm?nm.textContent.trim():''};
+}
+function mapSvg(pts){
+  const lat0=pts.reduce((s,p)=>s+p[0],0)/pts.length,k=Math.cos(lat0*Math.PI/180);
+  const xs=pts.map(p=>p[1]*k),ys=pts.map(p=>-p[0]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const W=300,H=170,pad=10,s=Math.min((W-2*pad)/((x1-x0)||1e-6),(H-2*pad)/((y1-y0)||1e-6));
+  const ox=(W-(x1-x0)*s)/2,oy=(H-(y1-y0)*s)/2;const c=pts.map((p,i)=>[(xs[i]-x0)*s+ox,(ys[i]-y0)*s+oy]);
+  const d=c.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ');const a=c[0],b=c[c.length-1];
+  return `<svg class="tmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tracé du parcours"><polyline points="${d}" fill="none" stroke="var(--c)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${b[0].toFixed(1)}" cy="${b[1].toFixed(1)}" r="5" fill="var(--fg)"/><circle cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="5" fill="var(--pink)" stroke="var(--surface)" stroke-width="2"/></svg>`;
+}
+function profSvg(pts){
+  const e=pts.filter(p=>p[2]!=null);if(e.length<2)return '';
+  const W=300,H=64,km=e[e.length-1][3]||1,lo=Math.min(...e.map(p=>p[2])),hi=Math.max(...e.map(p=>p[2])),r=(hi-lo)||1;
+  const c=e.map(p=>[(p[3]/km*W).toFixed(1),(H-4-(p[2]-lo)/r*(H-12)).toFixed(1)]);
+  return `<svg class="tprof" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Profil d'altitude"><polygon points="0,${H} ${c.map(q=>q.join(',')).join(' ')} ${W},${H}" fill="var(--c)" opacity=".18"/><polyline points="${c.map(q=>q.join(',')).join(' ')}" fill="none" stroke="var(--c)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function renderTraces(kind){
+  const root=document.querySelector(`[data-kind="${kind}"]`),list=root.querySelector('.trace-list');
+  const items=G.traces.filter(t=>t.kind===kind&&(G.cat[kind]==='all'||t.cat===G.cat[kind])).sort((a,b)=>a.km-b.km);
+  if(!G.db){list.innerHTML='<p class="note">La banque de traces n\'est pas disponible dans cette vue. Ouvre l\'app depuis claude.ai en étant connecté.</p>';return}
+  if(!items.length){list.innerHTML=`<div class="empty"><b>Aucune trace ${G.cat[kind]==='all'?'pour l\'instant':'dans cette catégorie'}.</b><span>${G.canEdit?'Ajoute un fichier GPX avec le bouton « Ajouter une trace ».':'Les coachs ajoutent les traces dans le dossier Drive du club ; elles apparaissent ici à la mise à jour suivante.'}</span></div>`;return}
+  list.innerHTML=items.map(t=>`<article class="trace" style="--c:var(${kind==='bike'?'--bike':'--run'})">
+    <div class="tvis">${mapSvg(t.pts)}${profSvg(t.pts)}</div>
+    <div class="tinfo"><span class="tag" style="--c:var(--red)">${escH(catLabel(kind,t.cat))}</span><h3 class="tname">${escH(t.name)}</h3>
+      ${t.desc?`<p class="tdesc">${escH(t.desc)}</p>`:''}
+      <dl class="tstats"><div><dt>Distance</dt><dd>${t.km} km</dd></div><div><dt>D+</dt><dd>${t.gain??'–'} m</dd></div><div><dt>D−</dt><dd>${t.loss??'–'} m</dd></div><div><dt>Alt. max</dt><dd>${t.maxEle??'–'} m</dd></div></dl>
+      <div class="tact">${G.downloads?`<button class="dl" data-id="${escH(t.id)}">Télécharger le GPX</button>`:''}${G.canEdit&&G.assets?`<button class="del ghost" data-id="${escH(t.id)}">Supprimer</button>`:''}<span class="tmsg" role="status"></span></div>
+    </div></article>`).join('');
+}
+function setupKind(kind){
+  const root=document.querySelector(`[data-kind="${kind}"]`),cf=root.querySelector('.cat-filters');
+  [['all','Toutes'],...CATS[kind]].forEach(([k,lab])=>{const b=document.createElement('button');b.type='button';b.textContent=lab;b.setAttribute('aria-pressed',k==='all');
+    b.onclick=()=>{G.cat[kind]=k;[...cf.children].forEach(c=>c.setAttribute('aria-pressed',c===b));renderTraces(kind)};cf.appendChild(b)});
+  root.querySelector('.trace-list').addEventListener('click',async e=>{
+    const btn=e.target.closest('button');if(!btn)return;const t=G.traces.find(x=>x.id===btn.dataset.id);if(!t)return;
+    const msg=btn.parentElement.querySelector('.tmsg');
+    if(btn.classList.contains('dl')){
+      btn.disabled=true;msg.textContent='';
+      try{const r=await fetch(t.file);if(!r.ok)throw 0;const txt=await r.text();
+        await G.downloads.save({filename:(t.fileName||t.name.replace(/[^\w\- ]+/g,'')+'.gpx'),data:txt});}
+      catch(err){if(err&&err.code==='declined'){}else msg.textContent="Le téléchargement n'a pas abouti. Réessaie.";}
+      btn.disabled=false;
+    } else if(btn.classList.contains('del')){
+      if(btn.dataset.confirm!=='1'){btn.dataset.confirm='1';btn.textContent='Confirmer la suppression';setTimeout(()=>{btn.dataset.confirm='';btn.textContent='Supprimer'},4000);return}
+      btn.disabled=true;
+      try{await G.db.doc(TCOL+'/'+t.id).delete();try{await G.assets.delete(t.assetId)}catch(_){}}
+      catch(err){msg.textContent='Suppression impossible : '+(err.message||err.code||'erreur');btn.disabled=false}
+    }
+  });
+  const form=root.querySelector('.add-form'),addBtn=root.querySelector('.add-btn');
+  form.innerHTML=`<h3>Nouvelle trace ${kind==='bike'?'vélo':'trail'}</h3>
+    <div class="fgrid"><div class="full"><label for="f-${kind}-file">Fichier GPX</label><input id="f-${kind}-file" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" required></div>
+    <div class="full"><label for="f-${kind}-name">Nom</label><input id="f-${kind}-name" type="text" maxlength="80" required placeholder="${kind==='bike'?'Tour du lac du Bourget':'Boucle du Nivolet'}"></div>
+    <div><label for="f-${kind}-cat">Catégorie</label><select id="f-${kind}-cat">${CATS[kind].map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div>
+    <div class="full"><label for="f-${kind}-desc">Description (facultatif)</label><textarea id="f-${kind}-desc" rows="2" maxlength="400" placeholder="Départ, points d'eau, difficulté…"></textarea></div></div>
+    <p class="fprev note" hidden></p>
+    <div class="tact"><button type="submit">Enregistrer la trace</button><button type="button" class="ghost cancel">Annuler</button><span class="tmsg" role="status"></span></div>`;
+  let parsed=null,fileText='',fileName='';
+  const $=s=>form.querySelector(s);
+  addBtn.onclick=()=>{form.hidden=!form.hidden;if(!form.hidden)$(`#f-${kind}-file`).focus()};
+  $('.cancel').onclick=()=>{form.reset();form.hidden=true;parsed=null;$('.fprev').hidden=true};
+  $(`#f-${kind}-file`).onchange=async e=>{
+    const f=e.target.files[0];const pv=$('.fprev');parsed=null;pv.hidden=false;if(!f){pv.hidden=true;return}
+    try{fileText=await f.text();fileName=f.name;parsed=parseGpx(fileText);
+      if(!$(`#f-${kind}-name`).value)$(`#f-${kind}-name`).value=(parsed.name||f.name.replace(/\.gpx$/i,'')).slice(0,80);
+      $(`#f-${kind}-cat`).value=autoCat(kind,parsed.km);
+      pv.textContent=`${parsed.km} km · D+ ${parsed.gain} m · ${parsed.pts.length} points conservés pour l'aperçu`;}
+    catch(err){pv.textContent=err.message}
+  };
+  form.onsubmit=async e=>{
+    e.preventDefault();const msg=form.querySelector('.tact .tmsg');
+    if(!parsed){msg.textContent='Choisis d\'abord un fichier GPX valide.';return}
+    const sb=form.querySelector('[type=submit]');sb.disabled=true;msg.textContent='Envoi…';
+    try{
+      const up=await G.assets.upload(new Blob([fileText],{type:'text/plain'}),{type:'text/plain'});
+      const ref=G.db.collection(TCOL).doc();
+      await ref.set({kind,cat:$(`#f-${kind}-cat`).value,name:$(`#f-${kind}-name`).value.trim(),desc:$(`#f-${kind}-desc`).value.trim(),
+        km:parsed.km,gain:parsed.gain,loss:parsed.loss,maxEle:parsed.maxEle,minEle:parsed.minEle,pts:parsed.pts,assetId:up.id,fileName,createdAt:new Date().toISOString()});
+      form.reset();form.hidden=true;parsed=null;$('.fprev').hidden=true;msg.textContent='';
+    }catch(err){msg.textContent='Enregistrement impossible : '+(err.message||err.code||'erreur')}
+    sb.disabled=false;
+  };
+}
+['bike','trail'].forEach(setupKind);
+(async()=>{
+  G.db={};G.canEdit=false;G.assets=null;
+  G.downloads={save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/gpx+xml'}));a.download=filename;document.body.appendChild(a);a.click();a.remove();}};
+  document.querySelectorAll('.add-btn').forEach(b=>b.hidden=true);
+  try{const r=await fetch('traces.json',{cache:'no-cache'});G.traces=r.ok?await r.json():[]}catch(e){G.traces=[]}
+  ['bike','trail'].forEach(renderTraces);
+})();
+</script>
+<script>
+// ---- Onglet Saison : calendrier annuel (cycles du « Plan annuelle » + courses) ----
+(function(){
+  const MF=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  const e=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+  const mon=(w,y)=>{const j4=new Date(y,0,4),d=(j4.getDay()+6)%7;return new Date(y,0,4-d+7*(w-1))};
+  const S=new Date(2026,8,1),E=new Date(2027,8,1),span=E-S,pct=d=>Math.max(0,Math.min(100,(d-S)/span*100));
+  const today=new Date();
+  const wk=SEASON.map(w=>{const a=mon(w.w,w.y),b=new Date(a);b.setDate(a.getDate()+7);const th=new Date(a);th.setDate(a.getDate()+3);return {...w,a,b,th}});
+  const macroName=m=>{const x=(m||'').match(/^CYCLE\s*(\d)\s*:\s*(.*?)\s*:\s*(.*)$/i);return x?{n:x[1],per:cap(x[2].toLowerCase()),t:cap(x[3].toLowerCase())}:null};
+  const runs=key=>{const out=[];wk.forEach(w=>{const k=key(w);const l=out[out.length-1];if(l&&l.k===k)l.b=w.b;else out.push({k,a:w.a,b:w.b})});return out.filter(r=>r.k)};
+  const macros=runs(w=>w.macro),mesos=runs(w=>w.meso);
+  const ev=[];
+  RACES.forEach(r=>{const d=new Date(r.date+'T00:00:00');ev.push({d,t:r.t,k:r.club?'club':'phare',lab:r.approx||null,end:r.end})});
+  wk.forEach(w=>{if(w.club&&!RACES.some(r=>r.t.toLowerCase().includes(w.club.toLowerCase())))ev.push({d:w.th,t:w.club,k:'club',lab:'S'+w.w});});
+  const infos=runs(w=>w.info);
+  // Frise
+  const months=[];for(let m=0;m<12;m++){const d=new Date(2026,8+m,1);months.push(d)}
+  const isMeso=t=>/décharge|coupure/i.test(t)?' light':'';
+  let fr=`<div class="frise" role="img" aria-label="Frise de la saison"><div class="fr-months">${months.map(d=>`<span style="left:${pct(d)}%">${MF[d.getMonth()].slice(0,3)}</span>`).join('')}</div>`;
+  fr+=`<div class="fr-row fr-macro">${macros.map(r=>{const m=macroName(r.k);return `<div class="bar c${m?m.n:0}" style="left:${pct(r.a)}%;width:${pct(r.b)-pct(r.a)}%" title="${e(r.k)}">${m?'Cycle '+m.n:''}</div>`}).join('')}</div>`;
+  fr+=`<div class="fr-row fr-meso">${mesos.map(r=>`<div class="bar${isMeso(r.k)}" style="left:${pct(r.a)}%;width:${pct(r.b)-pct(r.a)}%" title="${e(r.k)}"></div>`).join('')}</div>`;
+  fr+=`<div class="fr-row fr-ev">${ev.map(x=>`<i class="dot ${x.k}" style="left:${pct(x.d)}%" title="${e(x.t)}"></i>`).join('')}</div>`;
+  if(today>=S&&today<E)fr+=`<div class="fr-today" style="left:${pct(today)}%"><span>Aujourd'hui</span></div>`;
+  fr+=`</div>`;
+  // Mois
+  const fmtD=d=>`${d.getDate()}`;
+  const mhtml=months.map(m0=>{
+    const m1=new Date(m0.getFullYear(),m0.getMonth()+1,1);
+    const mw=wk.filter(w=>w.th>=m0&&w.th<m1);
+    const macro=[...new Set(mw.map(w=>w.macro).filter(Boolean))].map(macroName).filter(Boolean);
+    const blocks=[];mw.forEach(w=>{const l=blocks[blocks.length-1];const k=[w.meso,w.nat,w.velo,w.cap].join('|');if(l&&l.k===k)l.w.push(w.w);else blocks.push({k,w:[w.w],x:w})});
+    const evs=ev.filter(x=>x.d>=m0&&x.d<m1).sort((a,b)=>a.d-b.d);
+    const inf=[];mw.forEach(w=>{if(w.info&&!inf.some(i=>i.t===w.info))inf.push({t:w.info,d:w.a})});
+    const cur=today>=m0&&today<m1;
+    const thm=b=>{const x=b.x,parts=[['Natation','--swim',x.nat],['Vélo','--bike',x.velo],['Course','--run',x.cap]].filter(p=>p[2]&&p[2]!==x.meso);
+      return `<div class="mb"><div class="mb-h"><span class="wr">S${b.w[0]}${b.w.length>1?'–'+b.w[b.w.length-1]:''}</span><b>${x.meso?e(x.meso):'<span class="tbd">Thème à définir</span>'}</b></div>${parts.length?`<ul class="th">${parts.map(p=>`<li style="--c:var(${p[1]})"><span class="tag">${p[0]}</span>${e(p[2])}</li>`).join('')}</ul>`:''}</div>`};
+    return `<article class="month${cur?' cur':''}"><header><h3>${MF[m0.getMonth()]} <span>${m0.getFullYear()}</span></h3>${macro.map(m=>`<span class="cyc-n c${m.n}">Cycle ${m.n}</span>`).join('')}${cur?'<span class="now">En cours</span>':''}</header>
+      ${blocks.map(thm).join('')}
+      ${(evs.length||inf.length)?`<ul class="mev">${evs.map(x=>`<li><span class="dd">${x.lab?e(x.lab):fmtD(x.d)+(x.end?'–'+x.end:'')}</span><span class="ev ${x.k}">${e(x.t)}</span></li>`).join('')}${inf.map(i=>`<li><span class="dd">S${wk.find(w=>w.info===i.t).w}</span><span class="ev info">${e(i.t)}</span></li>`).join('')}</ul>`:''}
+    </article>`}).join('');
+  const legendMac=macros.map(r=>macroName(r.k)).filter(Boolean).map(m=>`<li><span class="cyc-n c${m.n}">Cycle ${m.n}</span>${e(m.t)} <span class="muted">(${e(m.per)})</span></li>`).join('');
+  document.getElementById('season').innerHTML=fr+`<ul class="mac-leg">${legendMac}</ul><div class="months">${mhtml}</div>`;
+})();
+</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
+</body>
+</html>
