@@ -117,6 +117,22 @@ td{font:500 .9rem var(--mono)}
 th:first-child,td:first-child{text-align:left}
 tr.hl td{background:var(--chip)}
 .split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.split output{display:block;font:700 1rem var(--mono);padding:9px 0}
+.zcards{display:flex;flex-direction:column;gap:8px}
+.zc{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--z);border-radius:10px;padding:10px 12px}
+.zc h4{margin:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font:700 1.05rem var(--display)}
+.zc h4 .zn{font:800 1.1rem var(--display);color:var(--z)}
+.zc h4 small{font:600 .72rem var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.zc h4 .dur{margin-left:auto;font:700 .85rem var(--mono);color:var(--red)}
+.zc dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;margin:6px 0 0;font-size:.85rem}
+.zc dt{color:var(--muted);font-weight:600}.zc dd{margin:0}
+.lst{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px;font-size:.92rem}
+.lexi{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.lexi section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.lexi h4{margin:0 0 6px;font:700 .85rem var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--red)}
+.lexi dl{display:grid;grid-template-columns:minmax(5.5em,auto) minmax(0,1fr);gap:4px 10px;margin:0;font-size:.88rem}
+.lexi dt{font-weight:700;font-family:var(--mono);font-size:.82rem}.lexi dd{margin:0}
+.calc{display:flex;flex-direction:column;gap:inherit}.calc[hidden]{display:none}
 .split label{font:700 .8rem var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:4px}
 .split input,.split select{width:100%;font:500 1rem var(--mono);padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
 .result{margin-top:12px;font:700 1.6rem var(--mono);color:var(--red)}
@@ -239,19 +255,22 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 
 <section role="tabpanel" id="p-vma" aria-labelledby="t-vma" hidden><div class="wrap">
   <div><h2>Calculateur d'allure</h2></div>
+  <div class="filters" id="calcSw" role="group" aria-label="Sport"><button type="button" aria-pressed="true" data-c="run">Course à pied</button><button type="button" aria-pressed="false" data-c="swim">Natation</button><button type="button" aria-pressed="false" data-c="lex">Zones &amp; lexique</button></div>
+  <div class="calc" id="calc-run">
   <div class="panel vma-in">
     <div><label for="vma">Ta VMA</label><input class="big" id="vma" type="number" inputmode="decimal" min="8" max="25" step="0.1" value="16"> <span class="unit">km/h</span></div>
     <div class="grow"><label for="vmaR">Ajuster</label><input id="vmaR" type="range" min="10" max="24" step="0.1" value="16"></div>
   </div>
-  <div><h3>Zones d'entraînement</h3><div class="zones" id="zones"></div></div>
+  <div><h3>Tes allures par zone</h3><div class="hrz" id="zones"></div><p class="note" style="margin-top:8px">Zones de la fiche club, traduites en % de VMA : ce sont des repères, la durée tenable et le ressenti restent la référence.</p></div>
   <div class="panel hr">
-    <h3>Zones cardiaques (méthode de Karvonen)</h3>
+    <h3>Zones cardiaques</h3>
+    <div class="filters" id="hrM" role="group" aria-label="Méthode" style="margin-bottom:12px"><button type="button" aria-pressed="true" data-m="club">% FC max (fiche club)</button><button type="button" aria-pressed="false" data-m="karv">Karvonen</button></div>
     <div class="split hr-in">
       <div><label for="hrRest">FC repos</label><input id="hrRest" type="number" inputmode="numeric" min="30" max="110" value="55"></div>
       <div><label for="hrMax">FC max</label><input id="hrMax" type="number" inputmode="numeric" min="120" max="230" value="190"></div>
       <div><label for="hrRes">FC de réserve</label><output id="hrRes">135</output></div>
     </div>
-    <p class="note hr-help">FC cible = FC repos + % × (FC max − FC repos). Prends ta FC de repos le matin au réveil, allongé. Tu ne connais pas ta FC max ? <label for="hrAge">Ton âge</label> <input id="hrAge" type="number" inputmode="numeric" min="12" max="90" placeholder="âge"> <button type="button" id="hrEst">Estimer</button> <span id="hrEstMsg"></span></p>
+    <p class="note hr-help"><span id="hrHow"></span> Prends ta FC de repos le matin au réveil, allongé. Tu ne connais pas ta FC max ? <label for="hrAge">Ton âge</label> <input id="hrAge" type="number" inputmode="numeric" min="12" max="90" placeholder="âge"> <button type="button" id="hrEst">Estimer</button> <span id="hrEstMsg"></span></p>
     <div class="hrz" id="hrZones"></div>
   </div>
   <div><h3>Allures par % de VMA</h3><div class="panel tbl"><table id="pct"></table></div></div>
@@ -267,6 +286,63 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   </div>
   <div><h3>Objectifs course (estimation)</h3><div class="panel tbl"><table id="races-pred"></table></div>
   <p class="note" style="margin-top:8px">Estimation selon des % de VMA usuels. Ça varie selon l'endurance et le profil de chacun.</p></div>
+  <div class="panel">
+    <h3>Distance et temps → allure</h3>
+    <div class="split">
+      <div><label for="rcD">Distance (km)</label><input id="rcD" type="number" inputmode="decimal" value="10" min="0.1" step="0.1"></div>
+      <div><label for="rcT">Temps</label><input id="rcT" type="text" inputmode="numeric" value="50:00" placeholder="h:mm:ss"></div>
+      <div><label for="rcV">Vitesse</label><output id="rcV"></output></div>
+    </div>
+    <div class="result" id="rcRes"></div>
+  </div>
+  </div>
+  <div class="calc" id="calc-swim" hidden>
+  <div class="panel">
+    <h3>Ton test CSS (vitesse critique)</h3>
+    <div class="split">
+      <div><label for="s400">Temps 400 m</label><input id="s400" type="text" inputmode="numeric" value="7:00" placeholder="m:ss"></div>
+      <div><label for="s200">Temps 200 m</label><input id="s200" type="text" inputmode="numeric" value="3:20" placeholder="m:ss"></div>
+      <div><label for="sCss">CSS /100 m</label><output id="sCss"></output></div>
+    </div>
+    <p class="note" style="margin-top:12px">Nage un 400 m à fond, récupère bien, puis un 200 m à fond. CSS = (T400 − T200) / 2 par 100 m : c'est ton allure seuil, tenable environ 30 minutes.</p>
+  </div>
+  <div><h3>Tes allures par zone</h3><div class="hrz" id="swZones"></div><p class="note" style="margin-top:8px">Zones de la fiche club, traduites en écart à ta CSS par 100 m.</p></div>
+  <div><h3>Temps de passage</h3><div class="panel tbl"><table id="swPass"></table></div></div>
+  <div class="panel">
+    <h3>Mes séries</h3>
+    <div class="split">
+      <div><label for="swRd">Distance (m)</label><input id="swRd" type="number" inputmode="numeric" value="100" min="25" step="25"></div>
+      <div><label for="swRo">Écart / CSS (s)</label><input id="swRo" type="number" inputmode="numeric" value="0" min="-15" max="30" step="1"></div>
+      <div><label for="swRr">Répétitions</label><input id="swRr" type="number" inputmode="numeric" value="10" min="1" step="1"></div>
+    </div>
+    <div class="result" id="swRres"></div>
+  </div>
+  <div class="panel">
+    <h3>Distance et temps → allure</h3>
+    <div class="split">
+      <div><label for="swD">Distance (m)</label><input id="swD" type="number" inputmode="numeric" value="1500" min="25" step="25"></div>
+      <div><label for="swT">Temps</label><input id="swT" type="text" inputmode="numeric" value="30:00" placeholder="h:mm:ss"></div>
+      <div><label for="swV">Vitesse</label><output id="swV"></output></div>
+    </div>
+    <div class="result" id="swRes"></div>
+  </div>
+  </div>
+  <div class="calc" id="calc-lex" hidden>
+  <div><h3>Les zones et domaines d'intensité</h3><div class="zcards" id="zCards"></div>
+  <p class="note" style="margin-top:8px"><b>SV1</b> (1er seuil ventilatoire) : la respiration s'accélère, fin de l'aisance, entre Z2 et Z3. <b>SV2</b> (2e seuil) : au-delà, le lactate s'accumule et l'épuisement arrive vite, entre Z4 et Z5. Les 4 domaines décrivent la réponse du corps : <b>modéré</b>, tout est stable ; <b>lourd</b>, l'organisme se stabilise à un niveau plus élevé ; <b>sévère</b>, plus rien n'est stable jusqu'à l'épuisement ; <b>extrême</b>, l'effort s'arrête avant même d'atteindre VO₂max. Lactate et FC sont des ordres d'idée, très individuels : seul un test donne tes vraies valeurs. RPE : effort perçu de 1 à 10.</p></div>
+  <div class="panel">
+    <h3>Pourquoi la durée plutôt que la distance ?</h3>
+    <ul class="lst">
+      <li>Un 10 km couru en 35 min se fait au seuil (Z4). Le même 10 km en 1h10 se court plutôt en tempo (Z3).</li>
+      <li>Un 1500 m nagé en 20 min ou en 35 min ne sollicite pas le corps de la même façon.</li>
+      <li>La durée que tu peux tenir est le seul repère qui vaut pour tout le monde, débutant comme confirmé.</li>
+      <li>« 200 Z2 / 100 Z3 » : 200 m à une allure que tu tiendrais des heures, puis 100 m un cran au-dessus.</li>
+      <li>Seuil (Z4) : l'allure la plus rapide que tu pourrais tenir environ 30 à 60 min. VMA (Z5) : l'allure que tu tiendrais 3 à 8 min, travaillée en fractions courtes.</li>
+    </ul>
+  </div>
+  <div><h3>Lexique natation &amp; course à pied</h3><div class="lexi" id="lexi"></div>
+  <div class="note" style="margin-top:8px"><b>Exemple : 9 x 100 R20" · 1 respi 3/5 · 1 25 dos / 25 cr · 1 dégressif par 25</b><br>9 x 100 m avec 20 s de récup, en alternant : un en respiration tous les 3 puis 5 mouvements, un en 25 m dos et 25 m crawl, un en ralentissant à chaque 25 m.</div></div>
+  </div>
 </div></section>
 
 <section role="tabpanel" id="p-3" aria-labelledby="t-3" hidden><div class="wrap" data-kind="bike">
@@ -418,11 +494,69 @@ function renderRaces(){
 }
 renderRaces();
 
+// ---- Zones du club (fiche « Zones d'intensité & physiologie » 2026-2027) ----
+const CLUBZ=[
+ {z:'Z1',n:'Récupération',sub:'',dom:'Modéré',c:'#7FB8E0',fc:[0,70],k:[50,60],vma:[0,65],css:[15,null],rpe:'1–2',dur:'Illimité',body:'Lactate au niveau de repos',dev:'Récupération, retour au calme',feel:'Très facile, on relâche tout'},
+ {z:'Z2',n:'Endurance',sub:'EF',dom:'Modéré',c:'#3E95D1',fc:[70,80],k:[60,70],vma:[65,75],css:[8,12],rpe:'3–4',dur:'Plusieurs heures',body:'Sous SV1 · lactate < 2 mmol/L, stable',dev:'Base aérobie : utilisation des graisses, capillaires, mitochondries, économie de geste',feel:'Allure constante, respiration calme, je peux discuter'},
+ {z:'Z3',n:'Tempo',sub:'SV1 → SV2',dom:'Lourd',c:'#2E9A6A',fc:[80,88],k:[70,80],vma:[75,85],css:[3,6],rpe:'5–6',dur:'1h à 3h',body:'Lactate 2 à 4 mmol/L, plus élevé mais encore stable',dev:'Endurance spécifique longue distance, part des glucides qui augmente',feel:'Soutenu, respiration accélérée, phrases courtes'},
+ {z:'Z4',n:'Seuil',sub:'≈ SV2',dom:'Lourd',c:'#E5A11A',fc:[88,93],k:[80,90],vma:[85,92],css:[-2,2],rpe:'7–8',dur:'30 à 60 min',body:'Plus haute intensité où le lactate reste stable (≈ 4 mmol/L, très individuel)',dev:"Repousser le seuil : aller plus vite sans s'asphyxier",feel:'Difficile, quelques mots seulement'},
+ {z:'Z5',n:'VMA / PMA',sub:'> SV2',dom:'Sévère',c:'#D93A3A',fc:[93,100],k:[90,100],vma:[95,105],css:[-6,-3],rpe:'9',dur:'3 à 8 min',body:"Plus rien n'est stable : la consommation d'O₂ grimpe jusqu'à VO₂max",dev:'La cylindrée : VO₂max et vitesse à VO₂max',feel:'Très intense, impossible de parler'},
+ {z:'Z6',n:'Lactique',sub:'> VO₂max',dom:'Extrême',c:'#ED68A3',fc:null,vma:[105,120],css:[null,-7],rpe:'9–10',dur:'20 s à 2 min',body:'Glycolyse anaérobie, forte accumulation de lactate',dev:'Tolérance à l\'acidose, changements de rythme',feel:'Explosif, les muscles brûlent'},
+ {z:'Z7',n:'Sprint',sub:'alactique',dom:'Extrême',c:'var(--fg)',fc:null,vma:null,css:null,rpe:'10',dur:'Moins de 20 s',body:'Phosphocréatine, sans production de lactate',dev:'Vitesse, puissance, recrutement nerveux',feel:'À bloc, effort maximal'}];
+const LEXI=[
+ ['Les nages',[['cr','Crawl'],['dos','Dos crawlé'],['4N','Quatre nages : papillon, dos, brasse, crawl'],['NC','Nage complète (bras + jambes)'],['libre','Nage libre : au choix du nageur'],['1 par nage','Une répétition dans chacune des 4 nages']]],
+ ['Le matériel',[['pull','Pull-buoy entre les cuisses : on nage avec les bras seuls'],['pull cheville','Pull-buoy coincé entre les chevilles'],['plaq','Plaquettes (mains)'],['palmes','Palmes courtes de natation'],['tuba','Tuba frontal : on nage sans tourner la tête pour respirer'],['élastique','Élastique aux chevilles : jambes immobilisées, bras seuls']]],
+ ['Les consignes',[['jbs','Jambes seules'],['ampli','Amplitude : le moins de coups de bras possible'],['CDB','Coups de bras par 25 m'],['respi 3/5/7','Nombre de mouvements de bras avant une respiration'],['coulée','Poussée au mur puis remontée passive, sans ondulation ni battement de jambes'],['culbute','Virage en roulade']]],
+ ['Les éducatifs',[['éduc','Éducatif : exercice technique ciblé'],['rattrapé',"Une main attend l'autre devant avant de tirer"],['batt lat','Battements sur le côté'],['godille',"Mains qui balayent l'eau en 8, pour sentir les appuis"],['petit chien',"Crawl tête hors de l'eau, petits mouvements de bras sous l'eau"],['grand chien',"Crawl avec retour des bras sous l'eau, bras allongés loin devant"],['crocodile',"Crawl avec les yeux au-dessus de l'eau, mais pas la bouche"],['WP',"Crawl water-polo : tête hors de l'eau, regard devant"],['touché tête / ép.',"Pendant le retour du bras, toucher la tête ou l'épaule"],['feuille morte / râteau',"Retour coude haut, le bout des doigts frôle l'eau"],['superman','Glisse bras tendus devant, battements de jambes'],['toboggan',"La main entre dans l'eau au niveau du front et glisse vers l'avant en suivant la pente d'un toboggan"],['paume magique','Crawl avec fin de poussée accentuée : paume vers le ciel, la main pousse vers l\'extérieur']]],
+ ['Les allures',[['souple','Très facile, récupération active'],['prog','Progressif : on accélère au fil de la répétition ou de la série'],['dégressif','Chaque 25 m moins vite que le précédent'],['MMP','Meilleure moyenne possible sur toute la série'],['fréquence','Cadence des bras, à augmenter sans perdre la technique']]],
+ ['Lire une série',[['8 x 50','8 répétitions de 50 m'],['R20"','20 secondes de récupération entre chaque'],['Bloc 3 x','Enchaîner le bloc 3 fois'],['25 / 25','Le 50 m est découpé en deux 25 m différents']]],
+ ['Course à pied',[['EF','Endurance fondamentale (Z2), footing facile'],['gammes','Éducatifs de course : talons-fesses, montées de genoux, pas chassés…'],['VMA','Vitesse maximale aérobie (Z5)'],['SV1','Seuil 1 : frontière entre Z2 et Z3'],['SV2','Seuil 2 : allure seuil (Z4)'],['actif','Allure soutenue mais contrôlée (Z3, tempo)'],['R100m','Récupération sur 100 m en trottinant'],["R2'",'2 minutes de récupération'],['en côte','Répétitions en montée, retour en descente pour récupérer']]]];
+const zRow=(z,txt,val)=>`<div class="z" style="--z:${z.c}"><b>${z.z}</b><span>${z.n} <small>${txt}</small></span><span class="bpm">${val}</span></div>`;
+document.getElementById('zCards').innerHTML=CLUBZ.map(z=>`<div class="zc" style="--z:${z.c}"><h4><span class="zn">${z.z}</span>${z.n}${z.sub?` <small>${esc(z.sub)}</small>`:''} <small>· ${z.dom}</small><span class="dur">${z.dur}</span></h4><dl><dt>Corps</dt><dd>${esc(z.body)}${z.fc?` · FC ${z.fc[0]?(z.fc[1]===100?'> '+z.fc[0]:z.fc[0]+'–'+z.fc[1]):'< '+z.fc[1]} % FCmax`:' · FC non pertinente'}</dd><dt>On développe</dt><dd>${esc(z.dev)}</dd><dt>Ressenti</dt><dd>${esc(z.feel)} · RPE ${z.rpe}</dd></dl></div>`).join('');
+document.getElementById('lexi').innerHTML=LEXI.map(([h,l])=>`<section><h4>${h}</h4><dl>${l.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl></section>`).join('');
+// ---- Calculateurs course / natation ----
+const parseT=v=>{const p=String(v).trim().replace(/[h'"]/g,':').split(':').filter(x=>x!=='').map(Number);if(!p.length||p.some(isNaN))return null;return p.reduce((a,b)=>a*60+b,0)||null};
+const fmtS=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),x=sec%60;return h?`${h}h${String(m).padStart(2,'0')}'${String(x).padStart(2,'0')}`:`${m}'${String(x).padStart(2,'0')}"`};
+(()=>{
+  const $=id=>document.getElementById(id);
+  document.querySelectorAll('#calcSw button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#calcSw button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    document.querySelectorAll('.calc').forEach(c=>c.hidden=c.id!=='calc-'+b.dataset.c);
+    try{localStorage.setItem('calc',b.dataset.c)}catch(e){}
+  }));
+  try{const c=localStorage.getItem('calc');if(c==='swim')document.querySelector('#calcSw [data-c=swim]').click()}catch(e){}
+  // course : distance + temps
+  const rc=()=>{const d=parseFloat(String($('rcD').value).replace(',','.')),t=parseT($('rcT').value);
+    if(!(d>0)||!t){$('rcRes').textContent='—';$('rcV').textContent='';return}
+    $('rcRes').innerHTML=`${fmtS(t/d).replace('"','')} /km<small>allure moyenne sur ${d} km</small>`;$('rcV').textContent=(d/(t/3600)).toFixed(1)+' km/h'};
+  ['rcD','rcT'].forEach(i=>$(i).addEventListener('input',rc));rc();
+  // natation
+  const SWD=[50,100,200,400,750,1500,1900,3800];
+  const css=()=>{const a=parseT($('s400').value),b=parseT($('s200').value);return a&&b&&a>b?(a-b)/2:null};
+  const sw=()=>{const c=css();
+    try{localStorage.setItem('swim',JSON.stringify({a:$('s400').value,b:$('s200').value}))}catch(e){}
+    if(!c){$('sCss').textContent='—';$('swZones').innerHTML='';$('swPass').innerHTML='';$('swRres').textContent='—';return}
+    $('sCss').textContent=fmtS(c);
+    $('swZones').innerHTML=CLUBZ.map(z=>{const o=z.css;
+      if(!o)return zRow(z,`effort maximal · ${z.dur}`,'à bloc');
+      if(o[1]===null)return zRow(z,`CSS + ${o[0]} s et plus · ${z.dur}`,`${fmtS(c+o[0])} et + /100`);
+      if(o[0]===null)return zRow(z,`plus vite que CSS ${o[1]} s · ${z.dur}`,`< ${fmtS(c+o[1])} /100`);
+      const t=o[0]===-o[1]?`CSS ± ${o[1]} s`:o[1]<=0?`CSS ${o[0]} à ${o[1]} s`:`CSS + ${o[0]} à ${o[1]} s`;
+      return zRow(z,`${t} · ${z.dur}`,`${fmtS(c+o[0])} – ${fmtS(c+o[1])} /100`)}).join('');
+    $('swPass').innerHTML='<tr><th>Distance</th><th>Z4 Seuil</th><th>Z3 Tempo</th><th>Z2 Endurance</th></tr>'+SWD.map(d=>`<tr><td><b>${d} m</b></td><td>${fmtS(c*d/100)}</td><td>${fmtS((c+4)*d/100)}</td><td>${fmtS((c+10)*d/100)}</td></tr>`).join('');
+    const d=+$('swRd').value,o=+$('swRo').value||0,r=+$('swRr').value||1;
+    $('swRres').innerHTML=d>0?`${fmtS((c+o)*d/100)}<small>par ${d} m à ${fmtS(c+o)} /100 m · ${r} × ${d} m = ${r*d} m nagés</small>`:'—'};
+  try{const v=JSON.parse(localStorage.getItem('swim')||'null');if(v){$('s400').value=v.a;$('s200').value=v.b}}catch(e){}
+  ['s400','s200','swRd','swRo','swRr'].forEach(i=>$(i).addEventListener('input',sw));sw();
+  const sd=()=>{const d=+$('swD').value,t=parseT($('swT').value);
+    if(!(d>0)||!t){$('swRes').textContent='—';$('swV').textContent='';return}
+    $('swRes').innerHTML=`${fmtS(t/d*100)} /100 m<small>allure moyenne sur ${d} m</small>`;$('swV').textContent=(d/(t/3600)/1000).toFixed(2)+' km/h'};
+  ['swD','swT'].forEach(i=>$(i).addEventListener('input',sd));sd();
+})();
 // ---- VMA ----
 const fmtPace=kmh=>{const s=3600/kmh;let m=Math.floor(s/60),r=Math.round(s%60);if(r===60){m++;r=0}return `${m}'${String(r).padStart(2,'0')}`};
 const fmtT=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;
   return h?`${h}h${String(m).padStart(2,'0')}'${String(s).padStart(2,'0')}`:m?`${m}'${String(s).padStart(2,'0')}"`:`${s}"`};
-const ZONES=[["Endurance fond.",60,70,"--swim","Footing, récup"],["Endurance active",70,80,"--other","Sortie longue"],["Seuil",80,90,"--bike","Tempo, allure semi-10 km"],["VMA",95,105,"--run","Fractionné court"]];
 const PCTS=[60,65,70,75,80,85,90,95,100,105,110];
 const DISTS=[200,300,400,500,800,1000,2000];
 const PRED=[["5 km",5,95],["10 km",10,90],["Semi-marathon",21.0975,83],["Marathon",42.195,77]];
@@ -431,7 +565,9 @@ function vma(){const v=parseFloat(String(vIn.value).replace(',','.'));return v>=
 function render(){
   const v=vma();if(!v)return;
   try{localStorage.setItem('vma',v)}catch(e){}
-  document.getElementById('zones').innerHTML=ZONES.map(([n,a,b,c,u])=>`<div class="zone" style="--z:var(${c})"><b>${n}</b><small>${a}–${b} % · ${u}</small><div class="p">${fmtPace(v*b/100)} – ${fmtPace(v*a/100)} /km</div></div>`).join('');
+  document.getElementById('zones').innerHTML=CLUBZ.map(z=>{const p=z.vma;
+    const val=!p?'à bloc':p[0]===0?`${fmtPace(v*p[1]/100)} et +`:`${fmtPace(v*p[1]/100)} – ${fmtPace(v*p[0]/100)}`;
+    return zRow(z,`${!p?'effort maximal':p[0]===0?'< '+p[1]:p[0]+'–'+p[1]} % VMA · ${z.dur}`,val+(p?' /km':''))}).join('');
   document.getElementById('pct').innerHTML='<tr><th>% VMA</th><th>Vitesse</th><th>Allure /km</th><th>400 m</th><th>1000 m</th></tr>'+
     PCTS.map(p=>{const s=v*p/100;return `<tr${p===100?' class="hl"':''}><td>${p} %</td><td>${s.toFixed(1)} km/h</td><td>${fmtPace(s)}</td><td>${fmtT(400/(s/3.6))}</td><td>${fmtT(1000/(s/3.6))}</td></tr>`}).join('');
   const fp=[85,90,95,100,105];
@@ -453,17 +589,25 @@ try{const s=localStorage.getItem('vma');if(s){vIn.value=s;vR.value=s}}catch(e){}
 render();
 </script>
 <script>
-// ---- Zones cardiaques (Karvonen) ----
+// ---- Zones cardiaques (fiche club en % FC max, ou Karvonen) ----
 (function(){
-  const HRZ=[["Z1",50,60,"Récupération","Footing très lent, retour au calme","--other"],["Z2",60,70,"Endurance fondamentale","Sorties longues, base aérobie","--swim"],["Z3",70,80,"Endurance active","Tempo, allure marathon","--bike"],["Z4",80,90,"Seuil","Allure semi à 10 km, fractionné long","--run"],["Z5",90,100,"VMA / PMA","Fractionné court, efforts maximaux","--red"]];
   const r=document.getElementById('hrRest'),m=document.getElementById('hrMax'),a=document.getElementById('hrAge');
-  try{const v=JSON.parse(localStorage.getItem('hr')||'null');if(v){r.value=v.r;m.value=v.m}}catch(e){}
+  let meth='club';
+  try{const v=JSON.parse(localStorage.getItem('hr')||'null');if(v){r.value=v.r;m.value=v.m;if(v.k)meth=v.k}}catch(e){}
+  const btns=document.querySelectorAll('#hrM button');
+  btns.forEach(b=>b.addEventListener('click',()=>{meth=b.dataset.m;draw()}));
   function draw(){
+    btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===meth)));
+    document.getElementById('hrHow').textContent=meth==='club'?'Fiche club : FC cible = % × FC max. La FC repos ne sert qu\'à la méthode Karvonen.':'Karvonen : FC cible = FC repos + % × (FC max − FC repos).';
     const R=+r.value,M=+m.value,out=document.getElementById('hrZones');
     if(!(R>=30&&M>R+30&&M<=230)){out.innerHTML='<p class="note">Entre une FC de repos et une FC max valides (la FC max doit dépasser la FC de repos d\'au moins 30).</p>';document.getElementById('hrRes').textContent='–';return}
     const res=M-R;document.getElementById('hrRes').textContent=res+' bpm';
-    try{localStorage.setItem('hr',JSON.stringify({r:R,m:M}))}catch(e){}
-    out.innerHTML=HRZ.map(([z,lo,hi,n,u,c])=>`<div class="z" style="--z:var(${c})"><b>${z}</b><span>${n} <small>${lo}–${hi} % · ${u}</small></span><span class="bpm">${Math.round(R+lo/100*res)}–${Math.round(R+hi/100*res)}</span></div>`).join('');
+    try{localStorage.setItem('hr',JSON.stringify({r:R,m:M,k:meth}))}catch(e){}
+    const zs=CLUBZ.filter(z=>z.fc);
+    out.innerHTML=zs.map(z=>{
+      if(meth==='club'){const[lo,hi]=z.fc;return zRow(z,`${lo?(hi===100?'> '+lo:lo+'–'+hi):'< '+hi} % FC max · ${z.feel}`,lo?(hi===100?'> '+Math.round(M*lo/100):Math.round(M*lo/100)+'–'+Math.round(M*hi/100)):'< '+Math.round(M*hi/100))}
+      const[lo,hi]=z.k;return zRow(z,`${lo}–${hi} % FC réserve · ${z.feel}`,`${Math.round(R+lo/100*res)}–${Math.round(R+hi/100*res)}`)}).join('')+
+      '<p class="note">Z6 et Z7 : FC non pertinente, on se fie au ressenti et à la durée.</p>';
   }
   [r,m].forEach(i=>i.addEventListener('input',draw));
   document.getElementById('hrEst').onclick=()=>{const g=+a.value,msg=document.getElementById('hrEstMsg');
