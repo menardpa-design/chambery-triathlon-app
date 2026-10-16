@@ -1,8 +1,11 @@
 """Met à jour les données de l'app Chambéry Triathlon depuis le Google Sheet "Plan adulte 2026-2027".
 Usage : python3 -I update_planning.py plan.xlsx page.html      (relit le Sheet)
         python3 -I update_planning.py --refilter page.html     (sans Sheet : recalcule seulement les semaines visibles)
-Remplace les lignes `const WEEKS=...;` et `const SEASON=...;` de la page, sans toucher au reste
-(CRENEAUX, EXTRA, RACES, lieux, etc.).
+Remplace les lignes `const WEEKS=...;`, `const SEASON=...;`, `const CRSHEET=...;` et `const CHANGES=...;` de la page,
+sans toucher au reste (CRENEAUX de base, EXTRA, RACES, lieux, etc.).
+Onglet « Créneaux » (facultatif) : Jour | Sport | Moment | Horaire | Entraîneur | Lieu  → remplace l'horaire, l'entraîneur ou le lieu habituels.
+Onglet « Changements » (facultatif) : Date | Sport | Moment | Statut | Entraîneur | Horaire | Lieu | Message
+  → une ligne par séance d'une date précise ; Statut « Annulé » barre la séance, sinon les cases remplies remplacent celles du créneau.
 Séances : seules la semaine en cours et la suivante sont publiées (demande de Paul, 2026-10-15) ;
 toutes les semaines sont gardées dans weeks_full.json, à côté de ce script (hors dépôt public).
 La planification annuelle (SEASON) reste complète."""
@@ -126,14 +129,94 @@ def season_from(wb):
         out.append({'w': w, 'y': 2026 if w >= 36 else 2027, **{k: (val(R[k], col) if R[k] else '') for k in ('macro', 'meso', 'nat', 'velo', 'cap', 'info', 'club')}})
     return out
 
+def norm(v):
+    import unicodedata
+    v = '' if v is None else str(v).strip()
+    return ''.join(c for c in unicodedata.normalize('NFD', v.lower()) if unicodedata.category(c) != 'Mn')
+
+def tab(wb, name):
+    n = next((n for n in wb.sheetnames if norm(n).startswith(name)), None)
+    if not n:
+        return None
+    rows = [[c for c in r] for r in wb[n].iter_rows(values_only=True)]
+    hi = next((i for i, r in enumerate(rows) if sum(1 for c in r if norm(c)) >= 3), None)
+    if hi is None:
+        return []
+    head = [norm(c) for c in rows[hi]]
+    col = lambda *ks: next((i for i, h in enumerate(head) if any(h.startswith(k) for k in ks)), None)
+    C = {k: col(*ks) for k, ks in {'jour': ('jour',), 'date': ('date',), 'sport': ('sport', 'seance', 'activite'), 'moment': ('moment', 'creneau'),
+         'h': ('horaire', 'heure'), 'coach': ('entraineur', 'coach'), 'lieu': ('lieu',), 'statut': ('statut', 'etat'), 'msg': ('message', 'commentaire', 'info', 'remarque')}.items()}
+    get = lambda r, k: (r[C[k]] if C[k] is not None and C[k] < len(r) else None)
+    return [{k: get(r, k) for k in C} for r in rows[hi + 1:] if any(norm(c) for c in r)]
+
+GRP = {'piste': ('deb', 'Piste'), 'trail': ('av', 'Trail')}
+
+def sport_of(v):
+    s = norm(v)
+    for k, code in (('nat', 'swim'), ('vel', 'bike'), ('course', 'run'), ('cap', 'run'), ('piste', 'run'), ('trail', 'run'), ('renfo', 'other'), ('ppg', 'other')):
+        if k in s:
+            return code, next((g for g in GRP if g in s), None)
+    return None, None
+
+def moment_of(v):
+    s = norm(v)
+    return next((m.capitalize() for m in ('matin', 'midi', 'soir') if m in s), '')
+
+def txt(v):
+    if v is None: return ''
+    if isinstance(v, datetime.time): return v.strftime('%Hh%M')
+    return str(v).strip()
+
+def creneaux_from(wb):
+    rows = tab(wb, 'creneau')
+    if rows is None:
+        return None
+    out = {}
+    for r in rows:
+        d = DAYS.get(norm(r['jour']).upper()); s, g = sport_of(r['sport'])
+        if d is None or not s:
+            continue
+        key = f"{d}-{s}-{moment_of(r['moment'])}" + (f"-{GRP[g][0]}" if g else '')
+        v = {k: txt(r[k]) for k in ('h', 'coach', 'lieu') if txt(r[k])}
+        if g: v['grp'] = GRP[g][1]
+        if v: out[key] = v
+    return out
+
+def date_of(v, today):
+    if isinstance(v, datetime.datetime): return v.date()
+    if isinstance(v, datetime.date): return v
+    m = re.match(r'\s*(\d{1,2})[/.-](\d{1,2})(?:[/.-](\d{2,4}))?', str(v or ''))
+    if not m: return None
+    d, mo, y = int(m.group(1)), int(m.group(2)), m.group(3)
+    y = (int(y) + 2000 if len(y) == 2 else int(y)) if y else (today.year if mo >= today.month - 6 else today.year + 1)
+    try: return datetime.date(y, mo, d)
+    except ValueError: return None
+
+def changes_from(wb):
+    rows = tab(wb, 'changement')
+    if rows is None:
+        return None
+    today = datetime.datetime.now(ZoneInfo('Europe/Paris')).date(); out = []
+    for r in rows:
+        dt = date_of(r['date'], today); s, g = sport_of(r['sport'])
+        if not dt or not s or dt < today - datetime.timedelta(days=7):
+            continue
+        c = {'date': dt.isoformat(), 's': s, 'slot': moment_of(r['moment'])}
+        if g: c['grp'] = GRP[g][1]
+        if norm(r['statut']).startswith('annul'): c['off'] = 1
+        c.update({k: txt(r[k]) for k in ('coach', 'h', 'lieu', 'msg') if txt(r[k])})
+        out.append(c)
+    return out
+
 if __name__ == '__main__':
     if sys.argv[1] == '--refilter':
-        html = sys.argv[2]; weeks = json.load(open(FULL, encoding='utf-8')); season = None
+        html = sys.argv[2]; weeks = json.load(open(FULL, encoding='utf-8')); season = cren = chg = None
     else:
         import openpyxl
         xlsx, html = sys.argv[1], sys.argv[2]
         wb = openpyxl.load_workbook(xlsx, data_only=True)
         weeks, season = weeks_from(wb), season_from(wb)
+        cren, chg = creneaux_from(wb) or {}, changes_from(wb) or []
         json.dump(weeks, open(FULL, 'w', encoding='utf-8'), ensure_ascii=False)
     shown = visible(weeks)
     s = open(html, encoding='utf-8').read()
@@ -141,6 +224,12 @@ if __name__ == '__main__':
     b = 1
     if season is not None:
         s, b = re.subn(r'^const SEASON=.*;$', lambda m: 'const SEASON=' + json.dumps(season, ensure_ascii=False) + ';', s, count=1, flags=re.M)
-    assert a == 1 and b == 1, 'lignes WEEKS/SEASON introuvables'
+    if cren is not None:
+        s, c1 = re.subn(r'^const CRSHEET=.*;$', lambda m: 'const CRSHEET=' + json.dumps(cren, ensure_ascii=False) + ';', s, count=1, flags=re.M)
+        s, c2 = re.subn(r'^const CHANGES=.*;$', lambda m: 'const CHANGES=' + json.dumps(chg, ensure_ascii=False) + ';', s, count=1, flags=re.M)
+        b = b and c1 and c2
+    assert a == 1 and b == 1, 'lignes WEEKS/SEASON/CRSHEET/CHANGES introuvables'
     open(html, 'w', encoding='utf-8').write(s)
     print('semaines dans le Sheet :', ', '.join(weeks), '| publiées :', ', '.join(shown))
+    if cren is not None:
+        print('créneaux du Sheet :', len(cren), '| changements :', len(chg))

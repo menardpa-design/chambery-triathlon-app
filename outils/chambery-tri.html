@@ -51,6 +51,9 @@ h3{font:700 1.1rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.0
 .slot .sinfo .place{flex-basis:100%;font-size:.88rem;color:var(--muted)}
 .slot .sinfo .place::before{content:"";display:inline-block;width:.55em;height:.55em;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--pink);margin-right:6px;vertical-align:.05em}
 .slot .sinfo .auto{font-weight:600;font-size:.92rem}
+.slot .chg{font:700 .78rem var(--body);text-transform:uppercase;letter-spacing:.05em;background:var(--pink);color:#0A0A0A;border-radius:6px;padding:4px 8px;margin-bottom:8px}
+.slot .chg.off{background:var(--fg);color:var(--bg)}
+.slot.cancel .sinfo,.slot.cancel .sh,.slot.cancel b,.slot.cancel summary{text-decoration:line-through;opacity:.6}
 .slot .tbd{font:italic .88rem var(--body);color:var(--muted)}
 .slot .sh{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:2px}
 .slot .lv{font:600 .7rem var(--body);text-transform:uppercase;letter-spacing:.05em;background:var(--chip);color:var(--fg);padding:1px 7px;border-radius:999px}
@@ -368,6 +371,10 @@ const CRENEAUX={
   '5-swim-Soir':{h:'20h00 – 21h15',coach:'Paul'},
   '4-run-':{h:'19h00 – 20h30',coach:'Paul'},
 };
+// Onglets « Créneaux » et « Changements » du Google Sheet (remplis par update_planning.py)
+const CRSHEET={};
+const CHANGES=[];
+for(const k in CRSHEET)CRENEAUX[k]={...(CRENEAUX[k]||{}),...CRSHEET[k]};
 // Séances récurrentes absentes du Google Sheet, ajoutées chaque semaine
 // Lieu : natation à Buisson Rond ; à partir de S45, mardi et jeudi matin à la piscine du Stade
 const lieu=(s,w)=>s.s!=='swim'?'':(w>=45&&(s.d===2||s.d===4)&&s.slot==='Matin')?'Piscine du Stade':'Piscine de Buisson Rond';
@@ -451,14 +458,18 @@ function renderDays(){
       return {title:ls[first]||'',rest:ls.slice(first+1).join('\n').replace(/^\n+/,'').replace(/\n{3,}/g,'\n\n'),dist,hint}};
     div.innerHTML=`<h4>${DAYS[d]} ${dd.getDate()}</h4>`+cards.map(s=>{
       const P=s.texts.map(parse),hint=P.some(p=>p.hint);
-      const ci=CRENEAUX[`${s.key}-${s.lvl}`]||CRENEAUX[s.key]||{};
+      const iso=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;
+      const ch=CHANGES.find(c=>c.date===iso&&c.s===s.s&&(!c.slot||c.slot===s.slot)&&(!c.grp||!s.grp||c.grp===s.grp));
+      let ci=CRENEAUX[`${s.key}-${s.lvl}`]||CRENEAUX[s.key]||{};
+      if(ch&&!ch.off)ci={...ci,...(ch.h?{h:ch.h}:{}),...(ch.coach?{coach:ch.coach}:{}),...(ch.lieu?{lieu:ch.lieu}:{})};
+      const chg=ch?`<div class="chg${ch.off?' off':''}">${ch.off?'Séance annulée':'Changement'}${ch.msg?' · '+esc(ch.msg):''}</div>`:'';
       const coach=ci.coach||(hint?'Maxime':'');
       const lv=s.grp?`<span class="lv">${esc(s.grp)}</span>`:'';
       const head=s.s==='bike'?'<div class="sinfo"><span class="auto">En autonomie</span></div>':`<div class="sinfo">${ci.h?`<time>${esc(ci.h)}</time>`:'<span class="tbd">Horaire à préciser</span>'}${coach?`<span class="coach">${esc(coach)}</span>`:'<span class="tbd">Entraîneur à préciser</span>'}${(ci.lieu||lieu(s,week))?`<span class="place">${esc(ci.lieu||lieu(s,week))}</span>`:''}</div>`;
       const one=(p,i)=>{const lab=P.length>1?`<span class="var">Variante ${i+1}</span>`:'';const dist=p.dist?`<span class="dist">${esc(p.dist)}</span>`:'';
         if(!p.title)return '<span class="tbd">Séance à venir</span>';
         return p.rest?`<details><summary>${lab}${esc(p.title)}${dist}</summary><pre>${esc(p.rest)}</pre></details>`:`<b>${lab}${esc(p.title)}${dist}</b>`};
-      return `<div class="slot" style="--c:var(${SPORT[s.s][1]})">${head}<div class="sh"><span class="tag">${SPORT[s.s][0]}${s.slot?' · '+s.slot:''}</span>${lv}</div>${P.map(one).join('')}</div>`}).join('');
+      return `<div class="slot${ch&&ch.off?' cancel':''}" style="--c:var(${SPORT[s.s][1]})">${chg}${head}<div class="sh"><span class="tag">${SPORT[s.s][0]}${s.slot?' · '+s.slot:''}</span>${lv}</div>${P.map(one).join('')}</div>`}).join('');
     out.appendChild(div)});
   if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
 }
