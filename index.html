@@ -387,7 +387,7 @@ const CRENEAUX={
   '4-run-':{h:'19h00 – 20h30',coach:'Paul'},
 };
 // Onglets « Créneaux » et « Changements » du Google Sheet (remplis par update_planning.py)
-const CRSHEET={};
+const CRSHEET={"1-swim-Midi": {"h": "12h30 – 13h30", "coach": "Maxime"}, "1-swim-Soir": {"h": "20h00 – 21h15", "coach": "Maxime"}, "2-swim-Matin": {"h": "6h45 – 8h00", "coach": "Paul"}, "2-run--deb": {"h": "19h00 – 20h30", "coach": "Paul", "lieu": "Piste", "grp": "Piste"}, "2-run--av": {"h": "19h00 – 20h30", "coach": "Sylvain Rota", "grp": "Trail"}, "3-swim-Soir": {"h": "19h30 – 21h00", "coach": "Paul"}, "4-swim-Matin": {"h": "6h45 – 8h00", "coach": "Paul"}, "4-run-": {"h": "19h00 – 20h30", "coach": "Paul"}, "4-other-": {"h": "19h00 – 20h30", "coach": "Régis Chaboud"}, "5-swim-Midi": {"h": "12h30 – 13h30", "coach": "Paul"}, "5-swim-Soir": {"h": "20h00 – 21h15", "coach": "Paul"}, "6-swim-Matin": {"h": "8h30 – 10h00", "coach": "Maxime et Paul", "lieu": "Piscine du Stade"}};
 const CHANGES=[];
 for(const k in CRSHEET)CRENEAUX[k]={...(CRENEAUX[k]||{}),...CRSHEET[k]};
 // Séances récurrentes absentes du Google Sheet, ajoutées chaque semaine

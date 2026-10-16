@@ -176,7 +176,7 @@ def creneaux_from(wb):
         d = DAYS.get(norm(r['jour']).upper()); s, g = sport_of(r['sport'])
         if d is None or not s:
             continue
-        key = f"{d}-{s}-{moment_of(r['moment'])}" + (f"-{GRP[g][0]}" if g else '')
+        key = f"{d}-{s}-{moment_of(r['moment']) if s == 'swim' else ''}" + (f"-{GRP[g][0]}" if g else '')
         v = {k: txt(r[k]) for k in ('h', 'coach', 'lieu') if txt(r[k])}
         if g: v['grp'] = GRP[g][1]
         if v: out[key] = v
@@ -201,7 +201,7 @@ def changes_from(wb):
         dt = date_of(r['date'], today); s, g = sport_of(r['sport'])
         if not dt or not s or dt < today - datetime.timedelta(days=7):
             continue
-        c = {'date': dt.isoformat(), 's': s, 'slot': moment_of(r['moment'])}
+        c = {'date': dt.isoformat(), 's': s, 'slot': moment_of(r['moment']) if s == 'swim' else ''}
         if g: c['grp'] = GRP[g][1]
         if norm(r['statut']).startswith('annul'): c['off'] = 1
         c.update({k: txt(r[k]) for k in ('coach', 'h', 'lieu', 'msg') if txt(r[k])})
