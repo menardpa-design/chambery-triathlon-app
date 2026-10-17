@@ -16,6 +16,7 @@ DAYS = {'LUNDI': 1, 'MARDI': 2, 'MERCREDI': 3, 'JEUDI': 4, 'VENDREDI': 5, 'SAMED
 
 FULL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weeks_full.json')
 AHEAD = 1  # semaines visibles après la semaine en cours
+UNLOCK = {43, 44}  # semaines ouvertes en avance à la demande de Paul (2026-10-17)
 
 def visible(weeks, now=None):
     now = now or datetime.datetime.now(ZoneInfo('Europe/Paris'))
@@ -26,7 +27,7 @@ def visible(weeks, now=None):
         past = [w for w in keys if key(w) <= key(cur)]
         cur = max(past, key=key) if past else min(keys, key=key)
     order = sorted(keys, key=key); i = order.index(cur)
-    keep = set(order[:i + AHEAD + 1])
+    keep = set(order[:i + AHEAD + 1]) | (UNLOCK & set(keys))
     return {w: v for w, v in weeks.items() if int(w) in keep}
 
 def merged_map(ws):
