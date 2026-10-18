@@ -254,6 +254,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   <div><h2>Calendrier des courses</h2></div>
   <div class="filters" id="rfilters"></div>
   <div class="races" id="races"></div>
+  <p class="note" id="racesSoon">📣 Les autres courses de la saison seront annoncées très bientôt !</p>
 </div></section>
 
 <section role="tabpanel" id="p-vma" aria-labelledby="t-vma" hidden><div class="wrap">
@@ -362,7 +363,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 </div></section>
 <section role="tabpanel" id="p-5" aria-labelledby="t-5" hidden><div class="wrap season">
   <div><h2>Saison 2026-2027</h2></div>
-  <div class="legend"><span class="ev phare">Course phare</span><span class="ev club">Course club</span><span class="ev info">Vacances / test</span></div>
+  <div class="legend"><span class="ev club">Course club</span><span class="ev info">Vacances / test</span></div>
   <div id="season" class="season"></div>
 </div></section>
 </main>
@@ -489,21 +490,27 @@ function renderDays(){
   if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
 }
 renderDays();
+// Calendrier en attente de validation du CA : seule la Bourget Xpress est visible. Passer SHOW_ALL à true pour tout réafficher.
+const SHOW_ALL=false;
+const SHOW_PHARE=SHOW_ALL;
+const RACES_V=RACES.filter(r=>SHOW_ALL||/bourget xpress/i.test(r.t));
 let rFilter='all';
 const rf=document.getElementById('rfilters');
-rf.hidden=true;[['all','Toutes'],['phare','Courses phares'],['club','Courses club']].forEach(([k,lab])=>{
+if(!SHOW_PHARE)rf.hidden=true;
+[['all','Toutes'],['phare','Courses phares'],['club','Courses club']].forEach(([k,lab])=>{
   const b=document.createElement('button');b.textContent=lab;b.setAttribute('aria-pressed',k===rFilter);
   b.onclick=()=>{rFilter=k;[...rf.children].forEach(c=>c.setAttribute('aria-pressed',c===b));renderRaces()};rf.appendChild(b)});
 function renderRaces(){
   const now=new Date();now.setHours(0,0,0,0);const M=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
-  const list=RACES.filter(r=>!r.club||r.t==='Bourget Xpress').sort((a,b)=>a.date.localeCompare(b.date));
+  const list=RACES_V.filter(r=>rFilter==='all'||(rFilter==='club')===!!r.club).sort((a,b)=>a.date.localeCompare(b.date));
   document.getElementById('races').innerHTML=list.map(r=>{const dt=new Date(r.date+'T00:00:00'),n=Math.round((dt-now)/864e5);
     const cd=n<0?'Passée':n===0?"Aujourd'hui":(r.approx?'~':'')+`J-${n}`;
     const d=r.approx?`<strong class="ap">${r.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}${r.end?'–'+r.end:''}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`;
     const meta=[r.f,r.pres?'Présents : '+r.pres:''].filter(Boolean).join(' · ');
-    return `<div class="race${n<0?' past':''}${r.club?'':' key'}"><div class="d">${d}</div><div><span class="tag" style="--c:var(--muted)">${r.type==='CAP'?'Course à pied':r.type}</span><b>${r.t}</b><span>${meta}</span></div><div class="cd">${cd}</div></div>`}).join('');
+    return `<div class="race${n<0?' past':''}${r.club?'':' key'}"><div class="d">${d}</div><div><span class="tag" style="--c:var(--muted)">${r.type==='CAP'?'Course à pied':r.type}</span><b>${r.t}</b><span>${meta}</span>${r.note?`<span class="warn">${r.note}</span>`:''}${r.clash?'<span class="warn">Même jour que 2 autres courses</span>':''}</div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderRaces();
+if(SHOW_ALL)document.getElementById('racesSoon').hidden=true;
 
 // ---- Zones du club (fiche « Zones d'intensité & physiologie » 2026-2027) ----
 const CLUBZ=[
@@ -758,8 +765,8 @@ function setupKind(kind){
   const runs=key=>{const out=[];wk.forEach(w=>{const k=key(w);const l=out[out.length-1];if(l&&l.k===k)l.b=w.b;else out.push({k,a:w.a,b:w.b})});return out.filter(r=>r.k)};
   const macros=runs(w=>w.macro),mesos=runs(w=>w.meso);
   const ev=[];
-  RACES.forEach(r=>{const d=new Date(r.date+'T00:00:00');ev.push({d,t:r.t,k:r.club?'club':'phare',lab:r.approx||null,end:r.end})});
-  wk.forEach(w=>{if(w.club&&!RACES.some(r=>r.t.toLowerCase().includes(w.club.toLowerCase())))ev.push({d:w.th,t:w.club,k:'club',lab:'S'+w.w});});
+  RACES_V.forEach(r=>{const d=new Date(r.date+'T00:00:00');ev.push({d,t:r.t,k:r.club?'club':'phare',lab:r.approx||null,end:r.end})});
+  wk.forEach(w=>{if(SHOW_ALL&&w.club&&!RACES_V.some(r=>r.t.toLowerCase().includes(w.club.toLowerCase())))ev.push({d:w.th,t:w.club,k:'club',lab:'S'+w.w});});
   const infos=runs(w=>w.info);
   // Frise
   const months=[];for(let m=0;m<12;m++){const d=new Date(2026,8+m,1);months.push(d)}
