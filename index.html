@@ -491,17 +491,17 @@ function renderDays(){
 renderDays();
 let rFilter='all';
 const rf=document.getElementById('rfilters');
-[['all','Toutes'],['phare','Courses phares'],['club','Courses club']].forEach(([k,lab])=>{
+rf.hidden=true;[['all','Toutes'],['phare','Courses phares'],['club','Courses club']].forEach(([k,lab])=>{
   const b=document.createElement('button');b.textContent=lab;b.setAttribute('aria-pressed',k===rFilter);
   b.onclick=()=>{rFilter=k;[...rf.children].forEach(c=>c.setAttribute('aria-pressed',c===b));renderRaces()};rf.appendChild(b)});
 function renderRaces(){
   const now=new Date();now.setHours(0,0,0,0);const M=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
-  const list=RACES.filter(r=>rFilter==='all'||(rFilter==='club')===!!r.club).sort((a,b)=>a.date.localeCompare(b.date));
+  const list=RACES.filter(r=>!r.club||r.t==='Bourget Xpress').sort((a,b)=>a.date.localeCompare(b.date));
   document.getElementById('races').innerHTML=list.map(r=>{const dt=new Date(r.date+'T00:00:00'),n=Math.round((dt-now)/864e5);
     const cd=n<0?'Passée':n===0?"Aujourd'hui":(r.approx?'~':'')+`J-${n}`;
     const d=r.approx?`<strong class="ap">${r.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}${r.end?'–'+r.end:''}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`;
     const meta=[r.f,r.pres?'Présents : '+r.pres:''].filter(Boolean).join(' · ');
-    return `<div class="race${n<0?' past':''}${r.club?'':' key'}"><div class="d">${d}</div><div><span class="tag" style="--c:var(--muted)">${r.type==='CAP'?'Course à pied':r.type}</span><b>${r.t}</b><span>${meta}</span>${r.note?`<span class="warn">${r.note}</span>`:''}${r.clash?'<span class="warn">Même jour que 2 autres courses</span>':''}</div><div class="cd">${cd}</div></div>`}).join('');
+    return `<div class="race${n<0?' past':''}${r.club?'':' key'}"><div class="d">${d}</div><div><span class="tag" style="--c:var(--muted)">${r.type==='CAP'?'Course à pied':r.type}</span><b>${r.t}</b><span>${meta}</span></div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderRaces();
 
