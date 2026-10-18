@@ -259,7 +259,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 
 <section role="tabpanel" id="p-vma" aria-labelledby="t-vma" hidden><div class="wrap">
   <div><h2>Calculateur d'allure</h2></div>
-  <div class="filters" id="calcSw" role="group" aria-label="Sport"><button type="button" aria-pressed="true" data-c="run">Course à pied</button><button type="button" aria-pressed="false" data-c="swim">Natation</button><button type="button" aria-pressed="false" data-c="lex">Zones &amp; lexique</button></div>
+  <div class="filters" id="calcSw" role="group" aria-label="Sport"><button type="button" aria-pressed="true" data-c="run">Course à pied</button><button type="button" aria-pressed="false" data-c="swim">Natation</button><button type="button" aria-pressed="false" data-c="bike">Vélo</button><button type="button" aria-pressed="false" data-c="lex">Zones &amp; lexique</button></div>
   <div class="calc" id="calc-run">
   <div class="panel vma-in">
     <div><label for="vma">Ta VMA</label><input class="big" id="vma" type="number" inputmode="decimal" min="8" max="25" step="0.1" value="16"> <span class="unit">km/h</span></div>
@@ -299,6 +299,18 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
     </div>
     <div class="result" id="rcRes"></div>
   </div>
+  </div>
+  <div class="calc" id="calc-bike" hidden>
+  <div class="panel">
+    <h3>Ta FTP (puissance au seuil)</h3>
+    <div class="split">
+      <div><label for="ftp">FTP (watts)</label><input class="big" id="ftp" type="number" inputmode="numeric" min="80" max="500" step="1" value="220"></div>
+      <div><label for="ftpKg">Poids (facultatif)</label><input id="ftpKg" type="number" inputmode="decimal" min="30" max="150" step="0.5" placeholder="kg"></div>
+      <div><label for="ftpWkg">Rapport</label><output id="ftpWkg">–</output></div>
+    </div>
+    <p class="note" style="margin-top:12px">Tu ne connais pas ta FTP ? Après un bon échauffement, roule 20 min à fond régulier et note ta puissance moyenne : <label for="ftp20">puissance 20 min</label> <input id="ftp20" type="number" inputmode="numeric" min="80" max="600" placeholder="W"> <button type="button" id="ftpEst">Calculer</button> <span id="ftpEstMsg"></span></p>
+  </div>
+  <div><h3>Tes zones de puissance</h3><div class="hrz" id="bkZones"></div><p class="note" style="margin-top:8px">Zones de la fiche club, traduites en % de FTP (repères de Coggan). Sans capteur de puissance, fie-toi à la FC et au ressenti.</p></div>
   </div>
   <div class="calc" id="calc-swim" hidden>
   <div class="panel">
@@ -514,13 +526,13 @@ if(SHOW_ALL)document.getElementById('racesSoon').hidden=true;
 
 // ---- Zones du club (fiche « Zones d'intensité & physiologie » 2026-2027) ----
 const CLUBZ=[
- {z:'Z1',n:'Récupération',sub:'',dom:'Modéré',c:'#7FB8E0',fc:[0,70],k:[50,60],vma:[0,65],css:[15,null],rpe:'1–2',dur:'Illimité',body:'Lactate au niveau de repos',dev:'Récupération, retour au calme',feel:'Très facile, on relâche tout'},
- {z:'Z2',n:'Endurance',sub:'EF',dom:'Modéré',c:'#3E95D1',fc:[70,80],k:[60,70],vma:[65,75],css:[8,12],rpe:'3–4',dur:'Plusieurs heures',body:'Sous SV1 · lactate < 2 mmol/L, stable',dev:'Base aérobie : utilisation des graisses, capillaires, mitochondries, économie de geste',feel:'Allure constante, respiration calme, je peux discuter'},
- {z:'Z3',n:'Tempo',sub:'SV1 → SV2',dom:'Lourd',c:'#2E9A6A',fc:[80,88],k:[70,80],vma:[75,85],css:[3,6],rpe:'5–6',dur:'1h à 3h',body:'Lactate 2 à 4 mmol/L, plus élevé mais encore stable',dev:'Endurance spécifique longue distance, part des glucides qui augmente',feel:'Soutenu, respiration accélérée, phrases courtes'},
- {z:'Z4',n:'Seuil',sub:'≈ SV2',dom:'Lourd',c:'#E5A11A',fc:[88,93],k:[80,90],vma:[85,92],css:[-2,2],rpe:'7–8',dur:'30 à 60 min',body:'Plus haute intensité où le lactate reste stable (≈ 4 mmol/L, très individuel)',dev:"Repousser le seuil : aller plus vite sans s'asphyxier",feel:'Difficile, quelques mots seulement'},
- {z:'Z5',n:'VMA / PMA',sub:'> SV2',dom:'Sévère',c:'#D93A3A',fc:[93,100],k:[90,100],vma:[95,105],css:[-6,-3],rpe:'9',dur:'3 à 8 min',body:"Plus rien n'est stable : la consommation d'O₂ grimpe jusqu'à VO₂max",dev:'La cylindrée : VO₂max et vitesse à VO₂max',feel:'Très intense, impossible de parler'},
- {z:'Z6',n:'Lactique',sub:'> VO₂max',dom:'Extrême',c:'#ED68A3',fc:null,vma:[105,120],css:[null,-7],rpe:'9–10',dur:'20 s à 2 min',body:'Glycolyse anaérobie, forte accumulation de lactate',dev:'Tolérance à l\'acidose, changements de rythme',feel:'Explosif, les muscles brûlent'},
- {z:'Z7',n:'Sprint',sub:'alactique',dom:'Extrême',c:'var(--fg)',fc:null,vma:null,css:null,rpe:'10',dur:'Moins de 20 s',body:'Phosphocréatine, sans production de lactate',dev:'Vitesse, puissance, recrutement nerveux',feel:'À bloc, effort maximal'}];
+ {z:'Z1',ftp:[0,55],n:'Récupération',sub:'',dom:'Modéré',c:'#7FB8E0',fc:[0,70],k:[50,60],vma:[0,65],css:[15,null],rpe:'1–2',dur:'Illimité',body:'Lactate au niveau de repos',dev:'Récupération, retour au calme',feel:'Très facile, on relâche tout'},
+ {z:'Z2',ftp:[56,75],n:'Endurance',sub:'EF',dom:'Modéré',c:'#3E95D1',fc:[70,80],k:[60,70],vma:[65,75],css:[8,12],rpe:'3–4',dur:'Plusieurs heures',body:'Sous SV1 · lactate < 2 mmol/L, stable',dev:'Base aérobie : utilisation des graisses, capillaires, mitochondries, économie de geste',feel:'Allure constante, respiration calme, je peux discuter'},
+ {z:'Z3',ftp:[76,90],n:'Tempo',sub:'SV1 → SV2',dom:'Lourd',c:'#2E9A6A',fc:[80,88],k:[70,80],vma:[75,85],css:[3,6],rpe:'5–6',dur:'1h à 3h',body:'Lactate 2 à 4 mmol/L, plus élevé mais encore stable',dev:'Endurance spécifique longue distance, part des glucides qui augmente',feel:'Soutenu, respiration accélérée, phrases courtes'},
+ {z:'Z4',ftp:[91,105],n:'Seuil',sub:'≈ SV2',dom:'Lourd',c:'#E5A11A',fc:[88,93],k:[80,90],vma:[85,92],css:[-2,2],rpe:'7–8',dur:'30 à 60 min',body:'Plus haute intensité où le lactate reste stable (≈ 4 mmol/L, très individuel)',dev:"Repousser le seuil : aller plus vite sans s'asphyxier",feel:'Difficile, quelques mots seulement'},
+ {z:'Z5',ftp:[106,120],n:'VMA / PMA',sub:'> SV2',dom:'Sévère',c:'#D93A3A',fc:[93,100],k:[90,100],vma:[95,105],css:[-6,-3],rpe:'9',dur:'3 à 8 min',body:"Plus rien n'est stable : la consommation d'O₂ grimpe jusqu'à VO₂max",dev:'La cylindrée : VO₂max et vitesse à VO₂max',feel:'Très intense, impossible de parler'},
+ {z:'Z6',ftp:[121,150],n:'Lactique',sub:'> VO₂max',dom:'Extrême',c:'#ED68A3',fc:null,vma:[105,120],css:[null,-7],rpe:'9–10',dur:'20 s à 2 min',body:'Glycolyse anaérobie, forte accumulation de lactate',dev:'Tolérance à l\'acidose, changements de rythme',feel:'Explosif, les muscles brûlent'},
+ {z:'Z7',ftp:[150,0],n:'Sprint',sub:'alactique',dom:'Extrême',c:'var(--fg)',fc:null,vma:null,css:null,rpe:'10',dur:'Moins de 20 s',body:'Phosphocréatine, sans production de lactate',dev:'Vitesse, puissance, recrutement nerveux',feel:'À bloc, effort maximal'}];
 const LEXI=[
  ['Les nages',[['cr','Crawl'],['dos','Dos crawlé'],['4N','Quatre nages : papillon, dos, brasse, crawl'],['NC','Nage complète (bras + jambes)'],['libre','Nage libre : au choix du nageur'],['1 par nage','Une répétition dans chacune des 4 nages']]],
  ['Le matériel',[['pull','Pull-buoy entre les cuisses : on nage avec les bras seuls'],['pull cheville','Pull-buoy coincé entre les chevilles'],['plaq','Plaquettes (mains)'],['palmes','Palmes courtes de natation'],['tuba','Tuba frontal : on nage sans tourner la tête pour respirer'],['élastique','Élastique aux chevilles : jambes immobilisées, bras seuls']]],
@@ -542,7 +554,23 @@ const fmtS=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(s
     document.querySelectorAll('.calc').forEach(c=>c.hidden=c.id!=='calc-'+b.dataset.c);
     try{localStorage.setItem('calc',b.dataset.c)}catch(e){}
   }));
-  try{const c=localStorage.getItem('calc');if(c==='swim')document.querySelector('#calcSw [data-c=swim]').click()}catch(e){}
+  try{const c=localStorage.getItem('calc');if(c==='swim'||c==='bike')document.querySelector('#calcSw [data-c='+c+']').click()}catch(e){}
+  // vélo : zones de puissance en % de FTP
+  const bk=()=>{const f=+$('ftp').value,kg=parseFloat(String($('ftpKg').value).replace(',','.'));
+    if(!(f>=50&&f<=600)){$('bkZones').innerHTML='<p class="note">Entre une FTP valide (en watts).</p>';$('ftpWkg').textContent='–';return}
+    try{localStorage.setItem('ftp',JSON.stringify({f,kg:$('ftpKg').value}))}catch(e){}
+    $('ftpWkg').textContent=kg>=30?(f/kg).toFixed(2).replace('.',',')+' W/kg':'–';
+    const w=p=>Math.round(f*p/100);
+    $('bkZones').innerHTML=CLUBZ.map(z=>{const[lo,hi]=z.ftp;
+      if(!hi)return zRow(z,`> ${lo} % FTP · ${z.dur}`,`> ${w(lo)} W`);
+      if(!lo)return zRow(z,`< ${hi} % FTP · ${z.dur}`,`< ${w(hi)} W`);
+      return zRow(z,`${lo}–${hi} % FTP · ${z.dur}`,`${w(lo)}–${w(hi)} W`)}).join('')};
+  try{const v=JSON.parse(localStorage.getItem('ftp')||'null');if(v){$('ftp').value=v.f;$('ftpKg').value=v.kg||''}}catch(e){}
+  ['ftp','ftpKg'].forEach(i=>$(i).addEventListener('input',bk));
+  $('ftpEst').onclick=()=>{const p=+$('ftp20').value,msg=$('ftpEstMsg');
+    if(!(p>=80&&p<=600)){msg.textContent='Entre ta puissance moyenne sur 20 min.';return}
+    $('ftp').value=Math.round(p*0.95);msg.textContent=`FTP estimée : ${$('ftp').value} W (95 % de ta puissance 20 min).`;bk()};
+  bk();
   // course : distance + temps
   const rc=()=>{const d=parseFloat(String($('rcD').value).replace(',','.')),t=parseT($('rcT').value);
     if(!(d>0)||!t){$('rcRes').textContent='—';$('rcV').textContent='';return}
