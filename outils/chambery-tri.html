@@ -208,6 +208,23 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 .race .ins a,.race .ins code,.race .ins em{font:600 .8rem var(--body);padding:3px 10px;border-radius:999px}
 .race .ins a{background:var(--pink);color:#0A0A0A;text-decoration:none}
 .race .ins code{font-family:var(--mono);background:var(--chip);color:var(--fg);user-select:all}
+.race .ins em.open{background:var(--pink);color:#0A0A0A;font-weight:600}
+#insPop{border:0;border-radius:16px;padding:0;max-width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--fg);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#insPop::backdrop{background:rgba(0,0,0,.45)}
+#insPop form{padding:18px 18px 14px}
+#insPop h3{margin:0 0 10px;font:700 1.15rem var(--display)}
+#insPop ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+#insPop li{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--chip)}
+#insPop li span{font-size:.82rem;color:var(--muted)}
+#insPop .ins{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+#insPop .ins a,#insPop .ins code,#insPop .ins em,#insPop .ins button{font:600 .8rem var(--body);padding:4px 10px;border-radius:999px;border:0}
+#insPop .ins a{background:var(--pink);color:#0A0A0A;text-decoration:none}
+#insPop .ins code{font-family:var(--mono);background:var(--surface);color:var(--fg);user-select:all}
+#insPop .ins em{font-style:normal;font-weight:500;background:var(--surface);color:var(--muted)}
+#insPop .ins button{background:var(--surface);color:var(--fg);cursor:pointer}
+#insPop .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+#insPop .acts button{font:600 .9rem var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+#insPop .acts button[value]{background:var(--pink);border-color:var(--pink);color:#0A0A0A}
 .race .ins em{font-style:normal;font-weight:500;background:var(--chip);color:var(--muted)}
 .hr-in output{display:block;font:600 1rem var(--mono);padding:8px 0}
 .hr-help{margin:10px 0}
@@ -245,10 +262,6 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
     <div class="wk-nav"><button id="wPrev" aria-label="Semaine précédente">‹</button><div id="wLabel"></div><button id="wNext" aria-label="Semaine suivante">›</button></div></div>
   <div class="filters" id="filters"></div>
   <div class="days" id="days"></div>
-  <div><h2>Calendrier des courses</h2></div>
-  <div class="filters" id="rfilters"></div>
-  <div class="races" id="races"></div>
-  <p class="note" id="racesSoon">📣 Les autres courses de la saison seront annoncées très bientôt !</p>
 </div></section>
 
 <section role="tabpanel" id="p-vma" aria-labelledby="t-vma" hidden><div class="wrap">
@@ -369,7 +382,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 </div></section>
 <section role="tabpanel" id="p-5" aria-labelledby="t-5" hidden><div class="wrap season">
   <div><h2>Saison 2026-2027</h2></div>
-  <div class="legend"><span class="ev club">Course club</span><span class="ev info">Vacances / test</span></div>
+  <div class="legend"><span class="ev phare">Course phare</span><span class="ev club">Course club</span><span class="ev info">Vacances / test</span></div>
   <div id="season" class="season"></div>
 </div></section>
 <section role="tabpanel" id="p-6" aria-labelledby="t-6" hidden><div class="wrap">
@@ -386,6 +399,11 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   <p class="note">Les liens d'inscription et les codes promo du club seront ajoutés ici dès qu'on les aura. Participer à au moins 2 des 7 courses phares donne droit à 50 € de réduction sur la réinscription de la saison suivante, si tu as fait tes 2 journées de bénévolat pour le club.</p>
 </div></section>
 </main>
+<dialog id="insPop" aria-labelledby="insT"><form method="dialog">
+  <h3 id="insT">📣 Inscriptions ouvertes</h3>
+  <ul id="insList"></ul>
+  <div class="acts"><button type="button" id="insGo">Voir les courses</button><button value="ok">OK</button></div>
+</form></dialog>
 
 <script>
 // ---- Données (à remplacer par les vraies) ----
@@ -509,42 +527,22 @@ function renderDays(){
   if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
 }
 renderDays();
-// Calendrier en attente de validation du CA : seule la Bourget Xpress est visible. Passer SHOW_ALL à true pour tout réafficher.
-const SHOW_ALL=false;
-const SHOW_PHARE=SHOW_ALL;
-const RACES_V=RACES.filter(r=>SHOW_ALL||/bourget xpress/i.test(r.t));
-let rFilter='all';
-const rf=document.getElementById('rfilters');
-if(!SHOW_PHARE)rf.hidden=true;
-[['all','Toutes'],['phare','Courses phares'],['club','Courses club']].forEach(([k,lab])=>{
-  const b=document.createElement('button');b.textContent=lab;b.setAttribute('aria-pressed',k===rFilter);
-  b.onclick=()=>{rFilter=k;[...rf.children].forEach(c=>c.setAttribute('aria-pressed',c===b));renderRaces()};rf.appendChild(b)});
-function renderRaces(){
-  const now=new Date();now.setHours(0,0,0,0);const M=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
-  const list=RACES_V.filter(r=>rFilter==='all'||(rFilter==='club')===!!r.club).sort((a,b)=>a.date.localeCompare(b.date));
-  document.getElementById('races').innerHTML=list.map(r=>{const dt=new Date(r.date+'T00:00:00'),n=Math.round((dt-now)/864e5);
-    const cd=n<0?'Passée':n===0?"Aujourd'hui":(r.approx?'~':'')+`J-${n}`;
-    const d=r.approx?`<strong class="ap">${r.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}${r.end?'–'+r.end:''}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`;
-    const meta=[r.f,r.pres?'Présents : '+r.pres:''].filter(Boolean).join(' · ');
-    return `<div class="race${n<0?' past':''}${r.club?'':' key'}"><div class="d">${d}</div><div><span class="tag" style="--c:var(--muted)">${r.type==='CAP'?'Course à pied':r.type}</span><b>${r.t}</b><span>${meta}</span>${r.note?`<span class="warn">${r.note}</span>`:''}${r.clash?'<span class="warn">Même jour que 2 autres courses</span>':''}</div><div class="cd">${cd}</div></div>`}).join('');
-}
-renderRaces();
-if(SHOW_ALL)document.getElementById('racesSoon').hidden=true;
-
 // ---- Onglet Courses (visuels d'Emy, saison 2027) ----
 // url = lien d'inscription, code = code promo du club : laisser "" tant qu'on ne les a pas.
+// open = ouverture des inscriptions (AAAA-MM-JJ) : un rappel s'affiche à l'ouverture de l'appli pendant 14 jours.
+// Source : Sheet « Courses phares/code de rémise ». Raidlight et Vercorsman : déjà ouvertes au 29/10.
 const COURSES=[
   {date:"2026-11-29",t:"Bourget Xpress",f:"5 et 10 km",k:"club",url:"",code:""},
-  {date:"2027-01-30",t:"Raidlight Winter Trail",f:"Trail · 9, 14, 18, 22 et 30 km · St Pierre de Chartreuse",k:"phare",url:"",code:""},
-  {date:"2027-03-21",t:"10 km d'Aix-les-Bains",f:"10 km",k:"club",url:"",code:""},
+  {date:"2027-01-30",t:"Raidlight Winter Trail",f:"Trail · 9, 14, 18, 22 et 30 km · St Pierre de Chartreuse",k:"phare",open:"2026-10-29",url:"",code:""},
+  {date:"2027-03-21",t:"10 km d'Aix-les-Bains",f:"10 km",k:"club",open:"2026-11-24",url:"",code:""},
   {date:"2027-04-04",t:"Entrelacs Run and Trail (ERAT)",f:"Trail · 13, 23, 42 et 61 km · courses jeunes",k:"phare",url:"",code:""},
   {date:"2027-04-04",t:"Foulées de Villeurbanne",f:"5, 10 et 20 km",k:"club",url:"",code:""},
   {date:"2027-04-04",t:"Triathlon de Saint-Marcellin",f:"Triathlon local · S en équipe de 3 à 5 ou en relais, XS · courses jeunes",k:"phare",url:"",code:""},
   {date:"2027-05-15",t:"Bivwak",f:"Raid orientation · parcours facile à très difficile",k:"club",url:"",code:""},
   {date:"2027-05-29",approx:"fin mai",t:"Triathlon de la Combe de Savoie",f:"Triathlon local · S, M/L (en individuel ou en relais) · courses jeunes",k:"phare",url:"",code:""},
-  {date:"2027-06-26",t:"Triathlon d'Embrun",f:"Longue distance · XS, S, M, L, XL · relais en M et L",k:"phare",url:"",code:""},
-  {date:"2027-07-04",t:"XTERRA France",f:"Cross triathlon · S et M · Gérardmer",k:"club",url:"",code:""},
-  {date:"2027-08-21",t:"Vercorsman",f:"Longue distance · S, M, L, XL · relais en M · courses jeunes",k:"phare",url:"",code:""},
+  {date:"2027-06-26",t:"Triathlon d'Embrun",f:"Longue distance · XS, S, M, L, XL · relais en M et L",k:"phare",open:"2026-12-01",url:"",code:""},
+  {date:"2027-07-04",t:"XTERRA France",f:"Cross triathlon · S et M · Gérardmer",k:"club",open:"2026-12-02",url:"",code:""},
+  {date:"2027-08-21",t:"Vercorsman",f:"Longue distance · S, M, L, XL · relais en M · courses jeunes",k:"phare",open:"2026-10-29",url:"",code:""},
   {date:"2027-09-05",t:"Triathlon d'Aix-les-Bains",f:"Triathlon local · M (en individuel ou en relais), aquathlon S · courses jeunes",k:"phare",url:"",code:""},
   {date:"2027-09-26",t:"Trail du Petit Saint-Bernard",f:"Trail · de 5 à 103 km",k:"club",url:"",code:""},
   {date:"2027-09-27",t:"Nature Man Var",f:"Triathlon",k:"club",url:"",code:""},
@@ -554,16 +552,34 @@ const cf=document.getElementById('cfilters');
 [['all','Toutes'],['phare','Courses phares'],['club','Courses club']].forEach(([k,lab])=>{
   const b=document.createElement('button');b.textContent=lab;b.setAttribute('aria-pressed',k===cFilter);
   b.onclick=()=>{cFilter=k;[...cf.children].forEach(c=>c.setAttribute('aria-pressed',c===b));renderCourses()};cf.appendChild(b)});
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fmtO=o=>{const d=new Date(o+'T00:00:00');return `${d.getDate()===1?'1er':d.getDate()} ${["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."][d.getMonth()]}`};
 function renderCourses(){
   const now=new Date();now.setHours(0,0,0,0);const M=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
   const list=COURSES.filter(c=>cFilter==='all'||c.k===cFilter).sort((a,b)=>a.date.localeCompare(b.date));
   document.getElementById('clist').innerHTML=list.map(c=>{const dt=new Date(c.date+'T00:00:00'),n=Math.round((dt-now)/864e5);
     const cd=n<0?'Passée':n===0?"Aujourd'hui":(c.approx?'~':'')+`J-${n}`;
-    const ins=(c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:'<em>Lien d\'inscription à venir</em>')
+    const op=c.open&&n>=0?(c.open<=iso(now)?'<em class="open">Inscriptions ouvertes</em>':`<em>Inscriptions le ${fmtO(c.open)}</em>`):'';
+    const ins=op+(c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:'<em>Lien d\'inscription à venir</em>')
       +(c.code?`<code title="Code promo">${c.code}</code>`:'<em>Code promo à venir</em>');
     return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span><div class="ins">${ins}</div></div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderCourses();
+// Rappel à l'ouverture des inscriptions (une fois par course, réaffiché si le code club arrive ensuite)
+(()=>{
+  const now=new Date();now.setHours(0,0,0,0);const td=iso(now);
+  const seen=k=>{try{return localStorage.getItem('insPop:'+k)}catch(e){return null}};
+  const key=c=>`${c.t}|${c.open}|${c.code}`;
+  const list=COURSES.filter(c=>{if(!c.open||c.open>td||c.date<=td)return false;
+    const end=new Date(c.open+'T00:00:00');end.setDate(end.getDate()+14);return now<=end&&!seen(key(c))});
+  const dlg=document.getElementById('insPop');if(!list.length||!dlg||!dlg.showModal)return;
+  document.getElementById('insList').innerHTML=list.map(c=>`<li><b>${esc(c.t)}</b><span>${esc(c.f)}</span><div class="ins">${c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:''}${c.code?`<code>${esc(c.code)}</code><button type="button" class="cp" data-code="${esc(c.code)}">Copier le code</button>`:'<em>Code club à venir</em>'}</div></li>`).join('');
+  dlg.querySelectorAll('.cp').forEach(b=>b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(b.dataset.code).then(()=>b.textContent='Copié ✓',()=>{})});
+  const done=()=>{list.forEach(c=>{try{localStorage.setItem('insPop:'+key(c),'1')}catch(e){}})};
+  dlg.addEventListener('close',done);
+  document.getElementById('insGo').onclick=()=>{dlg.close();show('t-6')};
+  setTimeout(()=>dlg.showModal(),400);
+})();
 
 // ---- Zones du club (fiche « Zones d'intensité & physiologie » 2026-2027) ----
 const CLUBZ=[
@@ -839,8 +855,7 @@ setTimeout(()=>{if(!G.db)['bike','trail'].forEach(renderTraces)},10500);
   const runs=key=>{const out=[];wk.forEach(w=>{const k=key(w);const l=out[out.length-1];if(l&&l.k===k)l.b=w.b;else out.push({k,a:w.a,b:w.b})});return out.filter(r=>r.k)};
   const macros=runs(w=>w.macro),mesos=runs(w=>w.meso);
   const ev=[];
-  RACES_V.forEach(r=>{const d=new Date(r.date+'T00:00:00');ev.push({d,t:r.t,k:r.club?'club':'phare',lab:r.approx||null,end:r.end})});
-  wk.forEach(w=>{if(SHOW_ALL&&w.club&&!RACES_V.some(r=>r.t.toLowerCase().includes(w.club.toLowerCase())))ev.push({d:w.th,t:w.club,k:'club',lab:'S'+w.w});});
+  COURSES.forEach(c=>{const d=new Date(c.date+'T00:00:00');ev.push({d,t:c.t,k:c.k,lab:c.approx||null})});
   const infos=runs(w=>w.info);
   // Frise
   const months=[];for(let m=0;m<12;m++){const d=new Date(2026,8+m,1);months.push(d)}
