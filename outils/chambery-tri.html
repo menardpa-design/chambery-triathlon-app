@@ -526,7 +526,8 @@ function renderDays(){
       const chg=ch?`<div class="chg${ch.off?' off':''}">${ch.off?'Séance annulée':'Changement'}${ch.msg?' · '+esc(ch.msg):''}</div>`:'';
       const coach=ci.coach||(hint?'Maxime':'');
       const lv=s.grp?`<span class="lv">${esc(s.grp)}</span>`:'';
-      const head=s.s==='bike'?'<div class="sinfo"><span class="auto">En autonomie</span></div>':`<div class="sinfo">${ci.h?`<time>${esc(ci.h)}</time>`:'<span class="tbd">Horaire à préciser</span>'}${coach?`<span class="coach">${esc(coach)}</span>`:'<span class="tbd">Entraîneur à préciser</span>'}${(ci.lieu||lieu(s,week))?`<span class="place">${esc(ci.lieu||lieu(s,week))}</span>`:''}</div>`;
+      const auto=s.s==='bike'||(s.s==='run'&&(s.d===6||s.d===0));
+      const head=auto?'<div class="sinfo"><span class="auto">En autonomie</span></div>':`<div class="sinfo">${ci.h?`<time>${esc(ci.h)}</time>`:'<span class="tbd">Horaire à préciser</span>'}${coach?`<span class="coach">${esc(coach)}</span>`:'<span class="tbd">Entraîneur à préciser</span>'}${(ci.lieu||lieu(s,week))?`<span class="place">${esc(ci.lieu||lieu(s,week))}</span>`:''}</div>`;
       const one=(p,i)=>{const lab=P.length>1?`<span class="var">Variante ${i+1}</span>`:'';const dist=p.dist?`<span class="dist">${esc(p.dist)}</span>`:'';
         if(!p.title)return '<span class="tbd">Séance à venir</span>';
         return p.rest?`<details><summary>${lab}${esc(p.title)}${dist}</summary><pre>${esc(p.rest)}</pre></details>`:`<b>${lab}${esc(p.title)}${dist}</b>`};
