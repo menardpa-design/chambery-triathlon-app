@@ -513,7 +513,7 @@ function renderDays(){
   document.getElementById('wPrev').disabled=week===wkKeys[0];document.getElementById('wNext').disabled=week===wkKeys[wkKeys.length-1];
   const today=new Date().getDay(),out=document.getElementById('days');out.innerHTML='';
   [1,2,3,4,5,6,0].forEach(d=>{
-    const items=WEEKS[week].concat(EXTRA.filter(e=>!e.from||week>=e.from)).filter(s=>s.d===d&&(filter==='all'||s.s===filter)&&true)
+    const items=WEEKS[week].concat(EXTRA.filter(e=>(!e.from||week>=e.from)&&!WEEKS[week].some(s=>s.d===e.d&&s.s===e.s&&s.slot===e.slot))).filter(s=>s.d===d&&(filter==='all'||s.s===filter)&&true)
       .sort((a,b)=>SPORTORD[a.s]-SPORTORD[b.s]||SLOTORD[a.slot]-SLOTORD[b.slot]||({all:0,deb:1,av:2}[a.lvl]-{all:0,deb:1,av:2}[b.lvl]));
     if(!items.length)return;
     const dd=new Date(m);dd.setDate(m.getDate()+(d+6)%7);
