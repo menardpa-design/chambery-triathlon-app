@@ -222,22 +222,24 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 .race .ins a{background:var(--pink);color:#0A0A0A;text-decoration:none}
 .race .ins code{font-family:var(--mono);background:var(--chip);color:var(--fg);user-select:all}
 .race .ins em.open{background:var(--pink);color:#0A0A0A;font-weight:600}
-#insPop{border:0;border-radius:16px;padding:0;max-width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--fg);box-shadow:0 12px 40px rgba(0,0,0,.35)}
-#insPop::backdrop{background:rgba(0,0,0,.45)}
-#insPop form{padding:18px 18px 14px}
-#insPop h3{margin:0 0 10px;font:700 1.15rem var(--display)}
-#insPop ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-#insPop li{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--chip)}
-#insPop li span{font-size:.82rem;color:var(--muted)}
-#insPop .ins{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-#insPop .ins a,#insPop .ins code,#insPop .ins em,#insPop .ins button{font:600 .8rem var(--body);padding:4px 10px;border-radius:999px;border:0}
-#insPop .ins a{background:var(--pink);color:#0A0A0A;text-decoration:none}
-#insPop .ins code{font-family:var(--mono);background:var(--surface);color:var(--fg);user-select:all}
-#insPop .ins em{font-style:normal;font-weight:500;background:var(--surface);color:var(--muted)}
-#insPop .ins button{background:var(--surface);color:var(--fg);cursor:pointer}
-#insPop .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-#insPop .acts button{font:600 .9rem var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
-#insPop .acts button[value]{background:var(--pink);border-color:var(--pink);color:#0A0A0A}
+:is(#insPop,#annPop){border:0;border-radius:16px;padding:0;max-width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--fg);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#annPop li b{font-weight:600}
+#annPop .when{font-size:.85rem;color:var(--muted);margin:0 0 10px}
+:is(#insPop,#annPop)::backdrop{background:rgba(0,0,0,.45)}
+:is(#insPop,#annPop) form{padding:18px 18px 14px}
+:is(#insPop,#annPop) h3{margin:0 0 10px;font:700 1.15rem var(--display)}
+:is(#insPop,#annPop) ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+:is(#insPop,#annPop) li{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--chip)}
+:is(#insPop,#annPop) li span{font-size:.82rem;color:var(--muted)}
+:is(#insPop,#annPop) .ins{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+:is(#insPop,#annPop) .ins a,:is(#insPop,#annPop) .ins code,:is(#insPop,#annPop) .ins em,:is(#insPop,#annPop) .ins button{font:600 .8rem var(--body);padding:4px 10px;border-radius:999px;border:0}
+:is(#insPop,#annPop) .ins a{background:var(--pink);color:#0A0A0A;text-decoration:none}
+:is(#insPop,#annPop) .ins code{font-family:var(--mono);background:var(--surface);color:var(--fg);user-select:all}
+:is(#insPop,#annPop) .ins em{font-style:normal;font-weight:500;background:var(--surface);color:var(--muted)}
+:is(#insPop,#annPop) .ins button{background:var(--surface);color:var(--fg);cursor:pointer}
+:is(#insPop,#annPop) .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+:is(#insPop,#annPop) .acts button{font:600 .9rem var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+:is(#insPop,#annPop) .acts button[value]{background:var(--pink);border-color:var(--pink);color:#0A0A0A}
 .race .ins em{font-style:normal;font-weight:500;background:var(--chip);color:var(--muted)}
 .hr-in output{display:block;font:600 1rem var(--mono);padding:8px 0}
 .hr-help{margin:10px 0}
@@ -414,6 +416,12 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   <p class="note">Les liens d'inscription et les codes promo du club seront ajoutés ici dès qu'on les aura. Participer à au moins 2 des 7 courses phares donne droit à 50 € de réduction sur la réinscription de la saison suivante, si tu as fait tes 2 journées de bénévolat pour le club.</p>
 </div></section>
 </main>
+<dialog id="annPop" aria-labelledby="annT"><form method="dialog">
+  <h3 id="annT"></h3>
+  <p class="when" id="annW"></p>
+  <ul id="annList"></ul>
+  <div class="acts"><button type="button" id="annGo">Voir le planning</button><button value="ok">OK</button></div>
+</form></dialog>
 <dialog id="insPop" aria-labelledby="insT"><form method="dialog">
   <h3 id="insT">📣 Inscriptions ouvertes</h3>
   <ul id="insList"></ul>
@@ -580,6 +588,24 @@ function renderCourses(){
     return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span><div class="ins">${ins}</div></div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderCourses();
+// Annonces du club : pop-up affichée une fois à l'ouverture de l'app, jusqu'à la date de fin
+const ANNONCES=[
+ {id:'creneaux-2026-11-02',fin:'2026-11-15',titre:'📣 Changement de lieux',quand:'À partir du lundi 2 novembre',
+  items:[['Natation du mardi et du jeudi matin (6h45 – 8h00)','Piscine du Stade, à la place de Buisson Rond'],
+         ['Renfo du jeudi avec Régis (19h00 – 20h30)','Piste Mas Barral, à la place du Tennis de Chambéry']]}
+];
+(()=>{
+  const now=new Date();now.setHours(0,0,0,0);const td=iso(now);
+  const seen=k=>{try{return localStorage.getItem('ann:'+k)}catch(e){return null}};
+  const a=ANNONCES.find(x=>td<=x.fin&&!seen(x.id));
+  const dlg=document.getElementById('annPop');if(!a||!dlg||!dlg.showModal)return;
+  document.getElementById('annT').textContent=a.titre;
+  document.getElementById('annW').textContent=a.quand||'';
+  document.getElementById('annList').innerHTML=a.items.map(([b,s])=>`<li><b>${esc(b)}</b><span>${esc(s)}</span></li>`).join('');
+  dlg.addEventListener('close',()=>{try{localStorage.setItem('ann:'+a.id,'1')}catch(e){}});
+  document.getElementById('annGo').onclick=()=>{dlg.close();show('t-plan')};
+  setTimeout(()=>dlg.showModal(),300);
+})();
 // Rappel à l'ouverture des inscriptions (une fois par course, réaffiché si le code club arrive ensuite)
 (()=>{
   const now=new Date();now.setHours(0,0,0,0);const td=iso(now);
@@ -593,7 +619,7 @@ renderCourses();
   const done=()=>{list.forEach(c=>{try{localStorage.setItem('insPop:'+key(c),'1')}catch(e){}})};
   dlg.addEventListener('close',done);
   document.getElementById('insGo').onclick=()=>{dlg.close();show('t-6')};
-  setTimeout(()=>dlg.showModal(),400);
+  setTimeout(()=>{const a=document.getElementById('annPop');if(a&&a.open)a.addEventListener('close',()=>setTimeout(()=>dlg.showModal(),200),{once:true});else dlg.showModal()},400);
 })();
 
 // ---- Zones du club (fiche « Zones d'intensité & physiologie » 2026-2027) ----
