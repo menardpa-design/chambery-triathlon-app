@@ -215,6 +215,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 .fb .send button{font:600 .95rem var(--body);padding:10px 18px;border-radius:999px;border:0;background:var(--pink);color:#0A0A0A;cursor:pointer}
 .fb .send button.sec{background:var(--chip);color:var(--fg)}
 .fb .send button:disabled{opacity:.4;cursor:not-allowed}
+.fb [hidden]{display:none}
 .fb .ok{font-size:.9rem;font-weight:600;color:var(--fg)}
 .vis{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .vis img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
@@ -418,11 +419,12 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   <div id="season" class="season"></div>
 </div></section>
 <section role="tabpanel" id="p-7" aria-labelledby="t-7" hidden><div class="wrap">
-  <div><h2>Un retour sur une séance ?</h2><p class="note">Ressenti, difficulté, idée, souci… Écris-le ici et envoie-le aux entraîneurs.</p></div>
+  <div><h2>Un retour, une question ?</h2><p class="note">Une séance, l'organisation, une idée, un souci… Écris-le ici et envoie-le aux entraîneurs.</p></div>
   <form class="fb fgrid" id="fbForm" novalidate>
-    <div class="full"><label for="fbSes">Séance</label><select id="fbSes"></select></div>
-    <div class="full"><label id="fbFeelL">Ton ressenti</label><div class="feel" role="group" aria-labelledby="fbFeelL" id="fbFeel"></div></div>
-    <div class="full"><label for="fbTxt">Ton commentaire</label><textarea id="fbTxt" rows="5" maxlength="1500" placeholder="Ce qui t'a plu, ce qui était trop dur ou trop facile, une suggestion…"></textarea></div>
+    <div class="full"><label for="fbSub">Sujet</label><select id="fbSub"><option>Retour sur une séance</option><option>Question sur l'entraînement</option><option>Organisation / logistique</option><option>Idée / suggestion</option><option>Autre</option></select></div>
+    <div class="full" id="fbSesW"><label for="fbSes">Séance</label><select id="fbSes"></select></div>
+    <div class="full" id="fbFeelW"><label id="fbFeelL">Ton ressenti</label><div class="feel" role="group" aria-labelledby="fbFeelL" id="fbFeel"></div></div>
+    <div class="full"><label for="fbTxt">Ton commentaire</label><textarea id="fbTxt" rows="5" maxlength="1500" placeholder="Ton message…"></textarea></div>
     <div class="full"><label for="fbName">Prénom et nom (facultatif)</label><input id="fbName" type="text" maxlength="80" autocomplete="name" placeholder="Laisse vide pour rester anonyme"></div>
     <div class="full send"><button type="submit" id="fbSend" disabled>Envoyer mon retour</button><button type="button" class="sec" id="fbCopy">Copier le message</button></div>
     <p class="full ok" id="fbOk" hidden></p>
@@ -662,7 +664,7 @@ renderCourses();
 // Tant que les deux sont vides, « Envoyer » ouvre le menu de partage du téléphone (WhatsApp, SMS, mail…).
 const FEEDBACK={mail:'',wa:''};
 (()=>{
-  const sel=document.getElementById('fbSes'),txt=document.getElementById('fbTxt'),nm=document.getElementById('fbName'),
+  const sub=document.getElementById('fbSub'),sel=document.getElementById('fbSes'),txt=document.getElementById('fbTxt'),nm=document.getElementById('fbName'),
     send=document.getElementById('fbSend'),ok=document.getElementById('fbOk'),fw=document.getElementById('fbFeel');
   const SN={swim:'Natation',bike:'Vélo',run:'Course',other:'Renfo'},JD=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'],MO=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
   const now=new Date();const opts=[];
@@ -672,19 +674,20 @@ const FEEDBACK={mail:'',wa:''};
     const key=`${w}-${x.d}-${x.s}-${x.slot}`;if(opts.some(o=>o.key===key))return;
     opts.push({key,dt,lab:`${JD[x.d]} ${dt.getDate()} ${MO[dt.getMonth()]} · ${SN[x.s]}${x.slot?' '+x.slot.toLowerCase():''}${t?' · '+t:''}`})})});
   opts.sort((a,b)=>b.dt-a.dt||a.lab.localeCompare(b.lab));
-  sel.innerHTML='<option value="">Choisis la séance…</option>'+opts.map(o=>`<option>${esc(o.lab)}</option>`).join('')+'<option>Autre / remarque générale</option>';
+  sel.innerHTML='<option value="">Choisis la séance…</option>'+opts.map(o=>`<option>${esc(o.lab)}</option>`).join('')+'<option>Autre / plusieurs séances</option>';
   const FEEL=[['😫','Trop dur'],['😅','Dur'],['🙂','Bien'],['😎','Facile'],['😴','Trop facile']];let feel='';
   fw.innerHTML=FEEL.map(([e,l])=>`<button type="button" aria-pressed="false" data-v="${l}"><span>${e}</span>${l}</button>`).join('');
   fw.querySelectorAll('button').forEach(b=>b.onclick=()=>{feel=feel===b.dataset.v?'':b.dataset.v;fw.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===feel)));upd()});
   try{nm.value=localStorage.getItem('fbName')||''}catch(e){}
-  const msg=()=>`💬 Retour séance – Chambéry Triathlon\nSéance : ${sel.value}${feel?`\nRessenti : ${feel}`:''}\n\n${txt.value.trim()}\n\n— ${nm.value.trim()||'Anonyme'}`;
-  const upd=()=>{send.disabled=!(sel.value&&(txt.value.trim()||feel));ok.hidden=true};
-  [sel,txt,nm].forEach(el=>el.addEventListener('input',upd));
+  const isS=()=>sub.selectedIndex===0;
+  const msg=()=>`💬 ${sub.value} – Chambéry Triathlon${isS()?`\nSéance : ${sel.value}${feel?`\nRessenti : ${feel}`:''}`:''}\n\n${txt.value.trim()}\n\n— ${nm.value.trim()||'Anonyme'}`;
+  const upd=()=>{document.getElementById('fbSesW').hidden=document.getElementById('fbFeelW').hidden=!isS();send.disabled=isS()?!(sel.value&&(txt.value.trim()||feel)):!txt.value.trim();ok.hidden=true};
+  [sub,sel,txt,nm].forEach(el=>el.addEventListener('input',upd));
   const done=t=>{ok.textContent=t;ok.hidden=false;try{localStorage.setItem('fbName',nm.value.trim())}catch(e){}};
   document.getElementById('fbCopy').onclick=async()=>{try{await navigator.clipboard.writeText(msg());done('Message copié ✓ Colle-le dans WhatsApp ou un mail aux entraîneurs.')}catch(e){done("Impossible de copier sur cet appareil.")}};
   document.getElementById('fbForm').onsubmit=async ev=>{ev.preventDefault();if(send.disabled)return;const m=msg();
     if(FEEDBACK.wa){window.open('https://wa.me/'+FEEDBACK.wa+'?text='+encodeURIComponent(m),'_blank','noopener');done('WhatsApp s\'ouvre avec ton message, il ne reste qu\'à l\'envoyer.');return}
-    if(FEEDBACK.mail){location.href='mailto:'+FEEDBACK.mail+'?subject='+encodeURIComponent('Retour séance – '+sel.value)+'&body='+encodeURIComponent(m);done('Ton appli mail s\'ouvre avec ton message, il ne reste qu\'à l\'envoyer.');return}
+    if(FEEDBACK.mail){location.href='mailto:'+FEEDBACK.mail+'?subject='+encodeURIComponent(sub.value+(isS()?' – '+sel.value:''))+'&body='+encodeURIComponent(m);done('Ton appli mail s\'ouvre avec ton message, il ne reste qu\'à l\'envoyer.');return}
     if(navigator.share){try{await navigator.share({text:m});done('Merci pour ton retour ! 🙏')}catch(e){if(e&&e.name!=='AbortError')document.getElementById('fbCopy').click()}return}
     document.getElementById('fbCopy').click()};
 })();
