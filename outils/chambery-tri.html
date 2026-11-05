@@ -215,6 +215,21 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 .race .ins em.open{background:var(--pink);color:#0A0A0A;font-weight:600}
 :is(#insPop,#annPop){border:0;border-radius:16px;padding:0;max-width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--fg);box-shadow:0 12px 40px rgba(0,0,0,.35)}
 #annPop li b{font-weight:600}
+#mustPop{border:0;border-radius:16px;padding:0;max-width:min(460px,calc(100vw - 32px));max-height:calc(100dvh - 32px);background:var(--surface);color:var(--fg);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#mustPop::backdrop{background:rgba(0,0,0,.6)}
+#mustPop form{padding:18px 18px 14px}
+#mustPop h3{margin:0 0 4px;font:800 1.1rem var(--display);color:#C0123C;text-transform:uppercase}
+#mustPop .sub{margin:0 0 12px;font-size:.8rem;color:var(--muted)}
+#mustPop p,#mustPop li{font-size:.9rem;line-height:1.45}
+#mustPop p{margin:0 0 10px}
+#mustPop h4{margin:14px 0 6px;font:700 .95rem var(--display)}
+#mustPop ul{margin:0 0 10px;padding-left:18px;display:grid;gap:6px}
+#mustPop .rule{padding:10px 12px;border-radius:10px;background:var(--chip);list-style:none;margin-left:-18px}
+#mustPop label.chk{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px;padding:12px;border:2px solid var(--pink);border-radius:10px;font-weight:600;font-size:.9rem;cursor:pointer}
+#mustPop label.chk input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--pink)}
+#mustPop .acts{display:flex;justify-content:flex-end;margin-top:12px}
+#mustPop .acts button{font:600 .95rem var(--body);padding:9px 18px;border-radius:999px;border:0;background:var(--pink);color:#0A0A0A;cursor:pointer}
+#mustPop .acts button:disabled{opacity:.4;cursor:not-allowed}
 #annPop .when{font-size:.85rem;color:var(--muted);margin:0 0 10px}
 :is(#insPop,#annPop)::backdrop{background:rgba(0,0,0,.45)}
 :is(#insPop,#annPop) form{padding:18px 18px 14px}
@@ -407,6 +422,27 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   <p class="note">Les liens d'inscription et les codes promo du club seront ajoutés ici dès qu'on les aura. Participer à au moins 2 des 7 courses phares donne droit à 50 € de réduction sur la réinscription de la saison suivante, si tu as fait tes 2 journées de bénévolat pour le club.</p>
 </div></section>
 </main>
+<dialog id="mustPop" aria-labelledby="mustT"><form method="dialog">
+  <h3 id="mustT">⚠️ Message important : à lire jusqu'au bout</h3>
+  <p class="sub">Piscine de Buisson Rond · badges et vestiaires</p>
+  <p>Il nous a été remonté que certains adhérents avaient pris l'habitude de forcer la porte automatique sur le côté de la piscine de Buisson Rond.</p>
+  <p>C'est <b>intolérable</b>. Les sanctions, en plus d'être financières en cas de dégradations, peuvent aller de la suppression des badges individuels jusqu'à la suppression de nos créneaux.</p>
+  <h4>2 règles simples</h4>
+  <ul>
+    <li class="rule"><b>Pas encore de badge ?</b> Arrive 15 min avant le début de la séance pour le récupérer auprès des entraîneurs. Il nous reste 50 cartes à distribuer !</li>
+    <li class="rule"><b>Badge oublié = pas de natation.</b></li>
+  </ul>
+  <p>Un problème de fonctionnement de badge ? Envoie un message à Paul avec tes <b>nom, prénom et la nature du problème</b>, et viens 15 min en avance pour que les coachs t'ouvrent le temps que ton badge soit réactivé.</p>
+  <h4>Au passage</h4>
+  <ul>
+    <li><b>Mardi et jeudi matin</b> : vestiaire bleu pour tout le monde.</li>
+    <li><b>Samedi matin</b> : vestiaire bleu pour les majeurs, vert pour les mineurs.</li>
+    <li><b>Déchausse-toi</b> au plus tôt (sas d'entrée au Stade, en haut des escaliers à Buisson Rond) et ne pose <b>jamais</b> tes chaussures au sol dans les vestiaires.</li>
+  </ul>
+  <p><b>Merci de respecter impérativement ces consignes.</b></p>
+  <label class="chk"><input type="checkbox" id="mustChk"> J'ai lu le message jusqu'au bout et je m'engage à respecter ces consignes.</label>
+  <div class="acts"><button value="ok" id="mustOk" disabled>Valider</button></div>
+</form></dialog>
 <dialog id="annPop" aria-labelledby="annT"><form method="dialog">
   <h3 id="annT"></h3>
   <p class="when" id="annW"></p>
@@ -596,6 +632,19 @@ function renderCourses(){
     return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span><div class="ins">${ins}</div></div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderCourses();
+// Message obligatoire : bloque l'appli jusqu'à ce que la case soit cochée (une fois par appareil, jusqu'à la date de fin).
+// Pour un nouveau message : changer MUST.id (et le texte de #mustPop). Les autres pop-ups attendent sa validation.
+const MUST={id:'badges-br-2026-11-05',fin:'2026-12-31'};
+const mustDone=new Promise(res=>{
+  const dlg=document.getElementById('mustPop'),chk=document.getElementById('mustChk'),ok=document.getElementById('mustOk');
+  const d=new Date(),td=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  let seen=null;try{seen=localStorage.getItem('must:'+MUST.id)}catch(e){}
+  if(!MUST.id||td>MUST.fin||seen||!dlg||!dlg.showModal)return res();
+  chk.addEventListener('change',()=>{ok.disabled=!chk.checked});
+  dlg.addEventListener('cancel',e=>e.preventDefault());
+  dlg.addEventListener('close',()=>{if(!chk.checked){dlg.showModal();return}try{localStorage.setItem('must:'+MUST.id,new Date().toISOString())}catch(e){}res()});
+  dlg.showModal();dlg.scrollTop=0;
+});
 // Annonces du club : pop-up affichée une fois à l'ouverture de l'app, jusqu'à la date de fin
 const ANNONCES=[
  {id:'creneaux-2026-11-02',fin:'2026-11-15',titre:'📣 Changement de lieux',quand:'À partir du lundi 2 novembre',
@@ -612,7 +661,7 @@ const ANNONCES=[
   document.getElementById('annList').innerHTML=a.items.map(([b,s])=>`<li><b>${esc(b)}</b><span>${esc(s)}</span></li>`).join('');
   dlg.addEventListener('close',()=>{try{localStorage.setItem('ann:'+a.id,'1')}catch(e){}});
   document.getElementById('annGo').onclick=()=>{dlg.close();show('t-plan')};
-  setTimeout(()=>dlg.showModal(),300);
+  mustDone.then(()=>setTimeout(()=>dlg.showModal(),300));
 })();
 // Rappel à l'ouverture des inscriptions (une fois par course, réaffiché si le code club arrive ensuite)
 (()=>{
@@ -627,7 +676,7 @@ const ANNONCES=[
   const done=()=>{list.forEach(c=>{try{localStorage.setItem('insPop:'+key(c),'1')}catch(e){}})};
   dlg.addEventListener('close',done);
   document.getElementById('insGo').onclick=()=>{dlg.close();show('t-6')};
-  setTimeout(()=>{const a=document.getElementById('annPop');if(a&&a.open)a.addEventListener('close',()=>setTimeout(()=>dlg.showModal(),200),{once:true});else dlg.showModal()},400);
+  mustDone.then(()=>setTimeout(()=>{const a=document.getElementById('annPop');if(a&&a.open)a.addEventListener('close',()=>setTimeout(()=>dlg.showModal(),200),{once:true});else dlg.showModal()},400));
 })();
 
 // ---- Zones du club (fiche « Zones d'intensité & physiologie » 2026-2027) ----
