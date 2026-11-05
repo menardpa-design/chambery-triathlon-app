@@ -203,9 +203,19 @@ tr.hl td{background:var(--chip)}
 .ev.phare{background:var(--pink);color:#0A0A0A}
 .ev.club{border:1px solid var(--pink);background:transparent}
 .ev.info{color:var(--muted)}
-nav.tabs .wrap{grid-template-columns:repeat(6,1fr)}
+nav.tabs .wrap{grid-template-columns:repeat(7,1fr)}
 nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
-@media (max-width:520px){nav.tabs .wrap{gap:2px}nav.tabs button{font-size:.66rem;letter-spacing:0}}
+@media (max-width:520px){nav.tabs .wrap{gap:2px}nav.tabs button{font-size:.6rem;letter-spacing:0}}
+.fb{display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.fb .feel{display:flex;gap:6px;flex-wrap:wrap}
+.fb .feel button{flex:1 1 0;min-width:56px;font:600 .8rem var(--body);padding:8px 4px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;display:grid;gap:2px;justify-items:center}
+.fb .feel button span{font-size:1.4rem;line-height:1}
+.fb .feel button[aria-pressed=true]{border-color:var(--pink);background:var(--chip);box-shadow:inset 0 0 0 1px var(--pink)}
+.fb .send{display:flex;gap:8px;flex-wrap:wrap}
+.fb .send button{font:600 .95rem var(--body);padding:10px 18px;border-radius:999px;border:0;background:var(--pink);color:#0A0A0A;cursor:pointer}
+.fb .send button.sec{background:var(--chip);color:var(--fg)}
+.fb .send button:disabled{opacity:.4;cursor:not-allowed}
+.fb .ok{font-size:.9rem;font-weight:600;color:var(--fg)}
 .vis{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .vis img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
 .race .ins{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
@@ -274,6 +284,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
     <button role="tab" id="t-4" aria-controls="p-4" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20l6-11 4 6 3-4 5 9z"/></svg>Trail</button>
     <button role="tab" id="t-5" aria-controls="p-5" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h8"/></svg>Saison</button>
     <button role="tab" id="t-6" aria-controls="p-6" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Courses</button>
+    <button role="tab" id="t-7" aria-controls="p-7" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 10.5h7M8.5 14h4"/></svg>Retours</button>
   </div>
 </nav>
 
@@ -405,6 +416,17 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   <div><h2>Saison 2026-2027</h2></div>
   <div class="legend"><span class="ev phare">Course phare</span><span class="ev club">Course club</span><span class="ev vie">Vie du club</span><span class="ev info">Vacances / test</span></div>
   <div id="season" class="season"></div>
+</div></section>
+<section role="tabpanel" id="p-7" aria-labelledby="t-7" hidden><div class="wrap">
+  <div><h2>Un retour sur une séance ?</h2><p class="note">Ressenti, difficulté, idée, souci… Écris-le ici et envoie-le aux entraîneurs.</p></div>
+  <form class="fb fgrid" id="fbForm" novalidate>
+    <div class="full"><label for="fbSes">Séance</label><select id="fbSes"></select></div>
+    <div class="full"><label id="fbFeelL">Ton ressenti</label><div class="feel" role="group" aria-labelledby="fbFeelL" id="fbFeel"></div></div>
+    <div class="full"><label for="fbTxt">Ton commentaire</label><textarea id="fbTxt" rows="5" maxlength="1500" placeholder="Ce qui t'a plu, ce qui était trop dur ou trop facile, une suggestion…"></textarea></div>
+    <div class="full"><label for="fbName">Prénom et nom (facultatif)</label><input id="fbName" type="text" maxlength="80" autocomplete="name" placeholder="Laisse vide pour rester anonyme"></div>
+    <div class="full send"><button type="submit" id="fbSend" disabled>Envoyer mon retour</button><button type="button" class="sec" id="fbCopy">Copier le message</button></div>
+    <p class="full ok" id="fbOk" hidden></p>
+  </form>
 </div></section>
 <section role="tabpanel" id="p-6" aria-labelledby="t-6" hidden><div class="wrap">
   <div><h2>Dates à noter</h2></div>
@@ -635,6 +657,37 @@ function renderCourses(){
     return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span><div class="ins">${ins}</div></div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderCourses();
+// ---- Onglet Retours : commentaire sur une séance ----
+// FEEDBACK.mail / FEEDBACK.wa (numéro au format international sans +, ex. 336XXXXXXXX) : destination directe.
+// Tant que les deux sont vides, « Envoyer » ouvre le menu de partage du téléphone (WhatsApp, SMS, mail…).
+const FEEDBACK={mail:'',wa:''};
+(()=>{
+  const sel=document.getElementById('fbSes'),txt=document.getElementById('fbTxt'),nm=document.getElementById('fbName'),
+    send=document.getElementById('fbSend'),ok=document.getElementById('fbOk'),fw=document.getElementById('fbFeel');
+  const SN={swim:'Natation',bike:'Vélo',run:'Course',other:'Renfo'},JD=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'],MO=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
+  const now=new Date();const opts=[];
+  [curW,curW-1].forEach(w=>{(WEEKS[w]||[]).forEach(x=>{if(!x.x||x.x==='_')return;
+    const dt=monday(w);dt.setDate(dt.getDate()+(x.d+6)%7);if(dt>now)return;
+    const t=(x.x.split('\n').map(l=>l.trim()).find(Boolean)||'').slice(0,45);
+    const key=`${w}-${x.d}-${x.s}-${x.slot}`;if(opts.some(o=>o.key===key))return;
+    opts.push({key,dt,lab:`${JD[x.d]} ${dt.getDate()} ${MO[dt.getMonth()]} · ${SN[x.s]}${x.slot?' '+x.slot.toLowerCase():''}${t?' · '+t:''}`})})});
+  opts.sort((a,b)=>b.dt-a.dt||a.lab.localeCompare(b.lab));
+  sel.innerHTML='<option value="">Choisis la séance…</option>'+opts.map(o=>`<option>${esc(o.lab)}</option>`).join('')+'<option>Autre / remarque générale</option>';
+  const FEEL=[['😫','Trop dur'],['😅','Dur'],['🙂','Bien'],['😎','Facile'],['😴','Trop facile']];let feel='';
+  fw.innerHTML=FEEL.map(([e,l])=>`<button type="button" aria-pressed="false" data-v="${l}"><span>${e}</span>${l}</button>`).join('');
+  fw.querySelectorAll('button').forEach(b=>b.onclick=()=>{feel=feel===b.dataset.v?'':b.dataset.v;fw.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===feel)));upd()});
+  try{nm.value=localStorage.getItem('fbName')||''}catch(e){}
+  const msg=()=>`💬 Retour séance – Chambéry Triathlon\nSéance : ${sel.value}${feel?`\nRessenti : ${feel}`:''}\n\n${txt.value.trim()}\n\n— ${nm.value.trim()||'Anonyme'}`;
+  const upd=()=>{send.disabled=!(sel.value&&(txt.value.trim()||feel));ok.hidden=true};
+  [sel,txt,nm].forEach(el=>el.addEventListener('input',upd));
+  const done=t=>{ok.textContent=t;ok.hidden=false;try{localStorage.setItem('fbName',nm.value.trim())}catch(e){}};
+  document.getElementById('fbCopy').onclick=async()=>{try{await navigator.clipboard.writeText(msg());done('Message copié ✓ Colle-le dans WhatsApp ou un mail aux entraîneurs.')}catch(e){done("Impossible de copier sur cet appareil.")}};
+  document.getElementById('fbForm').onsubmit=async ev=>{ev.preventDefault();if(send.disabled)return;const m=msg();
+    if(FEEDBACK.wa){window.open('https://wa.me/'+FEEDBACK.wa+'?text='+encodeURIComponent(m),'_blank','noopener');done('WhatsApp s\'ouvre avec ton message, il ne reste qu\'à l\'envoyer.');return}
+    if(FEEDBACK.mail){location.href='mailto:'+FEEDBACK.mail+'?subject='+encodeURIComponent('Retour séance – '+sel.value)+'&body='+encodeURIComponent(m);done('Ton appli mail s\'ouvre avec ton message, il ne reste qu\'à l\'envoyer.');return}
+    if(navigator.share){try{await navigator.share({text:m});done('Merci pour ton retour ! 🙏')}catch(e){if(e&&e.name!=='AbortError')document.getElementById('fbCopy').click()}return}
+    document.getElementById('fbCopy').click()};
+})();
 // Message obligatoire : bloque l'appli jusqu'à ce que la case soit cochée (une fois par appareil, jusqu'à la date de fin).
 // Pour un nouveau message : changer MUST.id (et le texte de #mustPop). Les autres pop-ups attendent sa validation.
 const MUST={id:'badges-br-2026-11-05b',fin:'2026-12-31'};
