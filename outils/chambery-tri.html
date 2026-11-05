@@ -425,14 +425,14 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 <dialog id="mustPop" aria-labelledby="mustT"><form method="dialog">
   <h3 id="mustT">⚠️ Message important : à lire jusqu'au bout</h3>
   <p class="sub">Piscine de Buisson Rond · badges et vestiaires</p>
-  <p>Il nous a été remonté que certains adhérents avaient pris l'habitude de forcer la porte automatique sur le côté de la piscine de Buisson Rond.</p>
+  <p>Il nous a été remonté que certains adhérents avaient pris l'habitude de forcer la porte automatique sur le côté de la piscine de Buisson Rond et de passer par-dessus ou par-dessous les tourniquets.</p>
   <p>C'est <b>intolérable</b>. Les sanctions, en plus d'être financières en cas de dégradations, peuvent aller de la suppression des badges individuels jusqu'à la suppression de nos créneaux.</p>
   <h4>2 règles simples</h4>
   <ul>
     <li class="rule"><b>Pas encore de badge ?</b> Arrive 15 min avant le début de la séance pour le récupérer auprès des entraîneurs. Il nous reste 50 cartes à distribuer !</li>
     <li class="rule"><b>Badge oublié = pas de natation.</b></li>
   </ul>
-  <p>Un problème de fonctionnement de badge ? Envoie un message à Paul avec tes <b>nom, prénom et la nature du problème</b>, et viens 15 min en avance pour que les coachs t'ouvrent le temps que ton badge soit réactivé.</p>
+  <p>Un problème de fonctionnement de badge ? Envoie un message à Paul ou Maxime avec tes <b>nom, prénom et la nature du problème</b>, et viens 15 min en avance pour que les coachs t'ouvrent le temps que ton badge soit réactivé.</p>
   <h4>Au passage</h4>
   <ul>
     <li><b>Mardi et jeudi matin</b> : vestiaire bleu pour tout le monde.</li>
@@ -634,7 +634,7 @@ function renderCourses(){
 renderCourses();
 // Message obligatoire : bloque l'appli jusqu'à ce que la case soit cochée (une fois par appareil, jusqu'à la date de fin).
 // Pour un nouveau message : changer MUST.id (et le texte de #mustPop). Les autres pop-ups attendent sa validation.
-const MUST={id:'badges-br-2026-11-05',fin:'2026-12-31'};
+const MUST={id:'badges-br-2026-11-05b',fin:'2026-12-31'};
 const mustDone=new Promise(res=>{
   const dlg=document.getElementById('mustPop'),chk=document.getElementById('mustChk'),ok=document.getElementById('mustOk');
   const d=new Date(),td=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
