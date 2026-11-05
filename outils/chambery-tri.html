@@ -662,7 +662,8 @@ renderCourses();
 // ---- Onglet Retours : commentaire sur une séance ----
 // FEEDBACK.mail / FEEDBACK.wa (numéro au format international sans +, ex. 336XXXXXXXX) : destination directe.
 // Tant que les deux sont vides, « Envoyer » ouvre le menu de partage du téléphone (WhatsApp, SMS, mail…).
-const FEEDBACK={mail:'',wa:''};
+// FEEDBACK.sheet : URL du script Google (Apps Script) qui écrit dans l'onglet « Retours » du Sheet : prioritaire.
+const FEEDBACK={sheet:'',mail:'',wa:''};
 (()=>{
   const sub=document.getElementById('fbSub'),sel=document.getElementById('fbSes'),txt=document.getElementById('fbTxt'),nm=document.getElementById('fbName'),
     send=document.getElementById('fbSend'),ok=document.getElementById('fbOk'),fw=document.getElementById('fbFeel');
@@ -686,6 +687,9 @@ const FEEDBACK={mail:'',wa:''};
   const done=t=>{ok.textContent=t;ok.hidden=false;try{localStorage.setItem('fbName',nm.value.trim())}catch(e){}};
   document.getElementById('fbCopy').onclick=async()=>{try{await navigator.clipboard.writeText(msg());done('Message copié ✓ Colle-le dans WhatsApp ou un mail aux entraîneurs.')}catch(e){done("Impossible de copier sur cet appareil.")}};
   document.getElementById('fbForm').onsubmit=async ev=>{ev.preventDefault();if(send.disabled)return;const m=msg();
+    if(FEEDBACK.sheet){send.disabled=true;try{await fetch(FEEDBACK.sheet,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({sujet:sub.value,seance:isS()?sel.value:'',ressenti:isS()?feel:'',message:txt.value.trim(),nom:nm.value.trim()})});
+      txt.value='';feel='';fw.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false'));upd();done('Merci, ton message est bien envoyé aux entraîneurs ✓');return}
+      catch(e){upd();done("Envoi impossible (pas de réseau ?). Réessaie plus tard ou utilise « Copier le message ».");return}}
     if(FEEDBACK.wa){window.open('https://wa.me/'+FEEDBACK.wa+'?text='+encodeURIComponent(m),'_blank','noopener');done('WhatsApp s\'ouvre avec ton message, il ne reste qu\'à l\'envoyer.');return}
     if(FEEDBACK.mail){location.href='mailto:'+FEEDBACK.mail+'?subject='+encodeURIComponent(sub.value+(isS()?' – '+sel.value:''))+'&body='+encodeURIComponent(m);done('Ton appli mail s\'ouvre avec ton message, il ne reste qu\'à l\'envoyer.');return}
     if(navigator.share){try{await navigator.share({text:m});done('Merci pour ton retour ! 🙏')}catch(e){if(e&&e.name!=='AbortError')document.getElementById('fbCopy').click()}return}
