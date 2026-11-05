@@ -86,7 +86,10 @@ def weeks_from(wb):
                         if b: sess.append({'d': d, 's': sp, 'slot': slot, 'lvl': 'av', 'x': b})
                 elif txt[0]:
                     sess.append({'d': d, 's': sp, 'slot': slot, 'lvl': 'all', 'x': txt[0]})
-        weeks[w] = [s for s in sess if s['x'].strip() not in ('_', '\\_')]
+        # « _ » = pas de séance ce jour-là : gardé comme marqueur (x='_') pour que l'appli n'affiche pas « Séance en construction ».
+        for s in sess:
+            if s['x'].strip() in ('_', '\\_'): s['x'] = '_'
+        weeks[w] = sess
     cap = next((wb[n] for n in wb.sheetnames if 'CAP' in n.upper()), None)
     if cap is not None:
         for row in range(1, cap.max_row + 1):

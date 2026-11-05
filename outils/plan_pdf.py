@@ -30,7 +30,7 @@ MOIS = 'janvier février mars avril mai juin juillet août septembre octobre nov
 JOURS = 'LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE'.split()
 fd = lambda d: f"{'1er' if d.day == 1 else d.day} {MOIS[d.month-1]}"
 e = html.escape
-sess = list(W[str(week)])
+sess = [s for s in W[str(week)] if s['x'].strip() not in ('_', '\\_')]
 for x in EXTRA:
     if (not x.get('from') or week >= x['from']) and not any(s['d']==x['d'] and s['s']==x['s'] and s['slot']==x['slot'] for s in sess):
         sess.append(x)
