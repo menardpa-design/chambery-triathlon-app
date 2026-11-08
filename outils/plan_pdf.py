@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Génère le plan hebdo (HTML imprimable) à partir de chambery-tri.html.
-Usage : python3 plan_pdf.py chambery-tri.html SEMAINE sortie.html  (puis impression PDF via Playwright)"""
+Usage : python3 plan_pdf.py chambery-tri.html SEMAINE sortie.html [notes.json]  (puis impression PDF via Playwright)"""
 import re, json, sys, datetime, html
 src, week, out = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+# Notes libres par semaine (optionnel) : JSON {"46": ["<b>Titre :</b> texte", ...]}
+NOTES = json.load(open(sys.argv[4], encoding='utf-8')) if len(sys.argv) > 4 else {}
 t = open(src, encoding='utf-8').read()
 W = json.loads(re.search(r'const WEEKS=(\{.*?\});', t).group(1))
 CRS = json.loads(re.search(r'const CRSHEET=(\{.*?\});', t).group(1))
@@ -43,7 +45,7 @@ def cell(s, date):
     key = f"{s['d']}-{s['s']}-{s['slot']}"
     ci = dict(CR.get(f"{key}-{s['lvl']}") or CR.get(key) or {})
     grp = (CR.get(f"{key}-{s['lvl']}") or {}).get('grp', '')
-    ch = next((c for c in CH if c['date'] == date.isoformat() and c['s'] == s['s'] and (not c.get('slot') or c['slot'] == s['slot'])), None)
+    ch = next((c for c in CH if c['date'] == date.isoformat() and c['s'] == s['s'] and (not c.get('slot') or c['slot'] == s['slot']) and (not c.get('grp') or not grp or c['grp'].lower() == grp.lower())), None)
     if ch and ch.get('off'): return '<span class="off">' + ('NATATION ANNULÉE' if s['s']=='swim' else 'SÉANCE ANNULÉE') + '</span>'
     if ch: ci.update({k: ch[k] for k in ('h', 'coach', 'lieu') if ch.get(k)})
     auto = s['s'] == 'bike' or (s['s'] == 'run' and s['d'] in (6, 0))
@@ -76,7 +78,7 @@ for sp, slot, lab, sub, cls in rows:
         tds += '<td>' + '<hr>'.join(cell(s, date) for s in cs) + '</td>'
     body += f'<tr class="{cls}"><th><b>{lab}</b>{"<br><small>"+sub+"</small>" if sub else ""}</th>{tds}</tr>\n'
 
-notes = []
+notes = list(NOTES.get(str(week), []))
 for dt, titre, items in anns:
     if mon <= dt <= days[-1]:
         notes.append(f"<b>{e(titre.replace('📣','').strip())} à partir du {fd(dt)} :</b> " + ' ; '.join(f"{e(a)} → {e(b)}" for a, b in items) + '.')
