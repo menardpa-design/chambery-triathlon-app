@@ -6,7 +6,8 @@ sans toucher au reste (CRENEAUX de base, EXTRA, RACES, lieux, etc.).
 Onglet « Créneaux » (facultatif) : Jour | Sport | Moment | Horaire | Entraîneur | Lieu  → remplace l'horaire, l'entraîneur ou le lieu habituels.
 Onglet « Changements » (facultatif) : Date | Sport | Moment | Statut | Entraîneur | Horaire | Lieu | Message
   → une ligne par séance d'une date précise ; Statut « Annulé » barre la séance, sinon les cases remplies remplacent celles du créneau.
-Séances : seules la semaine en cours et la suivante sont publiées (demande de Paul, 2026-10-15) ;
+Séances : la semaine précédente, la semaine en cours et la suivante sont publiées ; l'app n'affiche
+la suivante qu'à partir du vendredi (demande de Paul, 2026-11-09) ;
 toutes les semaines sont gardées dans weeks_full.json, à côté de ce script (hors dépôt public).
 La planification annuelle (SEASON) reste complète."""
 import sys, os, re, json, datetime
@@ -15,8 +16,8 @@ from zoneinfo import ZoneInfo
 DAYS = {'LUNDI': 1, 'MARDI': 2, 'MERCREDI': 3, 'JEUDI': 4, 'VENDREDI': 5, 'SAMEDI': 6, 'DIMANCHE': 0}
 
 FULL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weeks_full.json')
-AHEAD = 1  # semaines visibles après la semaine en cours
-UNLOCK = {43, 44}  # semaines ouvertes en avance à la demande de Paul (2026-10-17)
+AHEAD = 1  # semaines publiées après la semaine en cours (l'app la masque jusqu'au vendredi)
+BEHIND = 1  # semaines publiées avant la semaine en cours
 
 def visible(weeks, now=None):
     now = now or datetime.datetime.now(ZoneInfo('Europe/Paris'))
@@ -27,7 +28,7 @@ def visible(weeks, now=None):
         past = [w for w in keys if key(w) <= key(cur)]
         cur = max(past, key=key) if past else min(keys, key=key)
     order = sorted(keys, key=key); i = order.index(cur)
-    keep = set(order[:i + AHEAD + 1]) | (UNLOCK & set(keys))
+    keep = set(order[max(0, i - BEHIND):i + AHEAD + 1])
     return {w: v for w, v in weeks.items() if int(w) in keep}
 
 def merged_map(ws):
