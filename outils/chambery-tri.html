@@ -500,7 +500,7 @@ const CRENEAUX={
 };
 // Onglets « Créneaux » et « Changements » du Google Sheet (remplis par update_planning.py)
 const CRSHEET={"1-swim-Midi": {"h": "12h30 – 13h30", "coach": "Maxime / Ewen", "lieu": "Piscine Buisson rond"}, "1-swim-Soir": {"h": "20h00 – 21h15", "coach": "Maxime / Ewen", "lieu": "Piscine Buisson rond"}, "2-swim-Matin": {"h": "6h45 – 8h00", "coach": "Paul", "lieu": "Piscine du Stade"}, "2-run--deb": {"h": "19h00 – 20h30", "coach": "Paul / Ewen", "lieu": "Piste Mas Barral", "grp": "Piste"}, "2-run--av": {"h": "19h00 – 20h30", "coach": "Sylvain Rota", "lieu": "Tennis de Chambéry", "grp": "Trail"}, "3-swim-Soir": {"h": "19h30 – 21h00", "coach": "Paul / Ewen", "lieu": "Piscine Buisson rond"}, "4-swim-Matin": {"h": "6h45 – 8h00", "coach": "Paul", "lieu": "Piscine du Stade"}, "4-run-": {"h": "19h00 – 20h30", "coach": "Paul", "lieu": "Stade de Mager"}, "4-other-": {"h": "19h00 – 20h30", "coach": "Régis Chaboud", "lieu": "Piste Mas Barral"}, "5-swim-Midi": {"h": "12h30 – 13h30", "coach": "Paul / Ewen", "lieu": "Piscine Buisson rond"}, "5-swim-Soir": {"h": "20h00 – 21h15", "coach": "Paul / Ewen", "lieu": "Piscine Buisson rond"}, "6-swim-Matin": {"h": "8h30 – 10h00", "coach": "Maxime / Paul / Ewen", "lieu": "Piscine du Stade"}};
-const CHANGES=[{"date": "2026-11-11", "s": "swim", "slot": "Soir", "off": 1, "msg": "Piscine fermé"}, {"date": "2026-11-10", "s": "run", "slot": "", "grp": "Trail", "coach": "Sylvain Rota", "h": "19H - 20H30", "lieu": "Parking plan d'eau de Challes"}, {"date": "2026-11-24", "s": "run", "slot": "", "grp": "Trail", "coach": "Sylvain Rota", "h": "19H - 20H30", "lieu": "Parking plan d'eau de Challes"}];
+const CHANGES=[{"date": "2026-11-11", "s": "swim", "slot": "Soir", "off": 1, "msg": "Piscine fermé"}, {"date": "2026-11-10", "s": "run", "slot": "", "grp": "Trail", "coach": "Sylvain Rota", "h": "19H - 20H30", "lieu": "Parking plan d'eau de Challes"}, {"date": "2026-11-24", "s": "run", "slot": "", "grp": "Trail", "coach": "Sylvain Rota", "h": "19H - 20H30", "lieu": "Parking plan d'eau de Challes"}, {"date": "2026-11-12", "s": "run", "slot": "", "coach": "Paul", "h": "19h00 – 20h30", "lieu": "Stade Mas Barral", "msg": "Séance SV1 déplacée à Mas Barral à cause de la météo : terrain moins boueux qu'à Mager"}];
 for(const k in CRSHEET)CRENEAUX[k]={...(CRENEAUX[k]||{}),...CRSHEET[k]};
 const PH=Object.keys(CRENEAUX).map(k=>k.match(/^(\d)-(swim|run)-([^-]*)$/)).filter(Boolean).map(m=>({d:+m[1],s:m[2],slot:m[3],lvl:'all',x:''})).filter(p=>!(p.s==='run'&&(p.d===6||p.d===0)));
 // Séances récurrentes absentes du Google Sheet, ajoutées chaque semaine
@@ -714,6 +714,8 @@ const mustDone=new Promise(res=>{
 });
 // Annonces du club : pop-up affichée une fois à l'ouverture de l'app, jusqu'à la date de fin
 const ANNONCES=[
+ {id:'S46-sv1-masbarral',fin:'2026-11-12',titre:'📍 Ce soir : séance au Mas Barral',quand:'Jeudi 12 novembre, 19h00',
+  items:[['Course à pied du jeudi soir (séance SV1)','Stade Mas Barral, à la place de Mager : terrain moins boueux avec la météo']]},
  {id:'S46-chamberienne-annulee',fin:'2026-11-14',titre:'⚠️ La Chambérienne est annulée',quand:'Samedi 14 novembre',
   items:[['Samedi 14 novembre, après-midi et soir','La Chambérienne est annulée : pas de bénévolat']]},
  {id:'creneaux-2026-11-02',fin:'2026-11-15',titre:'📣 Changement de lieux',quand:'À partir du lundi 2 novembre',
