@@ -124,6 +124,7 @@ td{font:500 .9rem var(--mono)}
 th:first-child,td:first-child{text-align:left}
 tr.hl td{background:var(--chip)}
 .split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.hms{display:flex;align-items:center;gap:3px}.hms input{min-width:0;flex:1;padding:8px 4px;text-align:center}.hms span{font:600 .75rem var(--body);color:var(--muted)}
 .split output{display:block;font:700 1rem var(--mono);padding:9px 0}
 .zcards{display:flex;flex-direction:column;gap:8px}
 .zc{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--z);border-radius:10px;padding:10px 12px}
@@ -144,7 +145,7 @@ tr.hl td{background:var(--chip)}
 .split input,.split select{width:100%;font:500 1rem var(--mono);padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
 .result{margin-top:12px;font:700 1.6rem var(--mono);color:var(--red)}
 .result small{display:block;font:500 .85rem var(--body);color:var(--muted)}
-@media (max-width:480px){.split{grid-template-columns:1fr 1fr}.split > :last-child{grid-column:1 / -1}}
+@media (max-width:480px){.split{grid-template-columns:1fr 1fr}.split:has(.hms){grid-template-columns:1fr}.split > :last-child{grid-column:1 / -1}}
 /* Empty */
 .soon{text-align:center;padding:40px 16px}
 .soon h2{margin-bottom:8px}
@@ -349,7 +350,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
     <h3>Distance et temps → allure</h3>
     <div class="split">
       <div><label for="rcD">Distance (km)</label><input id="rcD" type="number" inputmode="decimal" value="10" min="0.1" step="0.1"></div>
-      <div><label for="rcT">Temps</label><input id="rcT" type="text" inputmode="numeric" value="50:00" placeholder="h:mm:ss"></div>
+      <div><label for="rcTm">Temps</label><div class="hms"><input id="rcTh" type="number" inputmode="numeric" min="0" max="99" value="" aria-label="heures"><span>h</span><input id="rcTm" type="number" inputmode="numeric" min="0" max="59" value="50" aria-label="minutes"><span>min</span><input id="rcTs" type="number" inputmode="numeric" min="0" max="59" value="" aria-label="secondes"><span>s</span></div></div>
       <div><label for="rcV">Vitesse</label><output id="rcV"></output></div>
     </div>
     <div class="result" id="rcRes"></div>
@@ -392,7 +393,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
     <h3>Distance et temps → allure</h3>
     <div class="split">
       <div><label for="swD">Distance (m)</label><input id="swD" type="number" inputmode="numeric" value="1500" min="25" step="25"></div>
-      <div><label for="swT">Temps</label><input id="swT" type="text" inputmode="numeric" value="30:00" placeholder="h:mm:ss"></div>
+      <div><label for="swTm">Temps</label><div class="hms"><input id="swTh" type="number" inputmode="numeric" min="0" max="99" value="" aria-label="heures"><span>h</span><input id="swTm" type="number" inputmode="numeric" min="0" max="59" value="30" aria-label="minutes"><span>min</span><input id="swTs" type="number" inputmode="numeric" min="0" max="59" value="" aria-label="secondes"><span>s</span></div></div>
       <div><label for="swV">Vitesse</label><output id="swV"></output></div>
     </div>
     <div class="result" id="swRes"></div>
@@ -785,8 +786,15 @@ const LEXI=[
 const zRow=(z,txt,val)=>`<div class="z" style="--z:${z.c}"><b>${z.z}</b><span>${z.n} <small>${txt}</small></span><span class="bpm">${val}</span></div>`;
 document.getElementById('zCards').innerHTML=CLUBZ.map(z=>`<div class="zc" style="--z:${z.c}"><h4><span class="zn">${z.z}</span>${z.n}${z.sub?` <small>${esc(z.sub)}</small>`:''} <small>· ${z.dom}</small><span class="dur">${z.dur}</span></h4><dl><dt>Corps</dt><dd>${esc(z.body)}${z.fc?` · FC ${z.fc[0]?(z.fc[1]===100?'> '+z.fc[0]:z.fc[0]+'–'+z.fc[1]):'< '+z.fc[1]} % FCmax`:' · FC non pertinente'}</dd><dt>On développe</dt><dd>${esc(z.dev)}</dd><dt>Ressenti</dt><dd>${esc(z.feel)} · RPE ${z.rpe}</dd></dl></div>`).join('');
 document.getElementById('lexi').innerHTML=LEXI.map(([h,l])=>`<section><h4>${h}</h4><dl>${l.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl></section>`).join('');
+// ---- Saisie des temps : ":" insérés automatiquement ----
+['s400','s200'].forEach(id=>{const el=document.getElementById(id);if(!el)return;
+  el.addEventListener('input',e=>{const raw=el.value;if(!/^[\d:]*$/.test(raw))return;
+    const d=raw.replace(/:/g,'').replace(/^0+(?=\d{3})/,'').slice(0,6);
+    let out=d;if(d.length>2){const ss=d.slice(-2),rest=d.slice(0,-2);out=rest.length>2?rest.slice(0,-2)+':'+rest.slice(-2)+':'+ss:rest+':'+ss}
+    if(out!==raw)el.value=out},true)});
 // ---- Calculateurs course / natation ----
-const parseT=v=>{const p=String(v).trim().replace(/[h'"]/g,':').split(':').filter(x=>x!=='').map(Number);if(!p.length||p.some(isNaN))return null;return p.reduce((a,b)=>a*60+b,0)||null};
+const hms=pre=>{const g=k=>{const v=parseFloat(String(document.getElementById(pre+k).value).replace(',','.'));return v>0?v:0};return g('h')*3600+g('m')*60+g('s')||null};
+const parseT=v=>{const p=String(v).trim().replace(/[h'".,]/g,':').split(':').filter(x=>x!=='').map(Number);if(!p.length||p.some(isNaN))return null;return p.reduce((a,b)=>a*60+b,0)||null};
 const fmtS=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),x=sec%60;return h?`${h}h${String(m).padStart(2,'0')}'${String(x).padStart(2,'0')}`:`${m}'${String(x).padStart(2,'0')}"`};
 (()=>{
   const $=id=>document.getElementById(id);
@@ -813,10 +821,10 @@ const fmtS=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(s
     $('ftp').value=Math.round(p*0.95);msg.textContent=`FTP estimée : ${$('ftp').value} W (95 % de ta puissance 20 min).`;bk()};
   bk();
   // course : distance + temps
-  const rc=()=>{const d=parseFloat(String($('rcD').value).replace(',','.')),t=parseT($('rcT').value);
+  const rc=()=>{const d=parseFloat(String($('rcD').value).replace(',','.')),t=hms('rcT');
     if(!(d>0)||!t){$('rcRes').textContent='—';$('rcV').textContent='';return}
     $('rcRes').innerHTML=`${fmtS(t/d).replace('"','')} /km<small>allure moyenne sur ${d} km</small>`;$('rcV').textContent=(d/(t/3600)).toFixed(1)+' km/h'};
-  ['rcD','rcT'].forEach(i=>$(i).addEventListener('input',rc));rc();
+  ['rcD','rcTh','rcTm','rcTs'].forEach(i=>$(i).addEventListener('input',rc));rc();
   // natation
   const SWD=[50,100,200,400,750,1500,1900,3800];
   const css=()=>{const a=parseT($('s400').value),b=parseT($('s200').value);return a&&b&&a>b?(a-b)/2:null};
@@ -835,10 +843,10 @@ const fmtS=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(s
     $('swRres').innerHTML=d>0?`${fmtS((c+o)*d/100)}<small>par ${d} m à ${fmtS(c+o)} /100 m · ${r} × ${d} m = ${r*d} m nagés</small>`:'—'};
   try{const v=JSON.parse(localStorage.getItem('swim')||'null');if(v){$('s400').value=v.a;$('s200').value=v.b}}catch(e){}
   ['s400','s200','swRd','swRo','swRr'].forEach(i=>$(i).addEventListener('input',sw));sw();
-  const sd=()=>{const d=+$('swD').value,t=parseT($('swT').value);
+  const sd=()=>{const d=+$('swD').value,t=hms('swT');
     if(!(d>0)||!t){$('swRes').textContent='—';$('swV').textContent='';return}
     $('swRes').innerHTML=`${fmtS(t/d*100)} /100 m<small>allure moyenne sur ${d} m</small>`;$('swV').textContent=(d/(t/3600)/1000).toFixed(2)+' km/h'};
-  ['swD','swT'].forEach(i=>$(i).addEventListener('input',sd));sd();
+  ['swD','swTh','swTm','swTs'].forEach(i=>$(i).addEventListener('input',sd));sd();
 })();
 // ---- VMA ----
 const fmtPace=kmh=>{const s=3600/kmh;let m=Math.floor(s/60),r=Math.round(s%60);if(r===60){m++;r=0}return `${m}'${String(r).padStart(2,'0')}`};
