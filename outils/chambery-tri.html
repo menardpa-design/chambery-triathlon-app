@@ -357,8 +357,8 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   <div class="panel">
     <h3>Ton test CSS (vitesse critique)</h3>
     <div class="split">
-      <div><label for="s400">Temps 400 m</label><input id="s400" type="text" inputmode="numeric" value="7:00" placeholder="m:ss"></div>
-      <div><label for="s200">Temps 200 m</label><input id="s200" type="text" inputmode="numeric" value="3:20" placeholder="m:ss"></div>
+      <div><label for="s400m">Temps 400 m</label><div class="hms"><input id="s400h" type="number" inputmode="numeric" min="0" max="99" value="" aria-label="heures"><span>h</span><input id="s400m" type="number" inputmode="numeric" min="0" max="59" value="7" aria-label="minutes"><span>min</span><input id="s400s" type="number" inputmode="numeric" min="0" max="59" value="" aria-label="secondes"><span>s</span></div></div>
+      <div><label for="s200m">Temps 200 m</label><div class="hms"><input id="s200h" type="number" inputmode="numeric" min="0" max="99" value="" aria-label="heures"><span>h</span><input id="s200m" type="number" inputmode="numeric" min="0" max="59" value="3" aria-label="minutes"><span>min</span><input id="s200s" type="number" inputmode="numeric" min="0" max="59" value="20" aria-label="secondes"><span>s</span></div></div>
       <div><label for="sCss">CSS /100 m</label><output id="sCss"></output></div>
     </div>
     <p class="note" style="margin-top:12px">Nage un 400 m à fond, récupère bien, puis un 200 m à fond. CSS = (T400 − T200) / 2 par 100 m : c'est ton allure seuil, tenable environ 30 minutes.</p>
@@ -771,12 +771,6 @@ const LEXI=[
 const zRow=(z,txt,val)=>`<div class="z" style="--z:${z.c}"><b>${z.z}</b><span>${z.n} <small>${txt}</small></span><span class="bpm">${val}</span></div>`;
 document.getElementById('zCards').innerHTML=CLUBZ.map(z=>`<div class="zc" style="--z:${z.c}"><h4><span class="zn">${z.z}</span>${z.n}${z.sub?` <small>${esc(z.sub)}</small>`:''} <small>· ${z.dom}</small><span class="dur">${z.dur}</span></h4><dl><dt>Corps</dt><dd>${esc(z.body)}${z.fc?` · FC ${z.fc[0]?(z.fc[1]===100?'> '+z.fc[0]:z.fc[0]+'–'+z.fc[1]):'< '+z.fc[1]} % FCmax`:' · FC non pertinente'}</dd><dt>On développe</dt><dd>${esc(z.dev)}</dd><dt>Ressenti</dt><dd>${esc(z.feel)} · RPE ${z.rpe}</dd></dl></div>`).join('');
 document.getElementById('lexi').innerHTML=LEXI.map(([h,l])=>`<section><h4>${h}</h4><dl>${l.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl></section>`).join('');
-// ---- Saisie des temps : ":" insérés automatiquement ----
-['s400','s200'].forEach(id=>{const el=document.getElementById(id);if(!el)return;
-  el.addEventListener('input',e=>{const raw=el.value;if(!/^[\d:]*$/.test(raw))return;
-    const d=raw.replace(/:/g,'').replace(/^0+(?=\d{3})/,'').slice(0,6);
-    let out=d;if(d.length>2){const ss=d.slice(-2),rest=d.slice(0,-2);out=rest.length>2?rest.slice(0,-2)+':'+rest.slice(-2)+':'+ss:rest+':'+ss}
-    if(out!==raw)el.value=out},true)});
 // ---- Calculateurs course / natation ----
 const hms=pre=>{const g=k=>{const v=parseFloat(String(document.getElementById(pre+k).value).replace(',','.'));return v>0?v:0};return g('h')*3600+g('m')*60+g('s')||null};
 const parseT=v=>{const p=String(v).trim().replace(/[h'".,]/g,':').split(':').filter(x=>x!=='').map(Number);if(!p.length||p.some(isNaN))return null;return p.reduce((a,b)=>a*60+b,0)||null};
@@ -812,9 +806,9 @@ const fmtS=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(s
   ['rcD','rcTh','rcTm','rcTs'].forEach(i=>$(i).addEventListener('input',rc));rc();
   // natation
   const SWD=[50,100,200,400,750,1500,1900,3800];
-  const css=()=>{const a=parseT($('s400').value),b=parseT($('s200').value);return a&&b&&a>b?(a-b)/2:null};
+  const css=()=>{const a=hms('s400'),b=hms('s200');return a&&b&&a>b?(a-b)/2:null};
   const sw=()=>{const c=css();
-    try{localStorage.setItem('swim',JSON.stringify({a:$('s400').value,b:$('s200').value}))}catch(e){}
+    try{localStorage.setItem('swim',JSON.stringify({a:hms('s400'),b:hms('s200')}))}catch(e){}
     if(!c){$('sCss').textContent='—';$('swZones').innerHTML='';$('swPass').innerHTML='';$('swRres').textContent='—';return}
     $('sCss').textContent=fmtS(c);
     $('swZones').innerHTML=CLUBZ.map(z=>{const o=z.css;
@@ -826,8 +820,8 @@ const fmtS=sec=>{sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor(s
     $('swPass').innerHTML='<tr><th>Distance</th><th>Z4 Seuil</th><th>Z3 Tempo</th><th>Z2 Endurance</th></tr>'+SWD.map(d=>`<tr><td><b>${d} m</b></td><td>${fmtS(c*d/100)}</td><td>${fmtS((c+4)*d/100)}</td><td>${fmtS((c+10)*d/100)}</td></tr>`).join('');
     const d=+$('swRd').value,o=+$('swRo').value||0,r=+$('swRr').value||1;
     $('swRres').innerHTML=d>0?`${fmtS((c+o)*d/100)}<small>par ${d} m à ${fmtS(c+o)} /100 m · ${r} × ${d} m = ${r*d} m nagés</small>`:'—'};
-  try{const v=JSON.parse(localStorage.getItem('swim')||'null');if(v){$('s400').value=v.a;$('s200').value=v.b}}catch(e){}
-  ['s400','s200','swRd','swRo','swRr'].forEach(i=>$(i).addEventListener('input',sw));sw();
+  try{const v=JSON.parse(localStorage.getItem('swim')||'null');if(v){const put=(pre,t)=>{t=typeof t==='number'?t:parseT(t);if(!t)return;$(pre+'h').value=t>=3600?Math.floor(t/3600):'';$(pre+'m').value=Math.floor(t%3600/60);$(pre+'s').value=t%60||''};put('s400',v.a);put('s200',v.b)}}catch(e){}
+  ['s400h','s400m','s400s','s200h','s200m','s200s','swRd','swRo','swRr'].forEach(i=>$(i).addEventListener('input',sw));sw();
   const sd=()=>{const d=+$('swD').value,t=hms('swT');
     if(!(d>0)||!t){$('swRes').textContent='—';$('swV').textContent='';return}
     $('swRes').innerHTML=`${fmtS(t/d*100)} /100 m<small>allure moyenne sur ${d} m</small>`;$('swV').textContent=(d/(t/3600)/1000).toFixed(2)+' km/h'};
