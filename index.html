@@ -22,9 +22,8 @@
   --swim:#2A7BD6; --bike:#D9861C; --run:#ED68A3; --other:#7A7280; --chip:#F3EBEF;
   --display:"Exo 2","Arial Narrow",system-ui,sans-serif; --body:"Barlow",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --red:#F48BBC; --pink:#ED68A3; --black:#000000; --bg:#0E0D10; --surface:#1A181C; --fg:#F1EDF0; --muted:#A79FA8; --line:#2C282E;
-  --swim:#5AA5F5; --bike:#F2A54A; --run:#ED68A3; --other:#A79FA8; --chip:#241F26; color-scheme:dark}}
+/* Fond clair pour tout le monde, même si le téléphone est en mode sombre (Paul, 2026-11-18). */
+:root{color-scheme:light}
 :root[data-theme="dark"]{
   --red:#F48BBC; --pink:#ED68A3; --black:#000000; --bg:#0E0D10; --surface:#1A181C; --fg:#F1EDF0; --muted:#A79FA8; --line:#2C282E;
   --swim:#5AA5F5; --bike:#F2A54A; --run:#ED68A3; --other:#A79FA8; --chip:#241F26; color-scheme:dark}
