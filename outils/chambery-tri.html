@@ -38,6 +38,8 @@ h3{font:700 1.1rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.0
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
 /* Planning */
 .filters{display:flex;flex-wrap:wrap;gap:6px}
+.grp-sel{display:flex;align-items:center;gap:8px;font-weight:600}
+.grp-sel select{font:600 .95rem var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:12em}
 .filters button{border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 .85rem var(--body);padding:6px 12px;border-radius:999px;cursor:pointer}
 .filters button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .days{display:flex;flex-direction:column;gap:14px}
@@ -294,6 +296,7 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 <section role="tabpanel" id="p-plan" aria-labelledby="t-plan"><div class="wrap">
   <div class="wk-head"><h2>Plan de la semaine</h2>
     <div class="wk-nav"><button id="wPrev" aria-label="Semaine précédente">‹</button><div id="wLabel"></div><button id="wNext" aria-label="Semaine suivante">›</button></div></div>
+  <label class="grp-sel" for="grpSel">Plan<select id="grpSel"><option value="adulte">Adulte</option><option value="mms">M&amp;M's</option><option value="avenir">Avenir</option><option value="perf">Espoir Perf</option></select></label>
   <div class="filters" id="filters"></div>
   <div class="days" id="days"></div>
 </div></section>
@@ -542,7 +545,10 @@ if(hashMap[location.hash.slice(1)])start=hashMap[location.hash.slice(1)];
 if(document.getElementById(start))show(start);
 
 // ---- Planning ----
-let filter='all',level='all',week=null;
+let filter='all',level='all',week=null,grp='adulte';
+// Choix du plan (liste déroulante, gardé sur l'appareil). Seul le plan Adulte est relié à un Sheet pour l'instant.
+const GROUPES={adulte:"Adulte",mms:"M&M's",avenir:"Avenir",perf:"Espoir Perf"};
+try{grp=localStorage.getItem('grp')||'adulte';if(!GROUPES[grp])grp='adulte'}catch(e){}
 try{level=localStorage.getItem('lvl')||'all'}catch(e){}
 // La sortie vélo du week-end a lieu le dimanche
 Object.values(WEEKS).forEach(l=>l.forEach(x=>{if(x.s==='bike'&&x.d===6)x.d=0}));
@@ -569,6 +575,8 @@ function renderDays(){
   document.getElementById('wLabel').innerHTML=`<b>Semaine ${week}</b><span>${m.getDate()} ${M[m.getMonth()]} – ${e.getDate()} ${M[e.getMonth()]}${week===curW?' · en cours':''}</span>`;
   document.getElementById('wPrev').disabled=week===wkKeys[0];document.getElementById('wNext').disabled=week===wkKeys[wkKeys.length-1];
   const today=new Date().getDay(),out=document.getElementById('days');out.innerHTML='';
+  fWrap.style.display=grp==='adulte'?'':'none';
+  if(grp!=='adulte'){out.innerHTML=`<p class="note">Le plan ${esc(GROUPES[grp])} arrive bientôt dans l'appli.</p>`;return}
   [1,2,3,4,5,6,0].forEach(d=>{
     // Créneau club sans séance dans le Sheet (case vide) → carte « ⌛ Séance en construction ⌛ » (semaine en cours et suivantes) ; « _ » dans le Sheet = pas de séance.
     const base=WEEKS[week],ph=week>=curW?PH.filter(p=>!(p.d===6&&week<45)&&!base.some(s=>s.d===p.d&&s.s===p.s&&s.slot===p.slot)):[];
@@ -609,6 +617,8 @@ function renderDays(){
     out.appendChild(div)});
   if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
 }
+const grpSel=document.getElementById('grpSel');grpSel.value=grp;
+grpSel.onchange=()=>{grp=grpSel.value;try{localStorage.setItem('grp',grp)}catch(e){}renderDays()};
 renderDays();
 // ---- Onglet Courses (visuels d'Emy, saison 2027) ----
 // url = lien d'inscription, code = code promo du club : laisser "" tant qu'on ne les a pas.
