@@ -969,13 +969,23 @@ function parseGpx(text){
   const nm=doc.querySelector('trk > name, rte > name, metadata > name');
   return {km:+dist.toFixed(1),gain:Math.round(gain),loss:Math.round(loss),maxEle:eles.length?Math.round(Math.max(...eles)):null,minEle:eles.length?Math.round(Math.min(...eles)):null,pts:simp,name:nm?nm.textContent.trim():''};
 }
+// Tracé sur fond de carte (tuiles CARTO Voyager / OpenStreetMap, projection Web Mercator, sans bibliothèque).
+// Si les tuiles ne chargent pas (hors ligne, page qui bloque les images externes), il reste le tracé sur fond uni.
 function mapSvg(pts){
-  const lat0=pts.reduce((s,p)=>s+p[0],0)/pts.length,k=Math.cos(lat0*Math.PI/180);
-  const xs=pts.map(p=>p[1]*k),ys=pts.map(p=>-p[0]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
-  const W=300,H=170,pad=10,s=Math.min((W-2*pad)/((x1-x0)||1e-6),(H-2*pad)/((y1-y0)||1e-6));
-  const ox=(W-(x1-x0)*s)/2,oy=(H-(y1-y0)*s)/2;const c=pts.map((p,i)=>[(xs[i]-x0)*s+ox,(ys[i]-y0)*s+oy]);
-  const d=c.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ');const a=c[0],b=c[c.length-1];
-  return `<svg class="tmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tracé du parcours"><polyline points="${d}" fill="none" stroke="var(--c)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${b[0].toFixed(1)}" cy="${b[1].toFixed(1)}" r="5" fill="var(--fg)"/><circle cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="5" fill="var(--pink)" stroke="var(--surface)" stroke-width="2"/></svg>`;
+  const W=300,H=170,pad=14,T=256;
+  const mx=lon=>(lon+180)/360,my=lat=>{const r=lat*Math.PI/180;return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2};
+  const X=pts.map(p=>mx(p[1])),Y=pts.map(p=>my(p[0]));
+  const x0=Math.min(...X),x1=Math.max(...X),y0=Math.min(...Y),y1=Math.max(...Y);
+  const zf=Math.min(15,Math.log2(Math.min((W-2*pad)/((x1-x0)*T||1e-9),(H-2*pad)/((y1-y0)*T||1e-9))));
+  const z=Math.max(1,Math.floor(zf)),sc=Math.pow(2,zf-z),N=Math.pow(2,z);
+  const cx=(x0+x1)/2*N*T,cy=(y0+y1)/2*N*T,L=cx-W/2/sc,Tp=cy-H/2/sc;
+  const px=x=>((x*N*T-L)*sc),py=y=>((y*N*T-Tp)*sc);
+  let tiles='';
+  for(let tx=Math.floor(L/T);tx<=Math.floor((L+W/sc)/T);tx++)for(let ty=Math.floor(Tp/T);ty<=Math.floor((Tp+H/sc)/T);ty++){
+    if(ty<0||ty>=N)continue;const wx=((tx%N)+N)%N,sub='abcd'[(wx+ty)%4];
+    tiles+=`<image href="https://${sub}.basemaps.cartocdn.com/rastertiles/voyager/${z}/${wx}/${ty}@2x.png" x="${((tx*T-L)*sc).toFixed(1)}" y="${((ty*T-Tp)*sc).toFixed(1)}" width="${(T*sc+.6).toFixed(1)}" height="${(T*sc+.6).toFixed(1)}" preserveAspectRatio="none"/>`}
+  const c=X.map((x,i)=>[px(x),py(Y[i])]),d=c.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' '),a=c[0],b=c[c.length-1];
+  return `<svg class="tmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tracé du parcours sur fond de carte">${tiles}<polyline points="${d}" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><polyline points="${d}" fill="none" stroke="var(--c)" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${b[0].toFixed(1)}" cy="${b[1].toFixed(1)}" r="5" fill="#121114" stroke="#fff" stroke-width="2"/><circle cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="5" fill="#ED68A3" stroke="#fff" stroke-width="2"/><text x="${W-3}" y="${H-3}" text-anchor="end" font-size="6.5" fill="#333" stroke="#fff" stroke-width="2" paint-order="stroke">© OpenStreetMap · © CARTO</text></svg>`;
 }
 function profSvg(pts){
   const e=pts.filter(p=>p[2]!=null);if(e.length<2)return '';
