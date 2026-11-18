@@ -241,7 +241,13 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 .race .ins a{background:var(--pink);color:#0A0A0A;text-decoration:none}
 .race .ins code{font-family:var(--mono);background:var(--chip);color:var(--fg);user-select:all}
 .race .ins em.open{background:var(--pink);color:#0A0A0A;font-weight:600}
-:is(#insPop,#annPop){border:0;border-radius:16px;padding:0;max-width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--fg);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.race .ins button.cal{font:600 .8rem var(--body);padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+#calPop .calb{display:grid;gap:8px}
+#calPop .calb button{font:600 .95rem var(--body);padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--fg);cursor:pointer;text-align:left}
+details.pastdays{border-top:1px dashed var(--line);padding-top:10px}
+details.pastdays>summary{cursor:pointer;font:600 .9rem var(--body);color:var(--muted);margin-bottom:10px}
+details.pastdays .day{margin-bottom:14px}
+:is(#insPop,#annPop,#calPop){border:0;border-radius:16px;padding:0;max-width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--fg);box-shadow:0 12px 40px rgba(0,0,0,.35)}
 #annPop li b{font-weight:600}
 #mustPop{border:0;border-radius:16px;padding:0;max-width:min(460px,calc(100vw - 32px));max-height:calc(100dvh - 32px);background:var(--surface);color:var(--fg);box-shadow:0 12px 40px rgba(0,0,0,.35)}
 #mustPop::backdrop{background:rgba(0,0,0,.6)}
@@ -259,21 +265,21 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 #mustPop .acts button{font:600 .95rem var(--body);padding:9px 18px;border-radius:999px;border:0;background:var(--pink);color:#0A0A0A;cursor:pointer}
 #mustPop .acts button:disabled{opacity:.4;cursor:not-allowed}
 #annPop .when{font-size:.85rem;color:var(--muted);margin:0 0 10px}
-:is(#insPop,#annPop)::backdrop{background:rgba(0,0,0,.45)}
-:is(#insPop,#annPop) form{padding:18px 18px 14px}
-:is(#insPop,#annPop) h3{margin:0 0 10px;font:700 1.15rem var(--display)}
-:is(#insPop,#annPop) ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-:is(#insPop,#annPop) li{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--chip)}
-:is(#insPop,#annPop) li span{font-size:.82rem;color:var(--muted)}
-:is(#insPop,#annPop) .ins{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-:is(#insPop,#annPop) .ins a,:is(#insPop,#annPop) .ins code,:is(#insPop,#annPop) .ins em,:is(#insPop,#annPop) .ins button{font:600 .8rem var(--body);padding:4px 10px;border-radius:999px;border:0}
-:is(#insPop,#annPop) .ins a{background:var(--pink);color:#0A0A0A;text-decoration:none}
-:is(#insPop,#annPop) .ins code{font-family:var(--mono);background:var(--surface);color:var(--fg);user-select:all}
-:is(#insPop,#annPop) .ins em{font-style:normal;font-weight:500;background:var(--surface);color:var(--muted)}
-:is(#insPop,#annPop) .ins button{background:var(--surface);color:var(--fg);cursor:pointer}
-:is(#insPop,#annPop) .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-:is(#insPop,#annPop) .acts button{font:600 .9rem var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
-:is(#insPop,#annPop) .acts button[value]{background:var(--pink);border-color:var(--pink);color:#0A0A0A}
+:is(#insPop,#annPop,#calPop)::backdrop{background:rgba(0,0,0,.45)}
+:is(#insPop,#annPop,#calPop) form{padding:18px 18px 14px}
+:is(#insPop,#annPop,#calPop) h3{margin:0 0 10px;font:700 1.15rem var(--display)}
+:is(#insPop,#annPop,#calPop) ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+:is(#insPop,#annPop,#calPop) li{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--chip)}
+:is(#insPop,#annPop,#calPop) li span{font-size:.82rem;color:var(--muted)}
+:is(#insPop,#annPop,#calPop) .ins{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+:is(#insPop,#annPop,#calPop) .ins a,:is(#insPop,#annPop,#calPop) .ins code,:is(#insPop,#annPop,#calPop) .ins em,:is(#insPop,#annPop,#calPop) .ins button{font:600 .8rem var(--body);padding:4px 10px;border-radius:999px;border:0}
+:is(#insPop,#annPop,#calPop) .ins a{background:var(--pink);color:#0A0A0A;text-decoration:none}
+:is(#insPop,#annPop,#calPop) .ins code{font-family:var(--mono);background:var(--surface);color:var(--fg);user-select:all}
+:is(#insPop,#annPop,#calPop) .ins em{font-style:normal;font-weight:500;background:var(--surface);color:var(--muted)}
+:is(#insPop,#annPop,#calPop) .ins button{background:var(--surface);color:var(--fg);cursor:pointer}
+:is(#insPop,#annPop,#calPop) .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+:is(#insPop,#annPop,#calPop) .acts button{font:600 .9rem var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+:is(#insPop,#annPop,#calPop) .acts button[value]{background:var(--pink);border-color:var(--pink);color:#0A0A0A}
 .race .ins em{font-style:normal;font-weight:500;background:var(--chip);color:var(--muted)}
 .hr-in output{display:block;font:600 1rem var(--mono);padding:8px 0}
 .hr-help{margin:10px 0}
@@ -497,6 +503,12 @@ nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
   <ul id="annList"></ul>
   <div class="acts"><button type="button" id="annGo">Voir le planning</button><button value="ok">OK</button></div>
 </form></dialog>
+<dialog id="calPop" aria-labelledby="calT"><form method="dialog">
+  <h3 id="calT">Ajouter à mon agenda</h3>
+  <p class="when" id="calW"></p>
+  <div class="calb"><button type="button" id="calIcs">📱 Calendrier du téléphone (iPhone, Outlook…)</button><button type="button" id="calG">🗓️ Google Agenda</button></div>
+  <div class="acts"><button value="ok">Fermer</button></div>
+</form></dialog>
 <dialog id="insPop" aria-labelledby="insT"><form method="dialog">
   <h3 id="insT">📣 Inscriptions ouvertes</h3>
   <ul id="insList"></ul>
@@ -598,7 +610,9 @@ function renderDays(){
   const today=new Date().getDay(),out=document.getElementById('days');out.innerHTML='';
   fWrap.style.display=grp==='adulte'?'':'none';
   if(grp!=='adulte'){out.innerHTML=`<p class="note">Le plan ${esc(GROUPES[grp])} arrive bientôt dans l'appli.</p>`;return}
-  [1,2,3,4,5,6,0].forEach(d=>{
+  // Semaine en cours : on commence par aujourd'hui, les jours déjà passés sont repliés en bas (« Plus tôt cette semaine »).
+  const ORD=[1,2,3,4,5,6,0],ti=ORD.indexOf(today),isCur=week===curW;let pastBox=null;
+  (isCur?ORD.slice(ti).concat(ORD.slice(0,ti)):ORD).forEach(d=>{
     // Créneau club sans séance dans le Sheet (case vide) → carte « ⌛ Séance en construction ⌛ » (semaine en cours et suivantes) ; « _ » dans le Sheet = pas de séance.
     const base=WEEKS[week],ph=week>=curW?PH.filter(p=>!(p.d===6&&week<45)&&!base.some(s=>s.d===p.d&&s.s===p.s&&s.slot===p.slot)):[];
     const items=base.concat(ph).concat(EXTRA.filter(e=>(!e.from||week>=e.from)&&!base.concat(ph).some(s=>s.d===e.d&&s.s===e.s&&s.slot===e.slot))).filter(s=>s.d===d&&s.x!=='_'&&s.x!=='\\_'&&(filter==='all'||s.s===filter))
@@ -635,7 +649,8 @@ function renderDays(){
         if(!p.title)return '<span class="tbd">⌛ Séance en construction ⌛</span>';
         return p.rest?`<details><summary>${lab}${esc(p.title)}${dist}</summary><pre>${esc(p.rest)}</pre></details>`:`<b>${lab}${esc(p.title)}${dist}</b>`};
       return `<div class="slot${ch&&ch.off?' cancel':''}" style="--c:var(${SPORT[s.s][1]})">${chg}${head}<div class="sh"><span class="tag">${SPORT[s.s][0]}${s.slot?' · '+s.slot:''}</span>${lv}</div>${P.map(one).join('')}</div>`}).join('');
-    out.appendChild(div)});
+    if(isCur&&ORD.indexOf(d)<ti){if(!pastBox){pastBox=document.createElement('details');pastBox.className='pastdays';pastBox.innerHTML='<summary>Plus tôt cette semaine</summary>'}pastBox.appendChild(div)}else out.appendChild(div)});
+  if(pastBox)out.appendChild(pastBox);
   if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
 }
 // Écran noir de choix du plan : à chaque ouverture de l.appli (Paul, 2026-11-18), et via le bouton « Plan … Changer ».
@@ -681,7 +696,7 @@ const AGENDA=[
   document.getElementById('alist').innerHTML=AGENDA.filter(a=>(a.end||a.date)>=td).map(a=>{const dt=new Date(a.date+'T00:00:00'),n=Math.round((dt-now)/864e5);
     const en=a.end?new Date(a.end+'T00:00:00'):null;
     const cd=n<=0?(en?'En cours':"Aujourd'hui"):`J-${n}`;
-    return `<div class="race vie"><div class="d"><strong>${dt.getDate()}${en?'–'+en.getDate():''}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small></div><div><span class="tag" style="--c:var(--muted)">Vie du club</span><b>${esc(a.t)}</b><span>${esc(a.f)}</span>${a.dl&&a.dl[0]>=td?`<em class="dl">⏰ ${esc(a.dl[1])}</em>`:''}</div><div class="cd">${cd}</div></div>`}).join('');
+    return `<div class="race vie"><div class="d"><strong>${dt.getDate()}${en?'–'+en.getDate():''}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small></div><div><span class="tag" style="--c:var(--muted)">Vie du club</span><b>${esc(a.t)}</b><span>${esc(a.f)}</span>${a.dl&&a.dl[0]>=td?`<em class="dl">⏰ ${esc(a.dl[1])}</em>`:''}<div class="ins"><button type="button" class="cal" data-a="${AGENDA.indexOf(a)}">📅 Ajouter à mon agenda</button></div></div><div class="cd">${cd}</div></div>`}).join('');
 })();
 let cFilter='all';
 const cf=document.getElementById('cfilters');
@@ -698,9 +713,30 @@ function renderCourses(){
     const op=c.open&&n>=0?(c.open<=iso(now)?'<em class="open">Inscriptions ouvertes</em>':`<em>Inscriptions le ${fmtO(c.open)}</em>`):'';
     const ins=c.noins?'':op+(c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:'<em>Lien d\'inscription à venir</em>')
       +(c.code?`<code title="Code promo">${c.code}</code>`+(c.remise?`<em class="open">${c.remise}</em>`:''):'<em>Code promo à venir</em>');
-    return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span><div class="ins">${ins}</div></div><div class="cd">${cd}</div></div>`}).join('');
+    return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span><div class="ins">${ins}${n>=0?`<button type="button" class="cal" data-c="${COURSES.indexOf(c)}">📅 Agenda</button>`:''}</div></div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderCourses();
+// ---- Ajouter une course ou une date du club à l'agenda (.ics pour iPhone/Outlook, lien Google Agenda) ----
+(()=>{
+  const pop=document.getElementById('calPop');let ev=null;
+  const ymd=d=>d.replace(/-/g,''),next=d=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+1);return iso(x)};
+  const open=e=>{ev=e;document.getElementById('calW').textContent=e.t;pop.showModal()};
+  document.addEventListener('click',e=>{const b=e.target.closest('button.cal');if(!b)return;
+    if(b.dataset.c!=null){const c=COURSES[+b.dataset.c];open({t:c.t,date:c.date,end:null,d:[c.f,c.approx?'Date approximative ('+c.approx+')':'',c.url?'Inscription : '+c.url:'',c.code?'Code club : '+c.code+(c.remise?' ('+c.remise+')':''):''].filter(Boolean).join('\n')})}
+    else{const a=AGENDA[+b.dataset.a];open({t:a.t+' · Chambéry Triathlon',date:a.date,end:a.end||null,d:a.f})}});
+  const txt=v=>v.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/([,;])/g,'\\$1');
+  document.getElementById('calIcs').onclick=()=>{if(!ev)return;
+    const now=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Chambery Triathlon//App//FR','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+      `UID:${ymd(ev.date)}-${ev.t.toLowerCase().replace(/[^a-z0-9]+/g,'-')}@chambery-triathlon`,`DTSTAMP:${now}`,
+      `DTSTART;VALUE=DATE:${ymd(ev.date)}`,`DTEND;VALUE=DATE:${ymd(next(ev.end||ev.date))}`,`SUMMARY:${txt(ev.t)}`,`DESCRIPTION:${txt(ev.d||'')}`,
+      'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY',`DESCRIPTION:${txt(ev.t)}`,'END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const url=URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download=ev.t.replace(/[^\wÀ-ÿ -]+/g,'').trim().replace(/\s+/g,'-')+'.ics';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);pop.close()};
+  document.getElementById('calG').onclick=()=>{if(!ev)return;
+    window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(ev.t)+'&dates='+ymd(ev.date)+'/'+ymd(next(ev.end||ev.date))+'&details='+encodeURIComponent(ev.d||''),'_blank','noopener');pop.close()};
+})();
 // ---- Onglet Retours : commentaire sur une séance ----
 // FEEDBACK.mail / FEEDBACK.wa (numéro au format international sans +, ex. 336XXXXXXXX) : destination directe.
 // Tant que les deux sont vides, « Envoyer » ouvre le menu de partage du téléphone (WhatsApp, SMS, mail…).
