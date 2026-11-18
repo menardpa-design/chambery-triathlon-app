@@ -615,7 +615,7 @@ renderDays();
 // open = ouverture des inscriptions (AAAA-MM-JJ) : un rappel s'affiche à l'ouverture de l'appli pendant 14 jours.
 // Source : Sheet « Courses phares/code de rémise ». Raidlight et Vercorsman : déjà ouvertes au 29/10.
 const COURSES=[
-  {date:"2026-11-29",t:"Bourget Xpress",f:"5 et 10 km",k:"club",url:"",code:""},
+  {date:"2026-11-29",t:"Bourget Xpress",f:"5 et 10 km",k:"club",noins:true},
   {date:"2027-01-30",t:"Raidlight Winter Trail",f:"Trail · 9, 14, 18, 22 et 30 km · St Pierre de Chartreuse",k:"phare",open:"2026-10-29",url:"",code:""},
   {date:"2027-03-21",t:"10 km d'Aix-les-Bains",f:"10 km",k:"club",open:"2026-11-24",url:"",code:""},
   {date:"2027-04-04",t:"Entrelacs Run and Trail (ERAT)",f:"Trail · 13, 23, 42 et 61 km · courses jeunes",k:"phare",url:"",code:""},
@@ -659,7 +659,7 @@ function renderCourses(){
   document.getElementById('clist').innerHTML=list.map(c=>{const dt=new Date(c.date+'T00:00:00'),n=Math.round((dt-now)/864e5);
     const cd=n<0?'Passée':n===0?"Aujourd'hui":(c.approx?'~':'')+`J-${n}`;
     const op=c.open&&n>=0?(c.open<=iso(now)?'<em class="open">Inscriptions ouvertes</em>':`<em>Inscriptions le ${fmtO(c.open)}</em>`):'';
-    const ins=op+(c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:'<em>Lien d\'inscription à venir</em>')
+    const ins=c.noins?'':op+(c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:'<em>Lien d\'inscription à venir</em>')
       +(c.code?`<code title="Code promo">${c.code}</code>`:'<em>Code promo à venir</em>');
     return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span><div class="ins">${ins}</div></div><div class="cd">${cd}</div></div>`}).join('');
 }
