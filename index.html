@@ -647,14 +647,14 @@ function renderDays(){
     out.appendChild(div)});
   if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
 }
-// Écran noir de choix du plan : à la première ouverture, puis via le bouton « Plan … Changer ».
+// Écran noir de choix du plan : à chaque ouverture de l.appli (Paul, 2026-11-18), et via le bouton « Plan … Changer ».
 const grpScreen=document.getElementById('grpScreen'),grpName=document.getElementById('grpName');
 const setGrp=g=>{grp=g;grpName.textContent=GROUPES[g];try{localStorage.setItem('grp',g)}catch(e){}grpScreen.hidden=true;document.body.style.overflow='';renderDays()};
 const openGrp=()=>{grpScreen.hidden=false;document.body.style.overflow='hidden';(grpScreen.querySelector(`[data-g="${grp}"]`)||grpScreen.querySelector('button')).focus()};
 grpScreen.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>setGrp(b.dataset.g));
 document.getElementById('grpBtn').onclick=openGrp;
 grpName.textContent=GROUPES[grp];
-if(!GROUPES[grpSaved])openGrp();
+openGrp();
 renderDays();
 // ---- Onglet Courses (visuels d'Emy, saison 2027) ----
 // url = lien d'inscription, code = code promo du club : laisser "" tant qu'on ne les a pas.
