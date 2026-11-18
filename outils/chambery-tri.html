@@ -163,7 +163,10 @@ tr.hl td{background:var(--chip)}
 .trace-list{display:flex;flex-direction:column;gap:12px}
 .trace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
 .tvis{display:flex;flex-direction:column;gap:6px;min-width:0}
-.tmap{width:100%;height:auto;background:var(--chip);border-radius:8px}
+.tmapw{position:relative;width:100%;aspect-ratio:300/170;overflow:hidden;border-radius:8px;background:var(--chip)}
+.tmapw img{position:absolute;max-width:none;display:block;user-select:none;-webkit-user-drag:none}
+.tmapw .tmap{position:absolute;inset:0;width:100%;height:100%}
+.tmapw small{position:absolute;right:4px;bottom:2px;font-size:.62rem;color:#333;background:rgba(255,255,255,.7);padding:0 4px;border-radius:4px}
 .tprof{width:100%;height:48px;display:block}
 .tinfo{min-width:0}
 .tname{font:700 1.2rem/1.15 var(--display);text-transform:none;letter-spacing:.01em;color:var(--fg);margin:4px 0 4px}
@@ -968,9 +971,10 @@ function mapSvg(pts){
   let tiles='';
   for(let tx=Math.floor(L/T);tx<=Math.floor((L+W/sc)/T);tx++)for(let ty=Math.floor(Tp/T);ty<=Math.floor((Tp+H/sc)/T);ty++){
     if(ty<0||ty>=N)continue;const wx=((tx%N)+N)%N,sub='abcd'[(wx+ty)%4];
-    tiles+=`<image href="https://${sub}.basemaps.cartocdn.com/rastertiles/voyager/${z}/${wx}/${ty}@2x.png" x="${((tx*T-L)*sc).toFixed(1)}" y="${((ty*T-Tp)*sc).toFixed(1)}" width="${(T*sc+.6).toFixed(1)}" height="${(T*sc+.6).toFixed(1)}" preserveAspectRatio="none"/>`}
+    const pc=v=>(v/W*100).toFixed(3)+'%',pv=v=>(v/H*100).toFixed(3)+'%',sz=T*sc+.6;
+    tiles+=`<img alt="" loading="lazy" decoding="async" referrerpolicy="strict-origin-when-cross-origin" src="https://${sub}.basemaps.cartocdn.com/rastertiles/voyager/${z}/${wx}/${ty}@2x.png" style="left:${pc((tx*T-L)*sc)};top:${pv((ty*T-Tp)*sc)};width:${pc(sz)};height:${pv(sz)}" onerror="this.remove()">`}
   const c=X.map((x,i)=>[px(x),py(Y[i])]),d=c.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' '),a=c[0],b=c[c.length-1];
-  return `<svg class="tmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tracé du parcours sur fond de carte">${tiles}<polyline points="${d}" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><polyline points="${d}" fill="none" stroke="var(--c)" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${b[0].toFixed(1)}" cy="${b[1].toFixed(1)}" r="5" fill="#121114" stroke="#fff" stroke-width="2"/><circle cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="5" fill="#ED68A3" stroke="#fff" stroke-width="2"/><text x="${W-3}" y="${H-3}" text-anchor="end" font-size="6.5" fill="#333" stroke="#fff" stroke-width="2" paint-order="stroke">© OpenStreetMap · © CARTO</text></svg>`;
+  return `<div class="tmapw">${tiles}<svg class="tmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tracé du parcours sur fond de carte"><polyline points="${d}" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><polyline points="${d}" fill="none" stroke="var(--c)" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${b[0].toFixed(1)}" cy="${b[1].toFixed(1)}" r="5" fill="#121114" stroke="#fff" stroke-width="2"/><circle cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="5" fill="#ED68A3" stroke="#fff" stroke-width="2"/></svg><small>© OpenStreetMap · © CARTO</small></div>`;
 }
 function profSvg(pts){
   const e=pts.filter(p=>p[2]!=null);if(e.length<2)return '';
