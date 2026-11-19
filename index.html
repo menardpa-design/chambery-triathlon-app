@@ -1166,21 +1166,28 @@ function setupKind(kind){
 <script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.getRegistration().then(r=>{if(!r)return navigator.serviceWorker.register('sw.js')}).catch(()=>{}))}</script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
-window.OneSignalDeferred=window.OneSignalDeferred||[];
-OneSignalDeferred.push(async function(OneSignal){
+(function(){
   const b=document.getElementById('notifBtn'),h=document.getElementById('notifHint');
-  await OneSignal.init({appId:'08efe86e-6964-415b-8658-16f9f82fc0d4',serviceWorkerPath:'chambery-triathlon-app/sw.js',serviceWorkerUpdaterPath:'chambery-triathlon-app/sw.js',serviceWorkerParam:{scope:'/chambery-triathlon-app/'},notifyButton:{enable:false},welcomeNotification:{disable:true}});
-  if(!OneSignal.Notifications.isPushSupported()){
-    const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-    if(ios&&!navigator.standalone)h.hidden=false;
-    return;
-  }
-  const sub=OneSignal.User.PushSubscription;
-  const upd=()=>{const on=!!sub.optedIn;b.textContent=on?'🔔 Notifications activées · Couper':'🔔 Activer les notifications';b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)};
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!('Notification' in window&&'serviceWorker' in navigator&&'PushManager' in window)){if(ios&&!navigator.standalone)h.hidden=false;return}
+  let OS=null,err='';
+  const say=t=>{h.textContent=t;h.hidden=false};
+  const upd=()=>{const on=!!(OS&&OS.User.PushSubscription.optedIn);b.textContent=on?'🔔 Notifications activées · Couper':'🔔 Activer les notifications';b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)};
   b.hidden=false;upd();
-  sub.addEventListener('change',upd);
-  b.onclick=async()=>{try{if(sub.optedIn)await sub.optOut();else await sub.optIn()}catch(e){}upd()};
-});
+  b.onclick=async()=>{
+    if(!OS){say(err?('Les notifications n’ont pas pu démarrer : '+err):'Les notifications ne se sont pas chargées. Un bloqueur de publicité peut les empêcher : autorise ce site, puis rouvre l’appli.');return}
+    const sub=OS.User.PushSubscription;
+    try{if(sub.optedIn)await sub.optOut();else{await sub.optIn();if(Notification.permission==='denied')say('Les notifications sont bloquées pour ce site dans les réglages du navigateur ou du téléphone.')}}catch(e){say('Erreur : '+(e&&e.message||e))}
+    upd();
+  };
+  window.OneSignalDeferred=window.OneSignalDeferred||[];
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.init({appId:'08efe86e-6964-415b-8658-16f9f82fc0d4',serviceWorkerPath:'chambery-triathlon-app/sw.js',serviceWorkerUpdaterPath:'chambery-triathlon-app/sw.js',serviceWorkerParam:{scope:'/chambery-triathlon-app/'},notifyButton:{enable:false},welcomeNotification:{disable:true}});
+      OS=OneSignal;OneSignal.User.PushSubscription.addEventListener('change',upd);upd();
+    }catch(e){err=(e&&e.message)||String(e);console.warn('OneSignal',e)}
+  });
+})();
 </script>
 </body>
 </html>
