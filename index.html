@@ -95,8 +95,10 @@ h3{font:700 1.1rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.0
 .wk-nav{display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
 .wk-head h2{width:100%}
 #grpBtn{align-self:center}
-.notif-btn{align-self:center;display:inline-flex;align-items:center;gap:6px;font:600 .9rem var(--body);color:#fff;background:var(--red);border:0;border-radius:999px;padding:8px 16px;cursor:pointer;margin-top:8px}
-.notif-btn.on{background:var(--surface);color:var(--fg);border:1px solid var(--line)}
+.wk-nav{position:relative}
+.wk-nav .notif-btn{position:absolute;right:0;top:50%;transform:translateY(-50%);width:40px;height:40px;font-size:1.1rem;background:var(--red);border-color:var(--red);color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.wk-nav .notif-btn.on{background:var(--surface);border-color:var(--line);color:var(--fg)}
+.wk-nav .notif-btn.on::after{content:"✓";position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:999px;background:var(--red);color:#fff;font:700 10px/16px var(--body);text-align:center}
 .notif-hint{align-self:center;text-align:center;font-size:.85rem;color:var(--muted);margin:8px 0 0;max-width:34em}
 .wk-nav button{width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:1.3rem;line-height:1;cursor:pointer}
 .wk-nav button:disabled{opacity:.35;cursor:default}
@@ -336,9 +338,8 @@ details.pastdays .day{margin-bottom:14px}
 <main>
 <section role="tabpanel" id="p-plan" aria-labelledby="t-plan"><div class="wrap">
   <div class="wk-head"><h2>Plan de la semaine</h2>
-    <div class="wk-nav"><button id="wPrev" aria-label="Semaine précédente">‹</button><div id="wLabel"></div><button id="wNext" aria-label="Semaine suivante">›</button></div></div>
+    <div class="wk-nav"><button id="wPrev" aria-label="Semaine précédente">‹</button><div id="wLabel"></div><button id="wNext" aria-label="Semaine suivante">›</button><button type="button" class="notif-btn" id="notifBtn" aria-label="Activer les notifications" title="Activer les notifications" hidden>🔔</button></div></div>
   <button type="button" class="grp-btn" id="grpBtn">Plan <b id="grpName">Adulte</b></button>
-  <button type="button" class="notif-btn" id="notifBtn" hidden>🔔 Activer les notifications</button>
   <p class="notif-hint" id="notifHint" hidden>📱 Sur iPhone : ajoute l'appli à l'écran d'accueil (bouton Partager, puis « Sur l'écran d'accueil ») et ouvre-la depuis l'icône pour pouvoir activer les notifications.</p>
   <div class="filters" id="filters"></div>
   <div class="days" id="days"></div>
@@ -1172,12 +1173,12 @@ function setupKind(kind){
   if(!('Notification' in window&&'serviceWorker' in navigator&&'PushManager' in window)){if(ios&&navigator.standalone){h.textContent='📱 Pour recevoir les notifications, mets à jour ton iPhone (iOS 16.4 ou plus récent).'}if(ios)h.hidden=false;return}
   let OS=null,err='';
   const say=t=>{h.textContent=t;h.hidden=false};
-  const upd=()=>{const on=!!(OS&&OS.User.PushSubscription.optedIn);b.textContent=on?'🔔 Notifications activées · Couper':'🔔 Activer les notifications';b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)};
+  const upd=()=>{const on=!!(OS&&OS.User.PushSubscription.optedIn);const l=on?'Notifications activées (toucher pour couper)':'Activer les notifications';b.setAttribute('aria-label',l);b.title=l;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)};
   b.hidden=false;upd();
   b.onclick=async()=>{
     if(!OS){say(err?('Les notifications n’ont pas pu démarrer : '+err):'Les notifications ne se sont pas chargées. Un bloqueur de publicité peut les empêcher : autorise ce site, puis rouvre l’appli.');return}
     const sub=OS.User.PushSubscription;
-    try{if(sub.optedIn)await sub.optOut();else{await sub.optIn();if(Notification.permission==='denied')say('Les notifications sont bloquées pour ce site dans les réglages du navigateur ou du téléphone.')}}catch(e){say('Erreur : '+(e&&e.message||e))}
+    try{if(sub.optedIn){await sub.optOut();say('🔕 Notifications coupées. Touche la cloche pour les réactiver.')}else{await sub.optIn();if(sub.optedIn)say('🔔 Notifications activées. Touche la cloche pour les couper.');if(Notification.permission==='denied')say('Les notifications sont bloquées pour ce site dans les réglages du navigateur ou du téléphone.')}}catch(e){say('Erreur : '+(e&&e.message||e))}
     upd();
   };
   window.OneSignalDeferred=window.OneSignalDeferred||[];

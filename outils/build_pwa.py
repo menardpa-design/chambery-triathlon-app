@@ -42,12 +42,12 @@ sw = ("""<script>if('serviceWorker' in navigator){addEventListener('load',()=>na
   if(!('Notification' in window&&'serviceWorker' in navigator&&'PushManager' in window)){if(ios&&navigator.standalone){h.textContent='📱 Pour recevoir les notifications, mets à jour ton iPhone (iOS 16.4 ou plus récent).'}if(ios)h.hidden=false;return}
   let OS=null,err='';
   const say=t=>{h.textContent=t;h.hidden=false};
-  const upd=()=>{const on=!!(OS&&OS.User.PushSubscription.optedIn);b.textContent=on?'🔔 Notifications activées · Couper':'🔔 Activer les notifications';b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)};
+  const upd=()=>{const on=!!(OS&&OS.User.PushSubscription.optedIn);const l=on?'Notifications activées (toucher pour couper)':'Activer les notifications';b.setAttribute('aria-label',l);b.title=l;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)};
   b.hidden=false;upd();
   b.onclick=async()=>{
     if(!OS){say(err?('Les notifications n’ont pas pu démarrer : '+err):'Les notifications ne se sont pas chargées. Un bloqueur de publicité peut les empêcher : autorise ce site, puis rouvre l’appli.');return}
     const sub=OS.User.PushSubscription;
-    try{if(sub.optedIn)await sub.optOut();else{await sub.optIn();if(Notification.permission==='denied')say('Les notifications sont bloquées pour ce site dans les réglages du navigateur ou du téléphone.')}}catch(e){say('Erreur : '+(e&&e.message||e))}
+    try{if(sub.optedIn){await sub.optOut();say('🔕 Notifications coupées. Touche la cloche pour les réactiver.')}else{await sub.optIn();if(sub.optedIn)say('🔔 Notifications activées. Touche la cloche pour les couper.');if(Notification.permission==='denied')say('Les notifications sont bloquées pour ce site dans les réglages du navigateur ou du téléphone.')}}catch(e){say('Erreur : '+(e&&e.message||e))}
     upd();
   };
   window.OneSignalDeferred=window.OneSignalDeferred||[];
