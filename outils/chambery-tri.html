@@ -82,6 +82,9 @@ h3{font:700 1.1rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.0
 .wk-nav{display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
 .wk-head h2{width:100%}
 #grpBtn{align-self:center}
+.notif-btn{align-self:center;display:inline-flex;align-items:center;gap:6px;font:600 .9rem var(--body);color:#fff;background:var(--red);border:0;border-radius:999px;padding:8px 16px;cursor:pointer;margin-top:8px}
+.notif-btn.on{background:var(--surface);color:var(--fg);border:1px solid var(--line)}
+.notif-hint{align-self:center;text-align:center;font-size:.85rem;color:var(--muted);margin:8px 0 0;max-width:34em}
 .wk-nav button{width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:1.3rem;line-height:1;cursor:pointer}
 .wk-nav button:disabled{opacity:.35;cursor:default}
 #wLabel{text-align:center;min-width:150px}
@@ -320,6 +323,8 @@ details.pastdays .day{margin-bottom:14px}
   <div class="wk-head"><h2>Plan de la semaine</h2>
     <div class="wk-nav"><button id="wPrev" aria-label="Semaine précédente">‹</button><div id="wLabel"></div><button id="wNext" aria-label="Semaine suivante">›</button></div></div>
   <button type="button" class="grp-btn" id="grpBtn">Plan <b id="grpName">Adulte</b></button>
+  <button type="button" class="notif-btn" id="notifBtn" hidden>🔔 Activer les notifications</button>
+  <p class="notif-hint" id="notifHint" hidden>📱 Sur iPhone : ajoute l'appli à l'écran d'accueil (bouton Partager, puis « Sur l'écran d'accueil ») et ouvre-la depuis l'icône pour pouvoir activer les notifications.</p>
   <div class="filters" id="filters"></div>
   <div class="days" id="days"></div>
 </div></section>

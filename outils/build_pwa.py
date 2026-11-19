@@ -30,7 +30,28 @@ body = body.replace("'Les traces ajoutées par le club apparaîtront ici.'", "'L
 assert "'/_blob/'" not in body and 'window.claude' not in body
 
 ver = hashlib.sha1(body.encode()).hexdigest()[:8]
-sw = '''<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>\n'''
+# Service worker : un seul pour le hors-ligne et les notifications OneSignal (sw.js importe le SDK OneSignal).
+# On n'enregistre sw.js que s'il n'y a encore rien : OneSignal le réenregistre avec ses paramètres et il ne faut pas se battre avec lui.
+ONESIGNAL_APP_ID = '08efe86e-6964-415b-8658-16f9f82fc0d4'
+sw = ("""<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.getRegistration().then(r=>{if(!r)return navigator.serviceWorker.register('sw.js')}).catch(()=>{}))}</script>\n"""
+      """<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>\n"""
+      """<script>
+window.OneSignalDeferred=window.OneSignalDeferred||[];
+OneSignalDeferred.push(async function(OneSignal){
+  const b=document.getElementById('notifBtn'),h=document.getElementById('notifHint');
+  await OneSignal.init({appId:'%s',serviceWorkerPath:'chambery-triathlon-app/sw.js',serviceWorkerUpdaterPath:'chambery-triathlon-app/sw.js',serviceWorkerParam:{scope:'/chambery-triathlon-app/'},notifyButton:{enable:false},welcomeNotification:{disable:true}});
+  if(!OneSignal.Notifications.isPushSupported()){
+    const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    if(ios&&!navigator.standalone)h.hidden=false;
+    return;
+  }
+  const sub=OneSignal.User.PushSubscription;
+  const upd=()=>{const on=!!sub.optedIn;b.textContent=on?'🔔 Notifications activées · Couper':'🔔 Activer les notifications';b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)};
+  b.hidden=false;upd();
+  sub.addEventListener('change',upd);
+  b.onclick=async()=>{try{if(sub.optedIn)await sub.optOut();else await sub.optIn()}catch(e){}upd()};
+});
+</script>\n""" % ONESIGNAL_APP_ID)
 doc = ('<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
        '<meta name="theme-color" content="#0A0A0A">\n<meta name="apple-mobile-web-app-capable" content="yes">\n'
