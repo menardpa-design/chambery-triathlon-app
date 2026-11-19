@@ -18,7 +18,7 @@
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--body);margin:0}
 .wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header.brand{background:var(--black);color:#fff;position:relative;overflow:hidden}
+header.brand{background:var(--black);color:#fff;position:relative;z-index:6;overflow:hidden}
 header.brand .wrap{padding-block:18px 16px;display:flex;align-items:center;justify-content:center;gap:14px}
 header.brand h1{width:100%;display:flex;justify-content:center}
 header.brand .logo{height:auto;width:min(100%,440px)}
@@ -26,7 +26,10 @@ header.brand .logo{height:auto;width:min(100%,440px)}
 .brand h1{font:800 1.9rem/1 var(--display);letter-spacing:.02em;text-transform:uppercase;margin:0}
 .brand p{margin:2px 0 0;font-size:.9rem;opacity:.9}
 .stripes{position:absolute;right:-20px;top:0;bottom:0;width:180px;opacity:.18;background:repeating-linear-gradient(115deg,#fff 0 10px,transparent 10px 26px)}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:50;pointer-events:none}
 nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--black);border-top:1px solid #2a2a2a}
+/* Cache opaque sous la barre d'état iPhone quand les onglets sont collés : le contenu ne passe plus derrière l'heure/batterie. Masqué par le header (z-index 6) tant qu'on est en haut de page. */
+nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:calc(env(safe-area-inset-top,0px) + 2px);background:var(--bg);pointer-events:none}
 nav.tabs .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-block:6px}
 nav.tabs button{appearance:none;border:0;background:transparent;color:#CFC8CE;font:700 .95rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.06em;padding:10px 4px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
 nav.tabs button svg{width:20px;height:20px}
