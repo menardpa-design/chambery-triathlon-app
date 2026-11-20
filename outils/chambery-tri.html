@@ -26,10 +26,9 @@ header.brand .logo{height:auto;width:min(100%,440px)}
 .brand h1{font:800 1.9rem/1 var(--display);letter-spacing:.02em;text-transform:uppercase;margin:0}
 .brand p{margin:2px 0 0;font-size:.9rem;opacity:.9}
 .stripes{position:absolute;right:-20px;top:0;bottom:0;width:180px;opacity:.18;background:repeating-linear-gradient(115deg,#fff 0 10px,transparent 10px 26px)}
-body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:50;pointer-events:none}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 1px);background:var(--bg);z-index:50;pointer-events:none}
 nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--black);border-top:1px solid #2a2a2a}
-/* Cache opaque sous la barre d'état iPhone quand les onglets sont collés : le contenu ne passe plus derrière l'heure/batterie. Masqué par le header (z-index 6) tant qu'on est en haut de page. */
-nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:calc(env(safe-area-inset-top,0px) + 2px);background:var(--bg);pointer-events:none}
+/* Barre d'état iPhone : body::before (fixe, 1px de plus que la zone de l'heure) cache le contenu qui défile sous l'heure ; les onglets se collent juste dessous. Pas de pseudo-élément sur nav.tabs : sur iPhone il recouvrait le bas du logo. */
 nav.tabs .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-block:6px}
 nav.tabs button{appearance:none;border:0;background:transparent;color:#CFC8CE;font:700 .95rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.06em;padding:10px 4px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
 nav.tabs button svg{width:20px;height:20px}
@@ -228,9 +227,10 @@ tr.hl td{background:var(--chip)}
 .ev.phare{background:var(--pink);color:#0A0A0A}
 .ev.club{border:1px solid var(--pink);background:transparent}
 .ev.info{color:var(--muted)}
-nav.tabs .wrap{grid-template-columns:repeat(7,1fr)}
+nav.tabs .wrap{grid-template-columns:repeat(7,minmax(0,1fr))}
 nav.tabs button{font-size:.85rem;letter-spacing:.03em;padding-inline:2px}
 @media (max-width:520px){nav.tabs .wrap{gap:2px}nav.tabs button{font-size:.6rem;letter-spacing:0}}
+@media (max-width:360px){nav.tabs .wrap{gap:0;padding-inline:4px}nav.tabs button{font-size:.52rem}}
 .fb{display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
 .fb .feel{display:flex;gap:6px;flex-wrap:wrap}
 .fb .feel button{flex:1 1 0;min-width:56px;font:600 .8rem var(--body);padding:8px 4px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;display:grid;gap:2px;justify-items:center}
