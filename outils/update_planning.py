@@ -1,8 +1,7 @@
 """Met à jour les données de l'app Chambéry Triathlon depuis le Google Sheet "Plan adulte 2026-2027".
 Usage : python3 -I update_planning.py plan.xlsx page.html      (relit le Sheet)
-        python3 -I update_planning.py --perf hebdo.xlsx page.html (Espoir Perf : PLAN HEBDO 2026-27)
+        python3 -I update_planning.py --perf detail.xlsx page.html (Espoir Perf : Sheet DÉTAIL NAT/CAP JEUNES ESPOIRS/PERFS)
         python3 -I update_planning.py --jeunes creneaux.xlsx page.html (Sheet « Créneaux jeunes 2026-2027 »)
-        python3 -I update_planning.py --perfht detail.xlsx page.html (Espoir Perf, onglet VÉLO EN AUTONOMIE du Sheet DÉTAIL NAT/CAP)
         python3 -I update_planning.py --refilter page.html     (sans Sheet : recalcule seulement les semaines visibles)
 Remplace les lignes `const WEEKS=...;`, `const SEASON=...;`, `const CRSHEET=...;` et `const CHANGES=...;` de la page,
 sans toucher au reste (CRENEAUX de base, EXTRA, RACES, lieux, etc.).
@@ -44,6 +43,8 @@ def merged_map(ws):
 
 def sport(lbl):
     l = lbl.lower()
+    if ('vélo' in l or 'velo' in l) and 'course' in l:
+        return 'mixed', ''  # ligne « VÉLO / COURSE À PIED » (Sheet Espoir Perf) : sport décidé case par case
     if 'natation' in l:
         return 'swim', (lbl.split()[-1].capitalize() if len(lbl.split()) > 1 else '')
     if 'vélo' in l or 'velo' in l:
@@ -75,7 +76,12 @@ def weeks_from(wb):
             sp, slot = sport(str(lbl).strip())
             if sp == 'other':
                 continue
+            lsp = sp
             for d, c, span in cols:
+                sp = lsp
+                if lsp == 'mixed':
+                    t0 = norm(ws.cell(row, c).value)
+                    sp = 'bike' if re.search(r'velo|home trainer|\bht\b|pma', t0) else 'run'
                 vals = []
                 for k in range(span):
                     cc = c + k; r = mr.get((row, cc))
@@ -300,23 +306,17 @@ def put(s, name, val):
     return s
 
 if __name__ == '__main__':
-    # Espoir Perf : « PLAN HEBDO 2026-27 » (Sheet de Maxime), même grille que le plan adulte → const WEEKS_PERF
-    if sys.argv[1] == '--perf':
+    # Espoir Perf : Sheet « DÉTAIL NAT/CAP JEUNES ESPOIRS/PERFS » (Paul, 2026-11-22 : seule source, plus le PLAN HEBDO)
+    # onglets SEMAINE n → séances ; onglet VÉLO EN AUTONOMIE → home trainer d'hiver → const WEEKS_PERF
+    if sys.argv[1] in ('--perf', '--perfht'):
         import openpyxl
-        wp = weeks_from(openpyxl.load_workbook(sys.argv[2], data_only=True))
+        wbp = openpyxl.load_workbook(sys.argv[2], data_only=True)
+        wp = weeks_from(wbp)
         json.dump(wp, open(FULL_PERF, 'w', encoding='utf-8'), ensure_ascii=False)
+        json.dump(ht_from(wbp), open(HT_PERF, 'w', encoding='utf-8'), ensure_ascii=False)
         s = put(open(sys.argv[3], encoding='utf-8').read(), 'WEEKS_PERF', visible(perf_weeks()))
         open(sys.argv[3], 'w', encoding='utf-8').write(s)
         print('Espoir Perf, semaines avec séances :', ', '.join(w for w, v in wp.items() if v), '| publiées :', ', '.join(visible(wp)))
-        sys.exit()
-    # Espoir Perf, vélo en autonomie (home trainer) : Sheet « DÉTAIL NAT/CAP JEUNES ESPOIRS/PERFS » → ajouté à WEEKS_PERF
-    if sys.argv[1] == '--perfht':
-        import openpyxl
-        ht = ht_from(openpyxl.load_workbook(sys.argv[2], data_only=True))
-        json.dump(ht, open(HT_PERF, 'w', encoding='utf-8'), ensure_ascii=False)
-        s = put(open(sys.argv[3], encoding='utf-8').read(), 'WEEKS_PERF', visible(perf_weeks()))
-        open(sys.argv[3], 'w', encoding='utf-8').write(s)
-        print('Espoir Perf, vélo en autonomie : semaines', ', '.join(ht))
         sys.exit()
     # M&M's / Avenir / Espoir Perf : Sheet « Créneaux jeunes 2026-2027 » → const CRJEUNES
     if sys.argv[1] == '--jeunes':
