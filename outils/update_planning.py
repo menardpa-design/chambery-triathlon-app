@@ -329,6 +329,7 @@ if __name__ == '__main__':
     jeunes = None
     if sys.argv[1] == '--refilter':
         html = sys.argv[2]; weeks = json.load(open(FULL, encoding='utf-8')); season = cren = chg = None
+    else:
         import openpyxl
         xlsx, html = sys.argv[1], sys.argv[2]
         wb = openpyxl.load_workbook(xlsx, data_only=True)
