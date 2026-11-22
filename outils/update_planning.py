@@ -2,6 +2,7 @@
 Usage : python3 -I update_planning.py plan.xlsx page.html      (relit le Sheet)
         python3 -I update_planning.py --perf hebdo.xlsx page.html (Espoir Perf : PLAN HEBDO 2026-27)
         python3 -I update_planning.py --jeunes creneaux.xlsx page.html (Sheet « Créneaux jeunes 2026-2027 »)
+        python3 -I update_planning.py --perfht detail.xlsx page.html (Espoir Perf, onglet VÉLO EN AUTONOMIE du Sheet DÉTAIL NAT/CAP)
         python3 -I update_planning.py --refilter page.html     (sans Sheet : recalcule seulement les semaines visibles)
 Remplace les lignes `const WEEKS=...;`, `const SEASON=...;`, `const CRSHEET=...;` et `const CHANGES=...;` de la page,
 sans toucher au reste (CRENEAUX de base, EXTRA, RACES, lieux, etc.).
@@ -246,6 +247,51 @@ def changes_from(wb):
         out.append(c)
     return out
 
+HT_PERF = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ht_perf.json')
+
+def ht_from(wb):
+    """Onglet « VÉLO EN AUTONOMIE » du Sheet « DÉTAIL NAT/CAP JEUNES ESPOIRS/PERFS » (Espoir Perf, home trainer d'hiver).
+    Paul, 2026-11-22 : séance 1 (PMA) le jeudi, séance 2 (pédalage / force puis seuil) le dimanche."""
+    n = next((n for n in wb.sheetnames if 'autonomie' in norm(n)), None)
+    if not n:
+        return {}
+    ws = wb[n]; info = {}; out = {}
+    for row in ws.iter_rows(values_only=True):
+        cells = [txt(c) for c in row]
+        lab = norm(cells[1]) if len(cells) > 1 else ''
+        if lab.startswith('echauffement'): info['ech'] = '\n'.join(l for l in cells[2].split('\n') if 'identique' not in norm(l))
+        elif lab.startswith('recup'): info['rec'] = cells[2]
+        elif lab.startswith('infos'): info['inf'] = cells[2]
+        m = re.match(r'sem\.?\s*(\d+)', lab)
+        if not m:
+            continue
+        w = int(m.group(1))
+        lines = [l.strip() for l in (info.get('inf') or '').split('\n') if l.strip()]
+        inf = [l for l in lines if not re.match(r'(mardi|jeudi)\b', norm(l))]
+        # Les repères notés « Mardi » / « Jeudi » dans le Sheet visent la séance PMA / la séance force (jours choisis par Paul)
+        tip = {4: [re.sub(r'^\s*mardi\s*:\s*', 'Répétitions : ', l, flags=re.I) for l in lines if norm(l).startswith('mardi')],
+               0: [(lambda t: t[:1].upper() + t[1:])(re.sub(r'^\s*jeudi\s*:\s*', '', l, flags=re.I)) for l in lines if norm(l).startswith('jeudi')]}
+        for d, col, title in ((4, 2, 'Home trainer · PMA'), (0, 3, 'Home trainer · Pédalage, force, seuil')):
+            body = cells[col] if len(cells) > col else ''
+            if not body:
+                continue
+            if 'echauffement' not in norm(body) and not re.search(r'duathlon|course|repos', norm(body)):
+                x = '\n\n'.join(filter(None, [title, 'Échauffement : ' + info.get('ech', '') if info.get('ech') else '', body.strip(),
+                                                 'Récup : ' + info['rec'] if info.get('rec') else '', 'Repères :\n' + '\n'.join(tip[d] + inf) if inf or tip[d] else '']))
+                out.setdefault(str(w), []).append({'d': d, 's': 'bike', 'slot': '', 'lvl': 'all', 'x': x, 'auto': 1})
+            else:
+                out.setdefault(str(w), []).append({'d': d, 's': 'bike', 'slot': '', 'lvl': 'all', 'x': body.strip()})
+    return out
+
+def perf_weeks():
+    wp = json.load(open(FULL_PERF, encoding='utf-8')) if os.path.exists(FULL_PERF) else {}
+    ht = json.load(open(HT_PERF, encoding='utf-8')) if os.path.exists(HT_PERF) else {}
+    allw = {**{k: list(v) for k, v in wp.items()}}
+    for w, l in ht.items():
+        allw.setdefault(w, []).extend(l)
+    order = sorted(allw, key=lambda w: (int(w) < 36, int(w)))
+    return {w: allw[w] for w in order}
+
 FULL_PERF = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weeks_full_perf.json')
 
 def put(s, name, val):
@@ -259,9 +305,18 @@ if __name__ == '__main__':
         import openpyxl
         wp = weeks_from(openpyxl.load_workbook(sys.argv[2], data_only=True))
         json.dump(wp, open(FULL_PERF, 'w', encoding='utf-8'), ensure_ascii=False)
-        s = put(open(sys.argv[3], encoding='utf-8').read(), 'WEEKS_PERF', visible(wp))
+        s = put(open(sys.argv[3], encoding='utf-8').read(), 'WEEKS_PERF', visible(perf_weeks()))
         open(sys.argv[3], 'w', encoding='utf-8').write(s)
         print('Espoir Perf, semaines avec séances :', ', '.join(w for w, v in wp.items() if v), '| publiées :', ', '.join(visible(wp)))
+        sys.exit()
+    # Espoir Perf, vélo en autonomie (home trainer) : Sheet « DÉTAIL NAT/CAP JEUNES ESPOIRS/PERFS » → ajouté à WEEKS_PERF
+    if sys.argv[1] == '--perfht':
+        import openpyxl
+        ht = ht_from(openpyxl.load_workbook(sys.argv[2], data_only=True))
+        json.dump(ht, open(HT_PERF, 'w', encoding='utf-8'), ensure_ascii=False)
+        s = put(open(sys.argv[3], encoding='utf-8').read(), 'WEEKS_PERF', visible(perf_weeks()))
+        open(sys.argv[3], 'w', encoding='utf-8').write(s)
+        print('Espoir Perf, vélo en autonomie : semaines', ', '.join(ht))
         sys.exit()
     # M&M's / Avenir / Espoir Perf : Sheet « Créneaux jeunes 2026-2027 » → const CRJEUNES
     if sys.argv[1] == '--jeunes':
@@ -294,8 +349,8 @@ if __name__ == '__main__':
     assert a == 1 and b == 1, 'lignes WEEKS/SEASON/CRSHEET/CHANGES introuvables'
     if jeunes is not None:
         s = put(s, 'CRJEUNES', jeunes)
-    if os.path.exists(FULL_PERF):
-        s = put(s, 'WEEKS_PERF', visible(json.load(open(FULL_PERF, encoding='utf-8'))))
+    if os.path.exists(FULL_PERF) or os.path.exists(HT_PERF):
+        s = put(s, 'WEEKS_PERF', visible(perf_weeks()))
     open(html, 'w', encoding='utf-8').write(s)
     print('semaines dans le Sheet :', ', '.join(weeks), '| publiées :', ', '.join(shown))
     if cren is not None:
