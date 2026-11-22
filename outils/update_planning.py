@@ -1,5 +1,7 @@
 """Met à jour les données de l'app Chambéry Triathlon depuis le Google Sheet "Plan adulte 2026-2027".
 Usage : python3 -I update_planning.py plan.xlsx page.html      (relit le Sheet)
+        python3 -I update_planning.py --perf hebdo.xlsx page.html (Espoir Perf : PLAN HEBDO 2026-27)
+        python3 -I update_planning.py --jeunes creneaux.xlsx page.html (Sheet « Créneaux jeunes 2026-2027 »)
         python3 -I update_planning.py --refilter page.html     (sans Sheet : recalcule seulement les semaines visibles)
 Remplace les lignes `const WEEKS=...;`, `const SEASON=...;`, `const CRSHEET=...;` et `const CHANGES=...;` de la page,
 sans toucher au reste (CRENEAUX de base, EXTRA, RACES, lieux, etc.).
@@ -52,19 +54,21 @@ def sport(lbl):
 def weeks_from(wb):
     weeks = {}
     for n in wb.sheetnames:
-        m = re.search(r'SEMAINE\s*(\d+)', n, re.I)
+        m = re.search(r'SEM[A-Z]*\s*(\d+)', n, re.I)  # tolère « SEMIANE 9 »
         if not m:
             continue
         w = int(m.group(1)); ws = wb[n]; mr = merged_map(ws)
+        # Case « SPORT / JOUR » : ligne des jours et colonne des sports (B2 dans le plan adulte, A2 dans le PLAN HEBDO)
+        hr, lc = next(((r, c) for r in range(1, 5) for c in range(1, 5) if 'SPORT' in str(ws.cell(r, c).value or '').upper()), (2, 2))
         cols = []
-        for c in range(3, ws.max_column + 1):
-            v = ws.cell(2, c).value
+        for c in range(lc + 1, ws.max_column + 1):
+            v = ws.cell(hr, c).value
             if v and str(v).strip().upper() in DAYS:
-                r = mr.get((2, c)); span = (r.max_col - r.min_col + 1) if r else 1
+                r = mr.get((hr, c)); span = (r.max_col - r.min_col + 1) if r else 1
                 cols.append((DAYS[str(v).strip().upper()], c, span))
         sess = []
-        for row in range(3, min(ws.max_row, 40) + 1):
-            lbl = ws.cell(row, 2).value
+        for row in range(hr + 1, min(ws.max_row, 40) + 1):
+            lbl = ws.cell(row, lc).value
             if not lbl or str(lbl).strip().upper() in ('AUTRE', 'SPORT / JOUR'):
                 continue
             sp, slot = sport(str(lbl).strip())
@@ -139,8 +143,8 @@ def norm(v):
     v = '' if v is None else str(v).strip()
     return ''.join(c for c in unicodedata.normalize('NFD', v.lower()) if unicodedata.category(c) != 'Mn')
 
-def tab(wb, name):
-    n = next((n for n in wb.sheetnames if norm(n).startswith(name)), None)
+def tab(wb, name, exclude=None):
+    n = next((n for n in wb.sheetnames if norm(n).startswith(name) and not (exclude and exclude in norm(n))), None)
     if not n:
         return None
     rows = [[c for c in r] for r in wb[n].iter_rows(values_only=True)]
@@ -149,7 +153,7 @@ def tab(wb, name):
         return []
     head = [norm(c) for c in rows[hi]]
     col = lambda *ks: next((i for i, h in enumerate(head) if any(h.startswith(k) for k in ks)), None)
-    C = {k: col(*ks) for k, ks in {'jour': ('jour',), 'date': ('date',), 'sport': ('sport', 'seance', 'activite'), 'moment': ('moment', 'creneau'),
+    C = {k: col(*ks) for k, ks in {'grp': ('groupe',), 'jour': ('jour',), 'date': ('date',), 'sport': ('sport', 'seance', 'activite'), 'moment': ('moment', 'creneau'),
          'h': ('horaire', 'heure'), 'coach': ('entraineur', 'coach'), 'lieu': ('lieu',), 'statut': ('statut', 'etat'), 'msg': ('message', 'commentaire', 'info', 'remarque')}.items()}
     get = lambda r, k: (r[C[k]] if C[k] is not None and C[k] < len(r) else None)
     return [{k: get(r, k) for k in C} for r in rows[hi + 1:] if any(norm(c) for c in r)]
@@ -173,7 +177,7 @@ def txt(v):
     return str(v).strip()
 
 def creneaux_from(wb):
-    rows = tab(wb, 'creneau')
+    rows = tab(wb, 'creneau', exclude='jeune')
     if rows is None:
         return None
     out = {}
@@ -185,6 +189,24 @@ def creneaux_from(wb):
         v = {k: txt(r[k]) for k in ('h', 'coach', 'lieu') if txt(r[k])}
         if g: v['grp'] = GRP[g][1]
         if v: out[key] = v
+    return out
+
+JEUNES = (('m&m', 'mms'), ('mm', 'mms'), ('micro', 'mms'), ('avenir', 'avenir'), ('espoir', 'perf'), ('perf', 'perf'))
+
+def jeunes_from(wb):
+    """Onglet « Créneaux jeunes » : Groupe | Jour | Sport | Horaire | Lieu | Entraîneur → const CRJEUNES (créneaux récurrents par groupe)."""
+    rows = tab(wb, 'creneaux jeune')
+    if rows is None:
+        return None
+    out = []
+    for r in rows:
+        g = next((code for k, code in JEUNES if k in norm(r['grp']).replace("'", '').replace(' ', '')), None)
+        d = DAYS.get(norm(r['jour']).upper()); s = sport_of(r['sport'])[0] or 'other'
+        if not g or d is None:
+            continue
+        c = {'g': g, 'd': d, 's': s, 'sp': txt(r['sport'])}
+        c.update({k: txt(r[k]) for k in ('h', 'coach', 'lieu', 'msg') if txt(r[k])})
+        out.append(c)
     return out
 
 def date_of(v, today):
@@ -213,15 +235,40 @@ def changes_from(wb):
         out.append(c)
     return out
 
+FULL_PERF = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weeks_full_perf.json')
+
+def put(s, name, val):
+    s, n = re.subn(r'^const ' + name + r'=.*;$', lambda m: 'const ' + name + '=' + json.dumps(val, ensure_ascii=False) + ';', s, count=1, flags=re.M)
+    assert n == 1, 'ligne const ' + name + ' introuvable'
+    return s
+
 if __name__ == '__main__':
+    # Espoir Perf : « PLAN HEBDO 2026-27 » (Sheet de Maxime), même grille que le plan adulte → const WEEKS_PERF
+    if sys.argv[1] == '--perf':
+        import openpyxl
+        wp = weeks_from(openpyxl.load_workbook(sys.argv[2], data_only=True))
+        json.dump(wp, open(FULL_PERF, 'w', encoding='utf-8'), ensure_ascii=False)
+        s = put(open(sys.argv[3], encoding='utf-8').read(), 'WEEKS_PERF', visible(wp))
+        open(sys.argv[3], 'w', encoding='utf-8').write(s)
+        print('Espoir Perf, semaines avec séances :', ', '.join(w for w, v in wp.items() if v), '| publiées :', ', '.join(visible(wp)))
+        sys.exit()
+    # M&M's / Avenir / Espoir Perf : Sheet « Créneaux jeunes 2026-2027 » → const CRJEUNES
+    if sys.argv[1] == '--jeunes':
+        import openpyxl
+        cj = jeunes_from(openpyxl.load_workbook(sys.argv[2], data_only=True)) or []
+        s = put(open(sys.argv[3], encoding='utf-8').read(), 'CRJEUNES', cj)
+        open(sys.argv[3], 'w', encoding='utf-8').write(s)
+        print('créneaux jeunes :', len(cj))
+        sys.exit()
+    jeunes = None
     if sys.argv[1] == '--refilter':
         html = sys.argv[2]; weeks = json.load(open(FULL, encoding='utf-8')); season = cren = chg = None
-    else:
         import openpyxl
         xlsx, html = sys.argv[1], sys.argv[2]
         wb = openpyxl.load_workbook(xlsx, data_only=True)
         weeks, season = weeks_from(wb), season_from(wb)
         cren, chg = creneaux_from(wb) or {}, changes_from(wb) or []
+        jeunes = jeunes_from(wb)  # None si le Sheet adulte n'a pas d'onglet « Créneaux jeunes »
         json.dump(weeks, open(FULL, 'w', encoding='utf-8'), ensure_ascii=False)
     shown = visible(weeks)
     s = open(html, encoding='utf-8').read()
@@ -234,6 +281,10 @@ if __name__ == '__main__':
         s, c2 = re.subn(r'^const CHANGES=.*;$', lambda m: 'const CHANGES=' + json.dumps(chg, ensure_ascii=False) + ';', s, count=1, flags=re.M)
         b = b and c1 and c2
     assert a == 1 and b == 1, 'lignes WEEKS/SEASON/CRSHEET/CHANGES introuvables'
+    if jeunes is not None:
+        s = put(s, 'CRJEUNES', jeunes)
+    if os.path.exists(FULL_PERF):
+        s = put(s, 'WEEKS_PERF', visible(json.load(open(FULL_PERF, encoding='utf-8'))))
     open(html, 'w', encoding='utf-8').write(s)
     print('semaines dans le Sheet :', ', '.join(weeks), '| publiées :', ', '.join(shown))
     if cren is not None:

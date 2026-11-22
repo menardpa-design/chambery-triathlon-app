@@ -561,6 +561,9 @@ const CRENEAUX={
 // Onglets « Créneaux » et « Changements » du Google Sheet (remplis par update_planning.py)
 const CRSHEET={"1-swim-Midi": {"h": "12h30 – 13h30", "coach": "Maxime / Ewen", "lieu": "Piscine Buisson rond"}, "1-swim-Soir": {"h": "20h00 – 21h15", "coach": "Maxime / Ewen", "lieu": "Piscine Buisson rond"}, "2-swim-Matin": {"h": "6h45 – 8h00", "coach": "Paul", "lieu": "Piscine du Stade"}, "2-run--deb": {"h": "19h00 – 20h30", "coach": "Paul / Ewen", "lieu": "Piste Mas Barral", "grp": "Piste"}, "2-run--av": {"h": "19h00 – 20h30", "coach": "Sylvain Rota", "lieu": "Tennis de Chambéry", "grp": "Trail"}, "3-swim-Soir": {"h": "19h30 – 21h00", "coach": "Paul / Ewen", "lieu": "Piscine Buisson rond"}, "4-swim-Matin": {"h": "6h45 – 8h00", "coach": "Paul", "lieu": "Piscine du Stade"}, "4-run-": {"h": "19h00 – 20h30", "coach": "Paul", "lieu": "Stade de Mager"}, "4-other-": {"h": "19h00 – 20h30", "coach": "Régis Chaboud", "lieu": "Piste Mas Barral"}, "5-swim-Midi": {"h": "12h30 – 13h30", "coach": "Paul / Ewen", "lieu": "Piscine Buisson rond"}, "5-swim-Soir": {"h": "20h00 – 21h15", "coach": "Paul / Ewen", "lieu": "Piscine Buisson rond"}, "6-swim-Matin": {"h": "8h30 – 10h00", "coach": "Maxime / Paul / Ewen", "lieu": "Piscine du Stade"}};
 const CHANGES=[{"date": "2026-11-24", "s": "run", "slot": "", "grp": "Trail", "coach": "Sylvain Rota", "h": "19H - 20H30", "lieu": "Parking plan d'eau de Challes"}, {"date": "2026-11-19", "s": "run", "slot": "", "coach": "Paul", "h": "19h - 20h30", "lieu": "Stade Mas Barral", "msg": "Séance SV1 déplacée à Mas Barral à cause de la météo : terrain moins boueux qu'à Mager"}, {"date": "2026-11-26", "s": "run", "slot": "", "coach": "Paul", "h": "19h - 20h30", "lieu": "Stade Mas barral", "msg": "Footing piste cyclable"}, {"date": "2026-12-12", "s": "swim", "slot": "Matin", "off": 1, "msg": "Class-tri Comité Savoie"}];
+// Espoir Perf : séances du « PLAN HEBDO 2026-27 » ; M&M's / Avenir / Espoir Perf : Sheet « Créneaux jeunes 2026-2027 » (remplis par update_planning.py)
+const WEEKS_PERF={"46": [{"d": 1, "s": "swim", "slot": "", "lvl": "all", "x": "IT\n\n1000 (200 cr / 50 4N)\n\n12x50 (2 50 1 bras / 1 25 jbs vite - 25 NC / 1 50 prog) r15\"\n\n2x \n100 d'1'45 + 6x50 VMA d'1'\n200 souple\n\n500 (25 VMA / 25 souple)\n\n100 souple\n400 palmes longues coulées\n200 souple\n\n4000"}, {"d": 3, "s": "swim", "slot": "", "lvl": "all", "x": "Aéro \n\n10x400 aéro r45\"\n\nNC / palmes / Plaq / pull / PullPlaq / NC / palmes / plaq / pull / NC\n\nNC respi 5T \nPalmes = longues coulées\npull = 1 respi devant / 25m\nplaq et pull/plaq = 25 polo / 75 ampli\n\n200 souple\n\n4200"}, {"d": 5, "s": "swim", "slot": "", "lvl": "all", "x": "Tech / Vitesse\n\n500 reverse palmes\n500 pull (25 grand chien / 50 cr / 25 prog)\n\n6x100 (25 polo / 25 à fond / 50 souple) r20\"\n\n400 pull respi 5T\n\n8x50 palmes prog 1 à 4 (3 VMA - 4 à fond) r30\"\n\n100 souple\n\n500 plaq ampli\n\n4x50 à fond d'1'30\n\n400 souple\n\n3600"}, {"d": 6, "s": "swim", "slot": "", "lvl": "all", "x": "Long\n\n4x150 (1 100 cr - 50 br / 1 100 cr - 50 jbs)\n\n6x100 (1 4N - 1 25 1 bras / 25 ampli)\n\n12x50 (25 tech - 25 NC) \n- gd chien\n- ptit chien\n- godille\n- prog\n\n3x\n300 pull r20\"\n100 4N r20\" \n2x150 (50 VMA / 50 lent / 25 VMA / 25 lent) r20\"\n\n200 souple\n\n4100"}, {"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "Duathlon Bourg en Bresse"}, {"d": 3, "s": "run", "slot": "", "lvl": "all", "x": "Footing 50'"}, {"d": 6, "s": "run", "slot": "", "lvl": "all", "x": "Footing 20' + \n4x5' (30\" VMA - 4' SV1 - 30\" VMA) r2'"}], "47": [{"d": 1, "s": "swim", "slot": "", "lvl": "all", "x": "IT\n\n400 cr respi 3/5\n300 4N (jbs/tech/NC)\n200 pull respi 5\n100 jbs\n\n4x (1 100 PapNage (pap/dos/pap/cr) / 1 (12,5 jambes vite / 12,5 cr ampli)\n\n150 souple\n\n3x \n25 d'45\" + 50 d'1' + 100 d'2' + 50 d'1' + 25 d'45\" allure VMA\n\n600 pull (125 cr ampli + 25 polo)\n\n12x25 VMA+ d'30\"\n\n6x100 BN sous SV1\n\n200 souple\n\n3600"}, {"d": 3, "s": "swim", "slot": "", "lvl": "all", "x": "Endurance et 4N\n\n4x200 (1 cr - 1 palmes avec longues coulées - 1 cr - 1 4N)\n\n12x100 (1 25 godille - 25 ampli - 25 gd chien - 25 ampli / 1 25 pap - 25 cr / 1 respi 5T / 1 100 dos)\n\n2x400 ( 1 25 4N vite / 75 ampli en cr - 1 25 polo / 75 NC en plaq)\n\n6x50 (25 prop 2 bras - 25 NC)\n6x50 palmes (25 godilles sans jambes + virage + coulée rapide + 6 mvm cr sprint)\n\n4x200 (1 4N - 1 pull respi 5)\n\n100 souple \n\n4300"}, {"d": 5, "s": "swim", "slot": "", "lvl": "all", "x": "Tech / Vitesse\n2x(200 cr + 100 4N)\n\n6x100 (25 tech / 25 NC)\n- 2 claq der\n- 2 claq der\n- 2 claq dev/der\n\n12x50 cr prog de 1 à 4\n\n2x300 ampli (1 pull - 1 tuba)\n\n6x100 (25 à fond - 75 tempo)\n\n2x (100 jbs + 100 souple)"}, {"d": 6, "s": "swim", "slot": "", "lvl": "all", "x": "ClassTri"}, {"d": 3, "s": "bike", "slot": "", "lvl": "all", "x": "1h45 avec endurance"}, {"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "20' chauff + gammes\n \n4x\n3' SV1 r1'30\n3x100m très vite r100 (50 marche / 50 trot) Départ 7'\n\n5' souple"}, {"d": 3, "s": "run", "slot": "", "lvl": "all", "x": "Rando/Trail"}, {"d": 6, "s": "run", "slot": "", "lvl": "all", "x": "ClassTri"}], "48": [{"d": 1, "s": "swim", "slot": "", "lvl": "all", "x": "IT\n\n3x300 (1 cr / 1 pull / 1 4N)\n\n3x200 (25 godille - 50 cr - 25 prog - 25 polo - 50 cr - 25 prog) r20\"\n\n3x100 (25 jbs vite / 25 souple) r15\"\n\n6 X (100 VMA r15\" + 50 VMA r30\")\n\n2x (100 dos + 100 jbs)\n\n6x100 prog de 1 à 3 (1 souple / 2 SV1 / 3 VMA)\n\n200 souple\n\n3900"}, {"d": 3, "s": "swim", "slot": "", "lvl": "all", "x": "Aéro\n\n500 cr \n\n3x100 4N (12,5 jbs + 12,5 NC)\n\n4x50 palmes (25 coulée / 25 cr) r'suffisante pour faire 25 coulée\n\n8x75m (1 25 pg fermé - 25 cr - 25 jbs / 1 pap - dos - br par 25) r15\"\n\n200 jambes \n\n12x100m (1 4N - 2 cr ampli avec le dernier 25 prog) r15\"\n\n500 reverse palmes (200 cr / 150 br ondul / 100 dos / 50 pap)\n\n100 souple ​\n\n3600"}, {"d": 5, "s": "swim", "slot": "", "lvl": "all", "x": "Tech / Vitesse\n600 (100 cr / 50 br / 100 cr / 50 jbs / 100 cr / 50 dos / 100 cr / 50 jbs)\n\n400 tuba ampli en engageant l'épaule\n\nBLOC X3\n3x50 elastique ou jambes croisées r15\"\n3x50 (25 à fond / 25 souple) r30\"\n200 pull respi 5T\n\n4X (100 moins de coup de bras r15\" + 50 (25 polo - 25 NC)\n\n100 palmes À FOND !\n\n300 souple\n\n3500"}, {"d": 6, "s": "swim", "slot": "", "lvl": "all", "x": "Long\n400 (25 touché tête / 25 cr / 25 feuille morte / 25 cr)\n\n8x50 (1 25 paume magique - 25 NC / 1 25 claq der - 25 NC) r15\"\n\n16x25 (1 25 4N / 1 25 cr prog) r15\"\n\n200 souple\n\nPyramide de Keops\n\n100 jbs (25 vite/25 lent) r15\"\n\n300 pull SV1 r30\"\n\n500 plaq (25 polo ampli - 100 BN) r45\"\n\n700 (25 VMA - 75 BN) r1'\n\n500 plaq (25 polo ampli - 100 BN) r45\"\n\n300 pull SV1 r30\"\n\n100 jbs (25 vite/25 lent)\n\n200 souple\n\n4100"}, {"d": 3, "s": "bike", "slot": "", "lvl": "all", "x": "1h30 avec endurance"}, {"d": 6, "s": "bike", "slot": "", "lvl": "all", "x": "2h avec des sprints"}, {"d": 2, "s": "run", "slot": "", "lvl": "all", "x": "25' chauff \n\nTravail Gammes 5' + LDs \n\n 3x(600 VMA r100 + 4x200 r100) R400\n\n5' souple"}, {"d": 4, "s": "run", "slot": "", "lvl": "all", "x": "Footing 50'"}, {"d": 0, "s": "run", "slot": "", "lvl": "all", "x": "Footing 20' + \n3x8' SV1"}]};
+const CRJEUNES=[];
 for(const k in CRSHEET)CRENEAUX[k]={...(CRENEAUX[k]||{}),...CRSHEET[k]};
 const PH=Object.keys(CRENEAUX).map(k=>k.match(/^(\d)-(swim|run)-([^-]*)$/)).filter(Boolean).map(m=>({d:+m[1],s:m[2],slot:m[3],lvl:'all',x:''})).filter(p=>!(p.s==='run'&&(p.d===6||p.d===0)));
 // Séances récurrentes absentes du Google Sheet, ajoutées chaque semaine
@@ -602,7 +605,7 @@ if(document.getElementById(start))show(start);
 
 // ---- Planning ----
 let filter='all',level='all',week=null,grp='adulte';
-// Choix du plan (liste déroulante, gardé sur l'appareil). Seul le plan Adulte est relié à un Sheet pour l'instant.
+// Choix du plan (gardé sur l'appareil). Adulte : plan adulte ; Espoir Perf : PLAN HEBDO ; M&M's et Avenir : créneaux seulement (Paul, 2026-11-22).
 const GROUPES={adulte:"Adulte",mms:"M&M's",avenir:"Avenir",perf:"Espoir Perf"};
 let grpSaved=null;try{grpSaved=localStorage.getItem('grp')}catch(e){}
 grp=GROUPES[grpSaved]?grpSaved:'adulte';
@@ -632,14 +635,16 @@ function renderDays(){
   document.getElementById('wLabel').innerHTML=`<b>Semaine ${week}</b><span>${m.getDate()} ${M[m.getMonth()]} – ${e.getDate()} ${M[e.getMonth()]}${week===curW?' · en cours':''}</span>`;
   document.getElementById('wPrev').disabled=week===wkKeys[0];document.getElementById('wNext').disabled=week===wkKeys[wkKeys.length-1];
   const today=new Date().getDay(),out=document.getElementById('days');out.innerHTML='';
-  fWrap.style.display=grp==='adulte'?'':'none';
-  if(grp!=='adulte'){out.innerHTML=`<p class="note">Le plan ${esc(GROUPES[grp])} arrive bientôt dans l'appli.</p>`;return}
+  const PERF=grp==='perf';
+  fWrap.style.display=grp==='adulte'||PERF?'':'none';
+  if(grp==='mms'||grp==='avenir'){renderJeunes(out,m,today);return}
+  const JS=PERF?CRJEUNES.filter(c=>c.g==='perf'):[];
   // Semaine en cours : on commence par aujourd'hui, les jours déjà passés sont repliés en bas (« Plus tôt cette semaine »).
   const ORD=[1,2,3,4,5,6,0],ti=ORD.indexOf(today),isCur=week===curW;let pastBox=null;
   (isCur?ORD.slice(ti).concat(ORD.slice(0,ti)):ORD).forEach(d=>{
     // Créneau club sans séance dans le Sheet (case vide) → carte « ⌛ Séance en construction ⌛ » (semaine en cours et suivantes) ; « _ » dans le Sheet = pas de séance.
-    const base=WEEKS[week],ph=week>=curW?PH.filter(p=>!(p.d===6&&week<45)&&!base.some(s=>s.d===p.d&&s.s===p.s&&s.slot===p.slot)):[];
-    const items=base.concat(ph).concat(EXTRA.filter(e=>(!e.from||week>=e.from)&&!base.concat(ph).some(s=>s.d===e.d&&s.s===e.s&&s.slot===e.slot))).filter(s=>s.d===d&&s.x!=='_'&&s.x!=='\\_'&&(filter==='all'||s.s===filter))
+    const base=(PERF?WEEKS_PERF[week]:WEEKS[week])||[],ph=!PERF&&week>=curW?PH.filter(p=>!(p.d===6&&week<45)&&!base.some(s=>s.d===p.d&&s.s===p.s&&s.slot===p.slot)):[];
+    const items=base.concat(ph).concat(EXTRA.filter(e=>!PERF&&(!e.from||week>=e.from)&&!base.concat(ph).some(s=>s.d===e.d&&s.s===e.s&&s.slot===e.slot))).filter(s=>s.d===d&&s.x!=='_'&&s.x!=='\\_'&&(filter==='all'||s.s===filter))
       .sort((a,b)=>SPORTORD[a.s]-SPORTORD[b.s]||SLOTORD[a.slot]-SLOTORD[b.slot]||({all:0,deb:1,av:2}[a.lvl]-{all:0,deb:1,av:2}[b.lvl]));
     if(!items.length)return;
     const dd=new Date(m);dd.setDate(m.getDate()+(d+6)%7);
@@ -661,14 +666,14 @@ function renderDays(){
     div.innerHTML=`<h4>${DAYS[d]} ${dd.getDate()}</h4>`+cards.map(s=>{
       const P=s.texts.map(parse),hint=P.some(p=>p.hint);
       const iso=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;
-      const ch=CHANGES.find(c=>c.date===iso&&c.s===s.s&&(!c.slot||c.slot===s.slot)&&(!c.grp||!s.grp||c.grp===s.grp));
-      let ci=CRENEAUX[`${s.key}-${s.lvl}`]||CRENEAUX[s.key]||{};
+      const ch=!PERF&&CHANGES.find(c=>c.date===iso&&c.s===s.s&&(!c.slot||c.slot===s.slot)&&(!c.grp||!s.grp||c.grp===s.grp));
+      let ci=PERF?(JS.find(c=>c.d===s.d&&c.s===s.s)||{}):CRENEAUX[`${s.key}-${s.lvl}`]||CRENEAUX[s.key]||{};
       if(ch&&!ch.off)ci={...ci,...(ch.h?{h:ch.h}:{}),...(ch.coach?{coach:ch.coach}:{}),...(ch.lieu?{lieu:ch.lieu}:{})};
       const chg=ch?`<div class="chg${ch.off?' off':''}">${ch.off?'Séance annulée':'Changement'}${ch.msg?' · '+esc(ch.msg):''}</div>`:'';
-      const coach=ci.coach||(hint?'Maxime':'');
+      const coach=ci.coach||(hint&&!PERF?'Maxime':''),where=ci.lieu||(PERF?'':lieu(s,week));
       const lv=s.grp?`<span class="lv">${esc(s.grp)}</span>`:'';
-      const auto=s.s==='bike'||(s.s==='run'&&(s.d===6||s.d===0));
-      const head=auto?'<div class="sinfo"><span class="auto">En autonomie</span></div>':`<div class="sinfo">${ci.h?`<time>${esc(ci.h)}</time>`:'<span class="tbd">Horaire à préciser</span>'}${coach?`<span class="coach">${esc(coach)}</span>`:'<span class="tbd">Entraîneur à préciser</span>'}${(ci.lieu||lieu(s,week))?`<span class="place">${esc(ci.lieu||lieu(s,week))}</span>`:''}</div>`;
+      const auto=!PERF&&(s.s==='bike'||(s.s==='run'&&(s.d===6||s.d===0)));
+      const head=PERF&&!ci.h&&!coach&&!where?'':auto?'<div class="sinfo"><span class="auto">En autonomie</span></div>':`<div class="sinfo">${ci.h?`<time>${esc(ci.h)}</time>`:'<span class="tbd">Horaire à préciser</span>'}${coach?`<span class="coach">${esc(coach)}</span>`:'<span class="tbd">Entraîneur à préciser</span>'}${where?`<span class="place">${esc(where)}</span>`:''}</div>`;
       const one=(p,i)=>{const lab=P.length>1?`<span class="var">Variante ${i+1}</span>`:'';const dist=p.dist?`<span class="dist">${esc(p.dist)}</span>`:'';
         if(!p.title)return '<span class="tbd">⌛ Séance en construction ⌛</span>';
         return p.rest?`<details><summary>${lab}${esc(p.title)}${dist}</summary><pre>${esc(p.rest)}</pre></details>`:`<b>${lab}${esc(p.title)}${dist}</b>`};
@@ -676,6 +681,20 @@ function renderDays(){
     if(isCur&&ORD.indexOf(d)<ti){if(!pastBox){pastBox=document.createElement('details');pastBox.className='pastdays';pastBox.innerHTML='<summary>Plus tôt cette semaine</summary>'}pastBox.appendChild(div)}else out.appendChild(div)});
   if(pastBox)out.appendChild(pastBox);
   if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
+}
+// M&M's et Avenir : seulement les créneaux (jour, horaire, lieu de rendez-vous, entraîneur), depuis CRJEUNES.
+function renderJeunes(out,m,today){
+  const L=CRJEUNES.filter(c=>c.g===grp);
+  if(!L.length){out.innerHTML=`<p class="note">Les créneaux ${esc(GROUPES[grp])} arrivent bientôt dans l'appli.</p>`;return}
+  const ORD=[1,2,3,4,5,6,0],ti=ORD.indexOf(today),isCur=week===curW;let pastBox=null;
+  (isCur?ORD.slice(ti).concat(ORD.slice(0,ti)):ORD).forEach(d=>{
+    const items=L.filter(c=>c.d===d).sort((a,b)=>(a.h||'').localeCompare(b.h||'',undefined,{numeric:true}));
+    if(!items.length)return;
+    const dd=new Date(m);dd.setDate(m.getDate()+(d+6)%7);
+    const div=document.createElement('div');div.className='day'+(d===today&&isCur?' today':'');
+    div.innerHTML=`<h4>${DAYS[d]} ${dd.getDate()}</h4>`+items.map(c=>`<div class="slot" style="--c:var(${SPORT[c.s][1]})"><div class="sinfo">${c.h?`<time>${esc(c.h)}</time>`:'<span class="tbd">Horaire à préciser</span>'}${c.coach?`<span class="coach">${esc(c.coach)}</span>`:'<span class="tbd">Entraîneur à préciser</span>'}${c.lieu?`<span class="place">${esc(c.lieu)}</span>`:''}</div><div class="sh"><span class="tag">${esc(c.sp||SPORT[c.s][0])}</span></div>${c.msg?`<b>${esc(c.msg)}</b>`:''}</div>`).join('');
+    if(isCur&&ORD.indexOf(d)<ti){if(!pastBox){pastBox=document.createElement('details');pastBox.className='pastdays';pastBox.innerHTML='<summary>Plus tôt cette semaine</summary>'}pastBox.appendChild(div)}else out.appendChild(div)});
+  if(pastBox)out.appendChild(pastBox);
 }
 // Écran noir de choix du plan : à chaque ouverture de l.appli (Paul, 2026-11-18), et via le bouton « Plan … Changer ».
 const grpScreen=document.getElementById('grpScreen'),grpName=document.getElementById('grpName');
