@@ -153,7 +153,7 @@ def tab(wb, name, exclude=None):
         return []
     head = [norm(c) for c in rows[hi]]
     col = lambda *ks: next((i for i, h in enumerate(head) if any(h.startswith(k) for k in ks)), None)
-    C = {k: col(*ks) for k, ks in {'grp': ('groupe',), 'jour': ('jour',), 'date': ('date',), 'sport': ('sport', 'seance', 'activite'), 'moment': ('moment', 'creneau'),
+    C = {k: col(*ks) for k, ks in {'grp': ('groupe',), 'per': ('periode', 'saison'), 'jour': ('jour',), 'date': ('date',), 'sport': ('sport', 'seance', 'activite'), 'moment': ('moment', 'creneau'),
          'h': ('horaire', 'heure'), 'coach': ('entraineur', 'coach'), 'lieu': ('lieu',), 'statut': ('statut', 'etat'), 'msg': ('message', 'commentaire', 'info', 'remarque')}.items()}
     get = lambda r, k: (r[C[k]] if C[k] is not None and C[k] < len(r) else None)
     return [{k: get(r, k) for k in C} for r in rows[hi + 1:] if any(norm(c) for c in r)]
@@ -198,6 +198,15 @@ def jeunes_from(wb):
     rows = tab(wb, 'creneaux jeune')
     if rows is None:
         return None
+    # Onglet « Périodes » : Période | Début | Fin (ex. Hiver / Été) ; un créneau sans période vaut toute l'année
+    per = {}
+    pn = next((n for n in wb.sheetnames if norm(n).startswith('periode')), None)
+    if pn:
+        today = datetime.datetime.now(ZoneInfo('Europe/Paris')).date()
+        for r in wb[pn].iter_rows(min_row=2, values_only=True):
+            if r and norm(r[0]):
+                a, b = (date_of(r[1], today) if len(r) > 1 else None), (date_of(r[2], today) if len(r) > 2 else None)
+                per[norm(r[0])] = {k: v.isoformat() for k, v in (('from', a), ('to', b)) if v}
     out = []
     for r in rows:
         g = next((code for k, code in JEUNES if k in norm(r['grp']).replace("'", '').replace(' ', '')), None)
@@ -206,6 +215,8 @@ def jeunes_from(wb):
             continue
         c = {'g': g, 'd': d, 's': s, 'sp': txt(r['sport'])}
         c.update({k: txt(r[k]) for k in ('h', 'coach', 'lieu', 'msg') if txt(r[k])})
+        if norm(r['per']):
+            c['p'] = txt(r['per']); c.update(per.get(norm(r['per']), {}))
         out.append(c)
     return out
 

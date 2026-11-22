@@ -623,7 +623,7 @@ function renderDays(){
   const PERF=grp==='perf';
   fWrap.style.display=grp==='adulte'||PERF?'':'none';
   if(grp==='mms'||grp==='avenir'){renderJeunes(out,m,today);return}
-  const JS=PERF?CRJEUNES.filter(c=>c.g==='perf'):[];
+  const JS=PERF?CRJEUNES.filter(c=>c.g==='perf'&&jeuneOn(c,m)):[];
   // Semaine en cours : on commence par aujourd'hui, les jours déjà passés sont repliés en bas (« Plus tôt cette semaine »).
   const ORD=[1,2,3,4,5,6,0],ti=ORD.indexOf(today),isCur=week===curW;let pastBox=null;
   (isCur?ORD.slice(ti).concat(ORD.slice(0,ti)):ORD).forEach(d=>{
@@ -667,9 +667,12 @@ function renderDays(){
   if(pastBox)out.appendChild(pastBox);
   if(!out.children.length)out.innerHTML='<p class="note">Aucune séance pour ce filtre cette semaine.</p>';
 }
+// Période Hiver / Été (onglet « Périodes ») : un créneau daté n'apparaît que les jours de sa période.
+const isoD=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const jeuneOn=(c,m)=>{const dd=new Date(m);dd.setDate(m.getDate()+(c.d+6)%7);const x=isoD(dd);return (!c.from||x>=c.from)&&(!c.to||x<=c.to)};
 // M&M's et Avenir : seulement les créneaux (jour, horaire, lieu de rendez-vous, entraîneur), depuis CRJEUNES.
 function renderJeunes(out,m,today){
-  const L=CRJEUNES.filter(c=>c.g===grp);
+  const L=CRJEUNES.filter(c=>c.g===grp&&jeuneOn(c,m));
   if(!L.length){out.innerHTML=`<p class="note">Les créneaux ${esc(GROUPES[grp])} arrivent bientôt dans l'appli.</p>`;return}
   const ORD=[1,2,3,4,5,6,0],ti=ORD.indexOf(today),isCur=week===curW;let pastBox=null;
   (isCur?ORD.slice(ti).concat(ORD.slice(0,ti)):ORD).forEach(d=>{
