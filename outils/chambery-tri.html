@@ -701,7 +701,7 @@ renderDays();
 const COURSES=[
   {date:"2026-11-29",t:"Bourget Xpress",f:"5 et 10 km",k:"club",noins:true},
   {date:"2027-01-30",t:"Raidlight Winter Trail",f:"Trail · 9, 14, 18, 22 et 30 km · St Pierre de Chartreuse",k:"phare",open:"2026-10-29",url:"",code:""},
-  {date:"2027-03-21",t:"10 km d'Aix-les-Bains",f:"10 km",k:"club",open:"2026-11-24",url:"https://in.njuko.com/10-km-daix-les-bains-by-credit-mutuel-2027/join-group-set/6b016e7571e9b9d9098a4d52/s4CBrlFi0ZRk48NC5ya4TTKH633E78pOHmO1dWnICUH/6af2e83d9c2f200b83d5c944",code:""},
+  {date:"2027-03-21",t:"10 km d'Aix-les-Bains",f:"10 km",k:"club",open:"2026-11-23",from:"2026-11-23T16:00:00+01:00",nocode:true,info:"70 places réservées pour le club, à prendre avant le 15 décembre",url:"https://in.njuko.com/10-km-daix-les-bains-by-credit-mutuel-2027/join-group-set/6b016e7571e9b9d9098a4d52/s4CBrlFi0ZRk48NC5ya4TTKH633E78pOHmO1dWnICUH/6af2e83d9c2f200b83d5c944",code:""},
   {date:"2027-04-04",t:"Entrelacs Run and Trail (ERAT)",f:"Trail · 13, 23, 42 et 61 km · courses jeunes",k:"phare",url:"",code:""},
   {date:"2027-04-04",t:"Foulées de Villeurbanne",f:"5, 10 et 20 km",k:"club",url:"",code:""},
   {date:"2027-04-04",t:"Triathlon de Saint-Marcellin",f:"Triathlon local · S en équipe de 3 à 5 ou en relais, XS · courses jeunes",k:"phare",url:"",code:""},
@@ -714,6 +714,8 @@ const COURSES=[
   {date:"2027-09-26",t:"Trail du Petit Saint-Bernard",f:"Trail · de 5 à 103 km",k:"club",url:"",code:""},
   {date:"2027-09-27",t:"Nature Man Var",f:"Triathlon",k:"club",url:"",code:""},
 ];
+// from = heure à partir de laquelle la course affiche ses inscriptions (lien, rappel) ; avant, rien n'apparaît.
+COURSES.forEach(c=>{if(c.from&&new Date()<new Date(c.from)){c.url='';delete c.open;delete c.info;delete c.nocode}});
 // Agenda du club (visuel « Les dates à noter dans l'agenda », Paul, 4 nov. 2026). dl = échéance affichée jusqu'à la date indiquée.
 const AGENDA=[
   {date:"2026-11-14",t:"La Chambérienne",f:"Bénévoles : répartition des postes en cours",dl:["2026-11-09","Vous serez contactés au plus tard le 9 novembre"]},
@@ -744,8 +746,8 @@ function renderCourses(){
     const cd=n<0?'Passée':n===0?"Aujourd'hui":(c.approx?'~':'')+`J-${n}`;
     const op=c.open&&n>=0?(c.open<=iso(now)?'<em class="open">Inscriptions ouvertes</em>':`<em>Inscriptions le ${fmtO(c.open)}</em>`):'';
     const ins=c.noins?'':op+(c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:'<em>Lien d\'inscription à venir</em>')
-      +(c.code?`<code title="Code promo">${c.code}</code>`+(c.remise?`<em class="open">${c.remise}</em>`:''):'<em>Code promo à venir</em>');
-    return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span><div class="ins">${ins}${n>=0?`<button type="button" class="cal" data-c="${COURSES.indexOf(c)}">📅 Agenda</button>`:''}</div></div><div class="cd">${cd}</div></div>`}).join('');
+      +(c.code?`<code title="Code promo">${c.code}</code>`+(c.remise?`<em class="open">${c.remise}</em>`:''):(c.nocode?'<em>Pas de code promo</em>':'<em>Code promo à venir</em>'));
+    return `<div class="race${n<0?' past':''}${c.k==='phare'?' key':''}"><div class="d">${c.approx?`<strong class="ap">${c.approx}</strong><small>${dt.getFullYear()}</small>`:`<strong>${dt.getDate()}</strong><small>${M[dt.getMonth()]} ${String(dt.getFullYear()).slice(2)}</small>`}</div><div><span class="tag" style="--c:var(--muted)">${c.k==='phare'?'Course phare':'Course club'}</span><b>${c.t}</b><span>${c.f}</span>${c.info?`<span>${c.info}</span>`:''}<div class="ins">${ins}${n>=0?`<button type="button" class="cal" data-c="${COURSES.indexOf(c)}">📅 Agenda</button>`:''}</div></div><div class="cd">${cd}</div></div>`}).join('');
 }
 renderCourses();
 // ---- Ajouter une course ou une date du club à l'agenda (.ics pour iPhone/Outlook, lien Google Agenda) ----
@@ -851,7 +853,7 @@ const ANNONCES=[
     const end=new Date(c.open+'T00:00:00');end.setDate(end.getDate()+14);return now<=end&&!seen(key(c))});
   const dlg=document.getElementById('insPop');if(!list.length||!dlg||!dlg.showModal)return;
   document.getElementById('insT').textContent=list.every(c=>phase(c)==='pre')?'📣 Inscriptions bientôt ouvertes':'📣 Inscriptions ouvertes';
-  document.getElementById('insList').innerHTML=list.map(c=>`<li><b>${esc(c.t)}</b><span>${esc(c.f)}</span>${phase(c)==='pre'?`<span>Ouverture le ${fmtO(c.open)}${c.remise?` · ${esc(c.remise)} avec le code club`:''}</span>`:(c.remise?`<span>${esc(c.remise)} avec le code club</span>`:'')}<div class="ins">${c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:''}${c.code?`<code>${esc(c.code)}</code><button type="button" class="cp" data-code="${esc(c.code)}">Copier le code</button>`:'<em>Code club à venir</em>'}</div></li>`).join('');
+  document.getElementById('insList').innerHTML=list.map(c=>`<li><b>${esc(c.t)}</b><span>${esc(c.f)}</span>${phase(c)==='pre'?`<span>Ouverture le ${fmtO(c.open)}${c.remise?` · ${esc(c.remise)} avec le code club`:''}</span>`:(c.remise?`<span>${esc(c.remise)} avec le code club</span>`:'')}${c.info?`<span>${esc(c.info)}</span>`:''}<div class="ins">${c.url?`<a href="${c.url}" target="_blank" rel="noopener">S'inscrire</a>`:''}${c.code?`<code>${esc(c.code)}</code><button type="button" class="cp" data-code="${esc(c.code)}">Copier le code</button>`:(c.nocode?'':'<em>Code club à venir</em>')}</div></li>`).join('');
   dlg.querySelectorAll('.cp').forEach(b=>b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(b.dataset.code).then(()=>b.textContent='Copié ✓',()=>{})});
   const done=()=>{list.forEach(c=>{try{localStorage.setItem('insPop:'+key(c),'1')}catch(e){}})};
   dlg.addEventListener('close',done);
