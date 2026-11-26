@@ -1,7 +1,7 @@
 // Service worker : l'app s'ouvre même sans réseau ; les données se mettent à jour dès qu'il y a du réseau.
 // Notifications push du club (OneSignal). En cas d'échec (hors-ligne au premier lancement), l'app marche sans.
 try{importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js')}catch(e){}
-const VERSION='ece5a39a';
+const VERSION='9b3d45a2';
 const CACHE='chambery-tri-'+VERSION;
 const SHELL=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png','favicon-32.png','traces.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
